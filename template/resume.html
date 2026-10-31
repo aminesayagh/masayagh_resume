@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ data.name }} - {{ data.role }}</title>
+  <style>
+
+        @font-face {
+            font-family: "Poppins";
+            src: url("{{ font_base }}Poppins-Regular.ttf") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Poppins";
+            src: url("{{ font_base }}Poppins-Medium.ttf") format("truetype");
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Poppins";
+            src: url("{{ font_base }}Poppins-SemiBold.ttf") format("truetype");
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Poppins";
+            src: url("{{ font_base }}Poppins-Bold.ttf") format("truetype");
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* Base styles and reset */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --color-black: #0F1828;
+            --color-gray: #57565D;
+            --color-white: #f2f2f2;
+            --font-family: 'Poppins', sans-serif;
+        }
+
+        html,
+        body {
+            width: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        /*
+            Flexbox gotcha:
+            flex items default to min-width:auto (content-based),
+            which can prevent shrinking => no wrapping.
+            This forces flex children to be allowed to shrink.
+            */
+        [style*="display:flex"],
+        [style*="display: flex"] {
+            flex-wrap: wrap;
+        }
+
+        [style*="display:flex"]>*,
+        [style*="display: flex"]>* {
+            min-width: 0 !important;
+        }
+
+        /* If you used a .flex class (Tailwind-like), support it too */
+        .flex {
+            flex-wrap: wrap;
+        }
+
+        .flex>* {
+            min-width: 0 !important;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        body {
+            /* background-color: var(--color-white); */
+            font-family: var(--font-family);
+            color: var(--color-black);
+            margin: 0;
+            padding: 0px;
+        }
+
+        a {
+            text-decoration: none;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            display: inline;
+            width: fit-content;
+        }
+
+        .color-black {
+            color: var(--color-black);
+        }
+
+        .color-gray {
+            color: var(--color-gray);
+        }
+
+        .title_h1 {
+            font-family: var(--font-family);
+            color: var(--color-black);
+            font-size: 26px;
+            line-height: 39px;
+            font-weight: 600;
+        }
+
+        .title_h2 {
+            font-family: var(--font-family);
+            color: var(--color-black);
+            font-size: 22px;
+            line-height: 33px;
+            font-weight: 400;
+        }
+
+        .title_h3 {
+            font-family: var(--font-family);
+            color: var(--color-black);
+            font-size: 15px;
+            line-height: 140%;
+            font-weight: 600;
+        }
+
+        .label {
+            font-family: var(--font-family);
+            font-size: 12px;
+            line-height: 21px;
+            font-weight: 500;
+        }
+
+        .paragraph {
+            font-family: var(--font-family);
+            color: var(--color-gray);
+            font-size: 11px;
+            line-height: 18px;
+            font-weight: 400;
+            text-decoration: none;
+            /* /no italics */
+            font-style: normal;
+            width: 100%;
+        }
+
+        .paragraph-content {
+            line-height: 20px;
+        }
+
+
+        .flex-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .text-nowrap {
+            white-space: nowrap !important;
+        }
+
+        .list-none {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-disc {
+            list-style-type: disc;
+            padding-left: 11.5px;
+        }
+
+        .gap-1 {
+            gap: 1px;
+        }
+
+        .gap-2 {
+            gap: 2px;
+        }
+
+        .gap-6 {
+            gap: 6px;
+        }
+
+        .gap-10 {
+            gap: 10px;
+        }
+
+        .gap-16 {
+            gap: 16px;
+        }
+
+        .gap-24 {
+            gap: 24px;
+        }
+
+        .gap-40 {
+            gap: 40px;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 55px;
+            left: 72px;
+            width: 100%;
+        }
+
+        .section-title {
+            width: 157px;
+        }
+
+        .section-content {
+            width: 483px;
+        }
+
+        .experience-date {
+            width: 80px;
+            padding-top: 1px;
+        }
+
+        .experience-content {
+            max-width: 389px;
+        }
+
+        .heading-divider {
+            width: 17px;
+            height: 2px;
+            background-color: var(--color-black);
+            border: none;
+        }
+
+        .grid_3cols {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            column-gap: 0px;
+            row-gap: 4px;
+        }
+
+        .grid_4cols {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            column-gap: 0px;
+            row-gap: 4px;
+        }
+
+        .skill-row {
+            display: grid;
+            grid-template-columns: 115px 1fr;
+            column-gap: 12px;
+            align-items: start;
+        }
+
+        .skill-category {
+            color: var(--color-black);
+            font-weight: 500;
+        }
+
+        .border {
+            border: 1px solid var(--color-black);
+        }
+
+        .section-divider {
+            width: 100%;
+            height: 1px;
+            background-color: var(--color-gray);
+        }
+
+        .section-divider-full {
+            width: 100%;
+            height: 1px;
+            border-top: 1px solid var(--color-gray);
+            background-color: transparent;
+            opacity: 0.2;
+        }
+
+        .logo-square {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+
+        @page {
+            size: 210mm 297mm;
+            /* A4 size */
+            background-color: var(--color-white);
+            color: var(--color-black);
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        /* One PDF page = one .page block */
+        .page {
+            width: 210mm;
+            height: 297mm;
+
+            padding: 55px 72px !important;
+
+            background: var(--color-white);
+            page-break-after: always;
+
+            /* avoid layout surprises */
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page>* {
+            max-width: 650px;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        /* ---- WRAP FIXES ---- */
+        html,
+        body {
+            width: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        [style*="display:flex"],
+        [style*="display: flex"] {
+            flex-wrap: wrap;
+        }
+
+        [style*="display:flex"]>*,
+        [style*="display: flex"]>* {
+            min-width: 0 !important;
+        }
+
+        .hidden {
+            display: none;
+            visibility: hidden;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+    .page { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; overflow: hidden; }
+    .page > header, .page > .body-content { flex: 0 0 auto; }
+    .body-content { display: flex; flex-direction: column; flex-wrap: nowrap; gap: 24px; width: 100%; }
+    .resume-section { display: flex; flex-direction: row; gap: 10px; width: 100%; }
+    .resume-section > .section-items { display: flex; flex-direction: column; gap: 16px; width: 483px; min-width: 0; }
+    .resume-section .section-title { flex: 0 0 157px; }
+    .job { flex-wrap: nowrap; break-inside: avoid; }
+    .experience-content { min-width: 0; }
+    .page footer { width: calc(100% - 144px); }
+    .page footer > p { width: auto; flex: 0 1 auto; }
+    .page footer > a { width: auto; flex: 0 0 auto; margin-left: auto; text-align: right; }
+    .first-page-header { width: 100%; justify-content: space-between; align-items: flex-start; }
+    .qr-card { display: flex; flex-direction: column; align-items: center; flex: 0 0 104px; width: 104px; color: var(--color-black); }
+    .qr-card svg { display: block; width: 96px; height: 96px; }
+    .pagination-error { color: red; }
+  </style>
+</head>
+<body class="w-full">
+  {% macro social_links() %}
+  <div class="flex-row gap-40" style="width: 77px;">
+    <a href="{{ data.contact.github }}" aria-label="GitHub" class="logo-square"><svg fill="none" height="15" viewbox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_page1_github)">
+<path clip-rule="evenodd" d="M7.52235 0C11.6573 0 15 3.4375 15 7.69016C15 11.0895 12.8582 13.967 9.88699 14.9855C9.51551 15.062 9.37944 14.82 9.37944 14.6164C9.37944 14.4381 9.39168 13.827 9.39168 13.1903C11.4718 13.6487 11.9049 12.2736 11.9049 12.2736C12.2392 11.3823 12.7345 11.1533 12.7345 11.1533C13.4154 10.6822 12.6849 10.6822 12.6849 10.6822C11.9297 10.7331 11.5335 11.4716 11.5335 11.4716C10.8651 12.6428 9.78796 12.3119 9.35464 12.1081C9.29281 11.6116 9.09459 11.2678 8.88413 11.0769C10.5432 10.8986 12.2887 10.2366 12.2887 7.28266C12.2887 6.44234 11.9917 5.75484 11.5212 5.22016C11.5955 5.02922 11.8555 4.23969 11.4468 3.18297C11.4468 3.18297 10.8155 2.97922 9.39184 3.97234C8.78233 3.80401 8.15376 3.71838 7.52235 3.71766C6.89097 3.71766 6.24735 3.80687 5.65301 3.97234C4.22923 2.97922 3.59786 3.18297 3.59786 3.18297C3.18918 4.23969 3.44939 5.02922 3.52362 5.22016C3.04071 5.75484 2.75602 6.44234 2.75602 7.28266C2.75602 10.2366 4.50153 10.8858 6.17296 11.0769C5.90051 11.3187 5.66541 11.777 5.66541 12.5028C5.66541 13.5341 5.67765 14.3617 5.67765 14.6162C5.67765 14.82 5.54143 15.062 5.1701 14.9856C2.19888 13.9669 0.0570919 11.0895 0.0570919 7.69016C0.044847 3.4375 3.3998 0 7.52235 0Z" fill="#0F1828" fill-rule="evenodd"></path>
+</g>
+<defs>
+<clippath id="clip0_page1_github">
+<rect fill="white" height="15" transform="matrix(-1 0 0 1 15 0)" width="15"></rect>
+</clippath>
+</defs>
+</svg></a>
+    <a href="{{ data.contact.linkedin }}" aria-label="LinkedIn" class="logo-square"><svg fill="none" height="13" viewbox="0 0 14 13" width="14" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.17827 12.9996H0.176915V4.22713H3.17806V9.19554C3.17933 10.1037 3.17764 12.0783 3.17827 12.9996ZM1.67812 3.02975C0.667114 3.04021 -0.00210612 2.36265 4.9803e-06 1.5142C-0.00295056 -0.49347 3.36722 -0.516035 3.37587 1.51441C3.37587 2.35608 2.72438 3.02975 1.67812 3.02975ZM13.9998 12.9996H10.9991V8.30709C10.9991 7.12776 10.5644 6.32342 9.47886 6.32342C8.36441 6.36117 7.81067 7.2012 7.84022 8.10134V12.9998L4.83929 13C4.83929 13 4.87877 5.05055 4.8395 4.22775H7.84043L7.82038 5.49959C8.21536 4.9008 8.92638 4.02179 10.5452 4.02179C12.5195 4.02179 14 5.27558 14 7.97005L13.9998 12.9996Z" fill="#0F1828"></path>
+</svg></a>
+  </div>
+  {% endmacro %}
+  {% macro footer(number) %}
+  <footer class="flex-row w-full justify-between">
+    <p class="paragraph" aria-label="Footer">{{ data.name }} <span class="color-black">Resume | P{{ number }}</span></p>
+    <a href="{{ data.contact.website_link }}" class="paragraph color-black" aria-label="Website">{{ data.contact.website }}</a>
+  </footer>
+  {% endmacro %}
+  <main class="page flex flex-col gap-24" id="page-1">
+    <header class="first-page-header flex-row gap-24">
+      <div class="flex-col gap-24">
+        <div><img src="{{ asset_base }}header-logo.svg" alt="Resume logo" style="width: 40px; height: 16px;"></div>
+        <div class="flex-col gap-10">
+          <div class="flex-col">
+            <h1 class="title_h1">{{ data.name }}</h1>
+            <h2 class="title_h2">{{ data.role }}</h2>
+          </div>
+          {{ social_links() }}
+        </div>
+        <address class="flex-col gap-2">
+          <a href="{{ data.contact.phone_link }}" class="paragraph">{{ data.contact.phone }}</a>
+          <a href="mailto:{{ data.contact.email }}" class="paragraph">{{ data.contact.email }}</a>
+          <p class="paragraph">{{ data.contact.location }}</p>
+          <a href="{{ data.contact.website_link }}" class="paragraph">{{ data.contact.website }}</a>
+        </address>
+      </div>
+      <a class="qr-card" href="{{ data.contact.qr_url }}" aria-label="Portfolio QR code: {{ data.contact.qr_url }}">
+        {{ qr_svg|safe }}
+      </a>
+    </header>
+    <div class="body-content">
+      {% if data.summary %}
+      <section class="resume-section">
+        <div class="flex-col gap-6 section-title"><h3 class="title_h3">Summary<br>of Experience</h3><hr class="heading-divider"></div>
+        <div class="section-content"><p class="paragraph">{{ data.summary }}</p></div>
+      </section>
+      {% endif %}
+      {% if data.skills %}
+      <section class="resume-section">
+        <div class="flex-col gap-6 section-title"><h3 class="title_h3">Technical Proficiencies</h3><hr class="heading-divider"></div>
+        <div class="flex-col gap-10 section-content">
+          {% for group in data.skills %}
+          <ul class="grid_4cols list-none">{% for skill in group %}<li class="paragraph">{{ skill }}</li>{% endfor %}</ul>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
+    {{ footer(1) }}
+  </main>
+
+  <template id="page-template">
+    <main class="page flex flex-col gap-24">
+      <header class="flex-row w-full justify-between">
+        <div><img src="{{ asset_base }}page-logo.svg" alt="Resume logo" style="width: 40px; height: 16px;"></div>
+        {{ social_links() }}
+      </header>
+      <div class="body-content"></div>
+      {{ footer('NUMBER') }}
+    </main>
+  </template>
+
+  <template id="experience-template">
+    {% for job in data.experience %}
+    <article class="job flex-row gap-10">
+      <div class="experience-date"><p class="paragraph paragraph-content">{{ job.dates }}</p></div>
+      <div class="flex-col gap-6 experience-content">
+        <header class="flex-col gap-1">
+          <h4 class="label">{{ job.company }}{% if job.detail %} <span class="color-gray">{{ job.detail }}</span>{% endif %}</h4>
+          {% if job.role %}<p class="paragraph">{{ job.role }}</p>{% endif %}
+        </header>
+        <div class="flex-col gap-6 w-full">
+          {% if job.description %}<p class="paragraph">{{ job.description }}</p>{% endif %}
+          {% if job.bullets %}<ul class="flex-col gap-2 w-full list-disc">{% for bullet in job.bullets %}<li class="paragraph">{{ bullet }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </template>
+  <template id="education-template">
+    {% for entry in data.education %}
+    <article class="job flex-row gap-10">
+      <div class="experience-date"><p class="paragraph">{{ entry.dates }}</p></div>
+      <div class="flex-col gap-6 experience-content">
+        <header class="flex-col gap-1"><h4 class="label">{{ entry.degree }}</h4><p class="paragraph">{{ entry.institution }}</p></header>
+      </div>
+    </article>
+    {% endfor %}
+  </template>
+  <template id="languages-template">
+    {% for entry in data.languages %}<li class="paragraph"><span class="color-black">{{ entry.language }}</span> - {{ entry.level }}</li>{% endfor %}
+  </template>
+  <script>
+    function paginate() {
+      let page = document.querySelector('.page');
+      let pageNumber = 1;
+      const pageTemplate = document.querySelector('#page-template');
+      const errors = [];
+      function newPage() {
+        pageNumber += 1;
+        page = pageTemplate.content.firstElementChild.cloneNode(true);
+        page.id = `page-${pageNumber}`;
+        page.querySelector('footer .color-black').textContent = `Resume | P${pageNumber}`;
+        document.body.appendChild(page);
+        return page;
+      }
+      function fits() {
+        const body = page.querySelector('.body-content');
+        const bodyRect = body.getBoundingClientRect();
+        const pageRect = page.getBoundingClientRect();
+        const footerTop = page.querySelector('footer').getBoundingClientRect().top;
+        return bodyRect.bottom <= footerTop - 16 && bodyRect.right <= pageRect.right - 72 + 1;
+      }
+      if (!fits()) errors.push('Summary and skills do not fit on page 1');
+      function section(title) {
+        const el = document.createElement('section');
+        el.className = 'resume-section';
+        el.innerHTML = `<div class="flex-col gap-6 section-title"><h3 class="title_h3">${title}</h3><hr class="heading-divider"></div><div class="section-items"></div>`;
+        page.querySelector('.body-content').appendChild(el);
+        return el;
+      }
+      function appendItems(templateId, title) {
+        const source = document.querySelector(templateId).content;
+        if (!source.children.length) return;
+        let target = section(title);
+        for (const item of [...source.children]) {
+          target.querySelector('.section-items').appendChild(item);
+          if (!fits()) {
+            // Keep the heading and description together. A long job may continue
+            // on the next page, but only between complete bullet points.
+            const list = title === 'Professional Experience' ? item.querySelector('.experience-content ul') : null;
+            const moved = [];
+            if (list && list.children.length > 1) {
+              while (!fits() && list.children.length) moved.unshift(list.removeChild(list.lastElementChild));
+              if (fits() && moved.length) {
+                const continuation = item.cloneNode(true);
+                continuation.querySelector('.experience-content > div > p')?.remove();
+                continuation.querySelector('ul').replaceChildren(...moved);
+                if (!list.children.length) list.remove();
+                newPage();
+                target = section(title);
+                target.querySelector('.section-items').appendChild(continuation);
+                if (!fits()) errors.push(`${title}: continuation is too tall for a page`);
+                continue;
+              }
+              moved.forEach(bullet => list.appendChild(bullet));
+            }
+            item.remove();
+            if (target.querySelector('.section-items').children.length === 0) {
+              target.remove();
+            }
+            newPage();
+            target = section(title);
+            target.querySelector('.section-items').appendChild(item);
+            if (!fits()) errors.push(`${title}: one entry is too tall for a page`);
+          }
+        }
+      }
+      appendItems('#experience-template', 'Professional Experience');
+      appendItems('#education-template', 'Academic<br>Education');
+      const languages = document.querySelector('#languages-template').content;
+      if (languages.children.length) {
+        let target = section('Languages');
+        const list = document.createElement('ul');
+        list.className = 'grid_3cols list-none section-content';
+        target.querySelector('.section-items').appendChild(list);
+        for (const item of [...languages.children]) {
+          list.appendChild(item);
+          if (!fits()) {
+            item.remove();
+            if (!list.children.length) target.remove();
+            newPage();
+            target = section('Languages');
+            const next = list.cloneNode(false);
+            target.querySelector('.section-items').appendChild(next);
+            next.appendChild(item);
+            if (!fits()) errors.push('Languages: one entry is too tall for a page');
+          }
+        }
+      }
+      document.body.dataset.pages = pageNumber;
+      document.body.dataset.paginationErrors = errors.join('; ');
+      if (errors.length) console.error(errors.join('; '));
+    }
+    window.addEventListener('load', () => document.fonts.ready.then(paginate));
+  </script>
+</body>
+</html>
