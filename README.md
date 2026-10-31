@@ -42,6 +42,27 @@ All resume content is in `content/default.json`. Copy it before tailoring a resu
 
 In `contact`, `website` is the displayed text and `website_link` is the clickable URL in the header, footer, and QR code. `email` sets both the displayed address and its email link. Change these fields in each job-specific JSON file. To give the QR a separate destination, add `qr_url` to that file.
 
+## Optional: local cv-matcher example
+
+The [fictional job offer](examples/fictional_full_stack_job.txt) and [example result](analysis/fictional_full_stack.json) show a local, model-assisted resume match using [cv-matcher](https://github.com/officialgabzz/cv-matcher). This is an illustrative score for an invented role, not a score from an employer's ATS.
+
+Use Python 3.12 for the local-model environment. With `uv`, install the optional dependencies:
+
+```bash
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -r requirements-ats.txt
+```
+
+Then run:
+
+```bash
+.venv/bin/python examples/score_cv_matcher.py
+```
+
+The first run downloads [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) to `.hf-cache/` (roughly 3 GB). A CUDA GPU is recommended; no API key is required. The runner uses `cv-matcher` to extract the full PDF text and validate its result. It requests four category ratings from the local model, computes the weighted total (35% skills, 30% experience, 20% education, 15% keywords), and checks skill terms literally in the PDF and posting. It refuses the library's silent rule-based fallback. The result is written to `analysis/`, keeping `output/` PDF-only.
+
+For another posting, pass `--cv`, `--job`, `--out`, and a comma-separated `--skills` list. The score is a model judgment and may vary with the model or job wording; review the evidence before editing your resume.
+
 ## Project files
 
 | Path | Purpose |
@@ -53,4 +74,6 @@ In `contact`, `website` is the displayed text and `website_link` is the clickabl
 | `template/assets/` | Local SVG logos used during PDF rendering |
 | `vendor/` | Bundled QR generator and its license |
 | `output/default.pdf` | Default sample PDF |
+| `examples/` | Local cv-matcher runner and fictional job offer |
+| `analysis/` | Example assessment JSON |
 

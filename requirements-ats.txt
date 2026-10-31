@@ -1,0 +1,3 @@
+-r requirements.txt
+cv-matcher[local]==0.4.3
+transformers>=4.45,<5

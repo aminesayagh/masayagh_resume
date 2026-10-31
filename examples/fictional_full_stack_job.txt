@@ -1,0 +1,20 @@
+FICTIONAL EXAMPLE — Full Stack Software Developer, Workflow Products
+
+A small B2B software team is hiring a developer to build workflow and AI-assisted
+features for web applications. The role is remote-first and based in Morocco.
+
+Responsibilities:
+- Build accessible React or Next.js interfaces and Python or FastAPI services.
+- Design and integrate APIs backed by PostgreSQL.
+- Turn product requirements into prototypes, then ship tested features.
+- Maintain Docker-based development and CI/CD delivery workflows.
+- Collaborate with product and design colleagues on customer-facing SaaS tools.
+
+Requirements:
+- At least three years of professional software development experience.
+- Experience with React, Python, SQL, API integration, and automated testing.
+- A computer science degree or equivalent practical experience.
+- Clear written communication in English.
+
+Nice to have:
+- Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.

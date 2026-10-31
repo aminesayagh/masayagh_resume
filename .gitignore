@@ -1,6 +1,8 @@
 __pycache__/
 *.py[cod]
 .venv/
+.uv-cache/
+.hf-cache/
 venv/
 .env
 .env.*
