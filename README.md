@@ -42,6 +42,19 @@ All resume content is in `content/default.json`. Copy it before tailoring a resu
 
 In `contact`, `website` is the displayed text and `website_link` is the clickable URL in the header, footer, and QR code. `email` sets both the displayed address and its email link. Change these fields in each job-specific JSON file. To give the QR a separate destination, add `qr_url` to that file.
 
+## Check the PDF text
+
+Applicant tracking systems (ATS) read your resume by extracting the PDF's text. `check_pdf.py` extracts that text the same way and compares it with your content JSON. It flags image-only pages, missing fields, headings and dates broken across lines, non-standard section names, jobs without a title, and job headers repeated on a continuation page.
+
+```bash
+.venv/bin/pip install -r requirements-review.txt
+.venv/bin/python check_pdf.py                       # output/default.pdf + content/default.json
+.venv/bin/python check_pdf.py output/company-role.pdf
+.venv/bin/python -m unittest test_check_pdf         # self-test
+```
+
+The JSON report is saved to `analysis/<pdf name>.pdf-check.json`. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).
+
 ## Optional: local cv-matcher example
 
 The [fictional job offer](examples/fictional_full_stack_job.txt) and [example result](analysis/fictional_full_stack.json) show a local, model-assisted resume match using [cv-matcher](https://github.com/officialgabzz/cv-matcher). This is an illustrative score for an invented role, not a score from an employer's ATS.
