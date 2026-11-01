@@ -58,6 +58,8 @@ Also check contact data (email and phone format, LinkedIn/GitHub/website written
 
 **Build:** Add `review_ats.py` with `--cv`, `--job`, `--content`, and `--out` options. Show PDF check findings first, then must-have requirements, then preferred requirements. Edit suggestions are rule-based only (for example "posting says X, PDF says Y"); no model-written suggestion enters the report. Support a reasoned human override in the job review file while preserving the automated finding. Each override stores the PDF quote it was made against, and is flagged stale when that quote is no longer in the PDF. Show counts for `met`/`partial`/`missing`/`uncertain` separately. If a numeric summary is useful, label it **evidence coverage**, publish its fixed formula and version, and never use it as a hiring probability or universal ATS score. Do not combine parseability and job coverage into one number.
 
+**Status:** done — `review_ats.py`, `test_review_ats.py`, reports `analysis/<job>.review.md` and `.review.json`. The report opens with a "Decisions for you" section (must-haves not met, stale overrides, PDF errors). Overrides live in the job file under `overrides` (`id`, `status`, `reason`, `pdf_quote`) and are validated by `check_job.py`. Evidence coverage v1 = (met + 0.5 × partial) ÷ requirements, per priority.
+
 **Deliverables:** JSON and Markdown reports under `analysis/`, documented command in `README.md`.
 
 **Done when:** One command reviews the fictional posting against `output/default.pdf`; each report links findings to posting and PDF quotes; the report clearly identifies human decisions; `output/` remains PDF-only.

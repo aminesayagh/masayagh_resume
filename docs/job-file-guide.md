@@ -49,3 +49,24 @@ A job file turns a posting into a list of requirements the reviewer can check yo
 - Leave out vague lines ("fast-paced environment", "team player") unless the posting makes them a stated requirement.
 - Work-authorization and location lines are real gates for many ATS knockout questions. Record them as `location` even though no resume keyword proves them.
 - When a requirement is ambiguous, prefer `preferred` and explain why in `note`. The reviewer reports `must_have` items first, so over-marking hides what matters.
+
+## Overriding a result
+
+When the automated result is wrong, add an override to the job file instead of editing the report. The automated finding stays visible next to your decision.
+
+```json
+"overrides": [
+  {
+    "id": "R07",
+    "status": "met",
+    "reason": "React is the main front-end stack at Phoenix AI",
+    "pdf_quote": "Built and refined the front-end experience in close collaboration"
+  }
+]
+```
+
+- `status`: `met`, `partial`, `missing` or `uncertain`.
+- `reason`: required. Explain why the automated result is wrong.
+- `pdf_quote`: the PDF text your decision relies on, or `null` if it does not rely on any. When that text disappears from the PDF (for example after you edit the resume), the report marks the override as **stale** so you check it again.
+
+Prefer fixing the resume over overriding: an override changes your report, not what an ATS or a recruiter reads.

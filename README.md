@@ -76,7 +76,7 @@ Applicant tracking systems (ATS) read your resume by extracting the PDF's text. 
 ```bash
 .venv/bin/python check_pdf.py                       # output/default.pdf + content/default.json
 .venv/bin/python check_pdf.py output/company-role.pdf
-.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style test_check_job test_match_job  # self-test
+.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style test_check_job test_match_job test_review_ats  # self-test
 ```
 
 The JSON report is saved to `analysis/<pdf name>.pdf-check.json`. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).
@@ -89,6 +89,25 @@ A job file (`jobs/<job-slug>.json`) lists what a posting asks for. Each requirem
 .venv/bin/python check_job.py jobs/fictional_full_stack.json
 .venv/bin/python check_job.py jobs/company-role.json --draft   # while still reviewing
 ```
+
+## Review a resume for a job (one command)
+
+`review_ats.py` runs all the checks for one posting and writes a readable report:
+
+```bash
+.venv/bin/python review_ats.py --job jobs/fictional_full_stack.json
+.venv/bin/python review_ats.py --job jobs/company-role.json --cv output/company-role.pdf --content content/company-role.json
+```
+
+The report, `analysis/<job name>.review.md` (with a `.review.json` beside it), contains these sections in order:
+
+1. **Decisions for you:** must-haves that are not met, stale overrides, and PDF errors.
+2. **PDF readability:** the `check_pdf.py` findings.
+3. **Content checks:** spelling and style warnings.
+4. **Must-have requirements, then preferred requirements:** gaps first, each with the posting quote, your PDF quote and page, the reason, and a rule-based suggestion such as "the posting says X; your PDF says Y".
+5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: (met + 0.5 × partial) ÷ requirements, per priority. Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
+
+Without `--cv`, the command uses `output/<job name>.pdf` if it exists, otherwise `output/default.pdf`. To correct a result, add an override to the job file (see the [job file guide](docs/job-file-guide.md#overriding-a-result)).
 
 ## Match your resume to a job
 

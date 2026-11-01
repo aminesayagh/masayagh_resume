@@ -79,6 +79,12 @@ def check(content: dict, headings: list[str], allow: set[str]) -> dict:
     return {"findings": findings}
 
 
+def load_allow() -> set[str]:
+    if not ALLOW_FILE.exists():
+        return set()
+    return {l.strip() for l in ALLOW_FILE.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("content", nargs="?", type=Path, default=HERE / "content" / "default.json")
@@ -86,10 +92,7 @@ def main() -> None:
     args = parser.parse_args()
 
     content = json.loads(args.content.read_text(encoding="utf-8"))
-    allow = set()
-    if ALLOW_FILE.exists():
-        allow = {l.strip() for l in ALLOW_FILE.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")}
-    report = check(content, check_pdf.template_headings(check_pdf.TEMPLATE), allow)
+    report = check(content, check_pdf.template_headings(check_pdf.TEMPLATE), load_allow())
     path = args.content.resolve()
     report["content"] = str(path.relative_to(HERE)) if path.is_relative_to(HERE) else str(args.content)
 

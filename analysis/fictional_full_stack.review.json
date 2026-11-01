@@ -1,0 +1,809 @@
+{
+  "cv": "output/default.pdf",
+  "job": "jobs/fictional_full_stack.json",
+  "content": "content/default.json",
+  "title": "FICTIONAL — Full Stack Software Developer, Workflow Products",
+  "generated": "2026-11-01",
+  "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
+  "pdf_check": {
+    "pdf": "output/default.pdf",
+    "pages": [
+      {
+        "page": 1,
+        "chars": 1763
+      },
+      {
+        "page": 2,
+        "chars": 2153
+      },
+      {
+        "page": 3,
+        "chars": 1559
+      }
+    ],
+    "experience_years": {
+      "merged": 5.4,
+      "summed": 9.1
+    },
+    "findings": [
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Heading 'Summary of Experience' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "heading_nonstandard",
+        "message": "Heading 'Summary of Experience' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Heading 'Technical Proficiencies' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "heading_nonstandard",
+        "message": "Heading 'Technical Proficiencies' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Heading 'Professional Experience' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Heading 'Academic Education' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "heading_nonstandard",
+        "message": "Heading 'Academic Education' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for LingoWP 'Jul 2026 - Present' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "role_missing",
+        "message": "'LingoWP' has no job title; parsers expect title, company and dates per entry."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Phoenix AI USA Inc. 'Jul 2025 - Present' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "entry_repeated",
+        "message": "'Phoenix AI USA Inc.' starts 2 lines; a parser may record it as separate jobs. Avoid repeating the entry header when a job continues on the next page."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Cogy Tech 'Nov 2024 - Jun 2025' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Rich Media 'Nov 2024 - Jan 2025' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Digital Consulting 'Jun 2024 - Oct 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Cyber Cohesion 'Apr 2023 - Jul 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "entry_repeated",
+        "message": "'Cyber Cohesion' starts 2 lines; a parser may record it as separate jobs. Avoid repeating the entry header when a job continues on the next page."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Jonas Agency 'Jun 2022 - Jul 2023' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Sodiadd 'Apr 2023 - Jul 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "role_missing",
+        "message": "'Sodiadd' has no job title; parsers expect title, company and dates per entry."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for Happy Water NFT 'Jun 2022 - Jul 2023' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "role_missing",
+        "message": "'Happy Water NFT' has no job title; parsers expect title, company and dates per entry."
+      },
+      {
+        "severity": "warning",
+        "code": "role_missing",
+        "message": "'Lavish Trading' has no job title; parsers expect title, company and dates per entry."
+      },
+      {
+        "severity": "warning",
+        "code": "field_split",
+        "message": "Dates for MySchool 'Sep 2020 - Jun 2021' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
+      },
+      {
+        "severity": "warning",
+        "code": "role_missing",
+        "message": "'MySchool' has no job title; parsers expect title, company and dates per entry."
+      },
+      {
+        "severity": "warning",
+        "code": "link_icon_only",
+        "message": "linkedin 'linkedin.com/in/mohamedamine-sayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured."
+      },
+      {
+        "severity": "warning",
+        "code": "link_icon_only",
+        "message": "github 'github.com/aminesayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured."
+      },
+      {
+        "severity": "warning",
+        "code": "date_single",
+        "message": "'Lavish Trading' has a single date 'Aug 2021'; parsers expect a range ('Aug 2021 - Aug 2021' or 'Aug 2021 - Sep 2021') to compute its length."
+      },
+      {
+        "severity": "info",
+        "code": "date_overlap",
+        "message": "10 overlapping job pair(s): LingoWP / Phoenix AI USA Inc.; Cogy Tech / Rich Media; Digital Consulting / Cyber Cohesion; Digital Consulting / Sodiadd; Cyber Cohesion / Jonas Agency; Cyber Cohesion / Sodiadd; Cyber Cohesion / Happy Water NFT; Jonas Agency / Sodiadd; Jonas Agency / Happy Water NFT; Sodiadd / Happy Water NFT. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.",
+        "pairs": [
+          "LingoWP / Phoenix AI USA Inc.",
+          "Cogy Tech / Rich Media",
+          "Digital Consulting / Cyber Cohesion",
+          "Digital Consulting / Sodiadd",
+          "Cyber Cohesion / Jonas Agency",
+          "Cyber Cohesion / Sodiadd",
+          "Cyber Cohesion / Happy Water NFT",
+          "Jonas Agency / Sodiadd",
+          "Jonas Agency / Happy Water NFT",
+          "Sodiadd / Happy Water NFT"
+        ]
+      },
+      {
+        "severity": "info",
+        "code": "experience_years",
+        "message": "Experience from your dates: 5.4 years counting overlaps once, 9.1 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these."
+      },
+      {
+        "severity": "info",
+        "code": "meta_author",
+        "message": "The PDF has no author field; set it to your name."
+      },
+      {
+        "severity": "warning",
+        "code": "file_name",
+        "message": "File name 'default.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_line",
+        "message": "'mohamed amine sayagh resume | p# masayagh.com' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section."
+      }
+    ]
+  },
+  "spelling": {
+    "findings": []
+  },
+  "style": {
+    "findings": [
+      {
+        "severity": "warning",
+        "code": "first_person",
+        "field": "summary",
+        "message": "summary: uses first person (I). Resume convention drops it: 'Business-oriented developer who partners with teams…'."
+      },
+      {
+        "severity": "warning",
+        "code": "weak_opener",
+        "field": "experience[1].description (Phoenix AI USA Inc.)",
+        "message": "experience[1].description (Phoenix AI USA Inc.): starts with 'Contributed'. Lead with what you did (Built, Shipped, Led, Reduced…) so your own part is clear."
+      },
+      {
+        "severity": "warning",
+        "code": "weak_opener",
+        "field": "experience[1].bullets[2] (Phoenix AI USA Inc.)",
+        "message": "experience[1].bullets[2] (Phoenix AI USA Inc.): starts with 'Supported'. Lead with what you did (Built, Shipped, Led, Reduced…) so your own part is clear."
+      },
+      {
+        "severity": "warning",
+        "code": "weak_opener",
+        "field": "experience[2].description (Cogy Tech)",
+        "message": "experience[2].description (Cogy Tech): starts with 'Helped'. Lead with what you did (Built, Shipped, Led, Reduced…) so your own part is clear."
+      },
+      {
+        "severity": "warning",
+        "code": "weak_opener",
+        "field": "experience[3].description (Rich Media)",
+        "message": "experience[3].description (Rich Media): starts with 'Contributed'. Lead with what you did (Built, Shipped, Led, Reduced…) so your own part is clear."
+      },
+      {
+        "severity": "info",
+        "code": "measurable",
+        "field": "experience",
+        "message": "experience: 3 of 27 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_opener",
+        "field": "experience",
+        "message": "experience: 3 lines start with 'Delivered'; vary the verbs."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_opener",
+        "field": "experience",
+        "message": "experience: 3 lines start with 'Built'; vary the verbs."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_opener",
+        "field": "experience",
+        "message": "experience: 4 lines start with 'Developed'; vary the verbs."
+      }
+    ]
+  },
+  "match_version": 1,
+  "results": [
+    {
+      "id": "R01",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Build React/Next.js front ends and Python/FastAPI services",
+      "posting_quote": "Build accessible React or Next.js interfaces and Python or FastAPI services.",
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
+      "page": 1,
+      "rationale": "Skills list or summary only: React, Next.js, Python, FastAPI.",
+      "terms": [
+        {
+          "term": "React",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        },
+        {
+          "term": "Next.js",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'Next.js' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        },
+        {
+          "term": "Python",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "JavaScript PHP Python SQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        },
+        {
+          "term": "FastAPI",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "FastAPI WordPress Odoo PostgreSQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'FastAPI' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'React' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Next.js' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Python' is only in your skills list. If you used it in a job, name it in that job's bullet. 'FastAPI' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R02",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Design and integrate APIs on PostgreSQL",
+      "posting_quote": "Design and integrate APIs backed by PostgreSQL.",
+      "keyword": "alias",
+      "status": "partial",
+      "method": "exact",
+      "quote": "FastAPI WordPress Odoo PostgreSQL",
+      "page": 1,
+      "rationale": "Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.",
+      "terms": [
+        {
+          "term": "APIs",
+          "keyword": "alias",
+          "status": "met",
+          "method": "alias",
+          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term."
+        },
+        {
+          "term": "PostgreSQL",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "FastAPI WordPress Odoo PostgreSQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'PostgreSQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R03",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Prototype from product requirements, then ship tested features",
+      "posting_quote": "Turn product requirements into prototypes, then ship tested features.",
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
+      "page": 2,
+      "rationale": "'prototypes' found in experience text.",
+      "terms": [
+        {
+          "term": "prototypes",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'prototypes' found in experience text."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R04",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Maintain Docker and CI/CD workflows",
+      "posting_quote": "Maintain Docker-based development and CI/CD delivery workflows.",
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Web scraping CI/CD Docker Testing Practices",
+      "page": 1,
+      "rationale": "Skills list or summary only: Docker, CI/CD.",
+      "terms": [
+        {
+          "term": "Docker",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Web scraping CI/CD Docker Testing Practices",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'Docker' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        },
+        {
+          "term": "CI/CD",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Web scraping CI/CD Docker Testing Practices",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'CI/CD' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Docker' is only in your skills list. If you used it in a job, name it in that job's bullet. 'CI/CD' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R05",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Work with product and design on customer-facing SaaS",
+      "posting_quote": "Collaborate with product and design colleagues on customer-facing SaaS tools.",
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+      "page": 1,
+      "rationale": "'SaaS' found in experience text.",
+      "terms": [
+        {
+          "term": "SaaS",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'SaaS' found in experience text."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R06",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "3+ years of professional software development",
+      "posting_quote": "At least three years of professional software development experience.",
+      "keyword": null,
+      "status": "met",
+      "method": "computed",
+      "quote": "Sep 2020 - Jun 2021",
+      "page": 3,
+      "years": {
+        "merged": 5.4,
+        "summed": 9.1
+      },
+      "rationale": "5.4 years with overlaps counted once (needs 3). Computed from the job dates; the quote is your earliest date range.",
+      "terms": [],
+      "kind_years": true,
+      "suggestion": null
+    },
+    {
+      "id": "R07",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Professional experience with React",
+      "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
+      "page": 1,
+      "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "terms": [
+        {
+          "term": "React",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'React' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R08",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Professional experience with Python",
+      "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "JavaScript PHP Python SQL",
+      "page": 1,
+      "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "terms": [
+        {
+          "term": "Python",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "JavaScript PHP Python SQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Python' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R09",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Professional experience with SQL",
+      "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "JavaScript PHP Python SQL",
+      "page": 1,
+      "rationale": "'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "terms": [
+        {
+          "term": "SQL",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "JavaScript PHP Python SQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'SQL' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R10",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Professional experience with API integration",
+      "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'API integration' not found in this PDF.",
+      "terms": [
+        {
+          "term": "API integration",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'API integration' not found in this PDF."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'API integration' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R11",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Professional experience with automated testing",
+      "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'automated testing' not found in this PDF.",
+      "terms": [
+        {
+          "term": "automated testing",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'automated testing' not found in this PDF."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'automated testing' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R12",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Computer science degree, or equivalent practical experience",
+      "posting_quote": "A computer science degree or equivalent practical experience.",
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "2020 - 2023 Bachelor's in Computer Science",
+      "page": 3,
+      "rationale": "'computer science' found in education text.",
+      "terms": [
+        {
+          "term": "computer science",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "2020 - 2023 Bachelor's in Computer Science",
+          "page": 3,
+          "section": "education",
+          "rationale": "'computer science' found in education text."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R13",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Written English",
+      "posting_quote": "Clear written communication in English.",
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Languages Arabic - Native French - Professional English - Professional",
+      "page": 3,
+      "rationale": "'English' found in education text.",
+      "terms": [
+        {
+          "term": "English",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Languages Arabic - Native French - Professional English - Professional",
+          "page": 3,
+          "section": "education",
+          "rationale": "'English' found in education text."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R14",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Experience with AWS",
+      "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'AWS' not found in this PDF.",
+      "terms": [
+        {
+          "term": "AWS",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'AWS' not found in this PDF."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'AWS' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R15",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Experience with Kubernetes",
+      "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'Kubernetes' not found in this PDF.",
+      "terms": [
+        {
+          "term": "Kubernetes",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'Kubernetes' not found in this PDF."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Kubernetes' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R16",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Experience with TypeScript",
+      "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'TypeScript' not found in this PDF.",
+      "terms": [
+        {
+          "term": "TypeScript",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'TypeScript' not found in this PDF."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'TypeScript' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R17",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Experience with creator-marketing",
+      "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+      "page": 1,
+      "rationale": "'creator-marketing' found in experience text.",
+      "terms": [
+        {
+          "term": "creator-marketing",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'creator-marketing' found in experience text."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R18",
+      "section": "location",
+      "priority": "must_have",
+      "description": "Based in Morocco, remote-first",
+      "posting_quote": "The role is remote-first and based in Morocco.",
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Casablanca, Morocco",
+      "page": 1,
+      "rationale": "'Morocco' found in header text.",
+      "terms": [
+        {
+          "term": "Morocco",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Casablanca, Morocco",
+          "page": 1,
+          "section": "header",
+          "rationale": "'Morocco' found in header text."
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    }
+  ],
+  "counts": {
+    "met": 7,
+    "partial": 6,
+    "missing": 5,
+    "uncertain": 0
+  },
+  "overridden": 0,
+  "evidence_coverage": {
+    "version": 1,
+    "formula": "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0",
+    "must_have": 0.61,
+    "preferred": 0.5
+  }
+}

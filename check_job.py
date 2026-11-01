@@ -19,6 +19,8 @@ HERE = Path(__file__).resolve().parent
 SECTIONS = {"responsibility", "requirement", "preferred", "location", "screening"}
 PRIORITIES = {"must_have", "preferred"}
 KINDS = {"evidence", "years_experience"}
+STATUSES = {"met", "partial", "missing", "uncertain"}
+OVERRIDE_FIELDS = {"id", "status", "reason", "pdf_quote"}
 FIELDS = {"id", "section", "priority", "quote", "description", "terms", "kind", "min_years", "reviewed", "note"}
 # Wording that signals a wish, not a gate. A must_have quoting it is an inferred hard gate.
 SOFT_WORDING = re.compile(r"\b(nice to have|a plus|bonus|ideally|preferred|preferably|desirable)\b", re.I)
@@ -109,6 +111,29 @@ def validate(job: dict, root: Path = HERE, draft: bool = False) -> list[dict]:
         if r.get("reviewed") is not True:
             add("warning" if draft else "error", "unreviewed", "not reviewed; check the quote and priority against "
                 "the posting, then set \"reviewed\": true.", rid)
+
+    overrides = job.get("overrides", [])
+    if not isinstance(overrides, list):
+        add("error", "overrides", "'overrides' must be a list.")
+        return findings
+    overridden = set()
+    for i, o in enumerate(overrides):
+        oid = o.get("id") if isinstance(o, dict) else None
+        label = f"overrides[{i}]"
+        if oid not in seen:
+            add("error", "override_id", f"{label} refers to unknown requirement id '{oid}'.")
+            continue
+        if oid in overridden:
+            add("error", "override_duplicate", f"{label}: more than one override for this requirement.", oid)
+        overridden.add(oid)
+        for key in sorted(set(o) - OVERRIDE_FIELDS):
+            add("error", "unknown_field", f"{label}: unknown field '{key}' (typo?).", oid)
+        if o.get("status") not in STATUSES:
+            add("error", "override_status", f"{label}: 'status' must be one of {sorted(STATUSES)}.", oid)
+        if not str(o.get("reason") or "").strip():
+            add("error", "override_reason", f"{label}: an override needs a 'reason'.", oid)
+        if o.get("pdf_quote") is not None and not isinstance(o["pdf_quote"], str):
+            add("error", "override_quote", f"{label}: 'pdf_quote' must be the PDF text the decision relies on, or null.", oid)
     return findings
 
 
