@@ -125,6 +125,10 @@ Every `met` or `partial` result quotes the exact PDF line and its page. "At leas
 
 The report is saved to `analysis/<job name>.match.json`.
 
+## For AI assistants
+
+The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/SKILL.md`](.claude/skills/ats-review/SKILL.md). Claude Code loads that file automatically as a skill. Other tools reach it through [`AGENTS.md`](AGENTS.md).
+
 ## Optional: local cv-matcher example
 
 The [fictional job offer](examples/fictional_full_stack_job.txt) and [example result](analysis/fictional_full_stack.json) show a local, model-assisted resume match using [cv-matcher](https://github.com/officialgabzz/cv-matcher). This is an illustrative score for an invented role, not a score from an employer's ATS.
