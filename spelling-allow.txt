@@ -1,0 +1,14 @@
+# Words confirmed correct for check_spelling.py: one per line, case-insensitive.
+# A plural ("workflows") is covered by its singular ("workflow").
+# Industry terms
+workflow
+influencer
+backend
+app
+onboarding
+touchpoint
+gamification
+# Product and client names
+Inflauditor
+Miratti
+Warzone

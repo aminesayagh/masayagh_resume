@@ -14,6 +14,12 @@ The current `examples/score_cv_matcher.py` remains an optional experiment. Its m
 - Every `met` or `partial` result must cite an exact quote from extracted PDF text and its page number. `missing` means no supporting evidence was found in this PDF; `uncertain` means the available text cannot support a confident decision. Neither status asserts that the candidate lacks the skill.
 - A reviewer can override an assessment with a reason; the original automated finding remains visible.
 
+## Milestone 0 — Spelling
+
+**Build:** Spell-check the content JSON before the PDF is built. Report each unknown word as a warning with suggestions and the field path, never as an error, because names and tech terms are often correct. Trust words from names, companies, skills, institutions and locations. Confirmed words go in `spelling-allow.txt`.
+
+**Status:** done — `check_spelling.py` (`pyspellchecker`, English, offline), `test_check_spelling.py`, report in `analysis/<content>.spelling.json`.
+
 ## Milestone 1 — PDF text and integrity checks
 
 **Build:** Add a PDF reader that extracts text page by page and checks that the generated document is readable. Compare important fields from `content/<job-slug>.json` with the extracted text: name, contact address, experience headings and dates, education, and section headings. Flag missing, duplicated, or badly ordered text. Keep layout and rendering checks separate from job fit.
@@ -60,7 +66,7 @@ Also check what parsers commonly trip on: section headings that are not standard
 
 ## First implementation slice
 
-Milestone 1 is shipped on its own: it needs no job file and already finds real issues in `output/default.pdf`. Fix those in `template/resume.html` next, then build milestone 2. The reviewer's dependencies live in `requirements-review.txt` (`pypdf` only), separate from the model stack in `requirements-ats.txt`. The first real posting is needed at milestone 5; its text or URL can be supplied then.
+Milestone 1 is shipped on its own: it needs no job file and already finds real issues in `output/default.pdf`. Fix those in `template/resume.html` next, then build milestone 2. The reviewer's dependencies live in `requirements-review.txt` (`pypdf` and `pyspellchecker`), separate from the model stack in `requirements-ats.txt`. The first real posting is needed at milestone 5; its text or URL can be supplied then.
 
 ## References
 
