@@ -1,0 +1,209 @@
+{
+  "title": "FICTIONAL — Full Stack Software Developer, Workflow Products",
+  "posting_file": "examples/fictional_full_stack_job.txt",
+  "requirements": [
+    {
+      "id": "R01",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Build accessible React or Next.js interfaces and Python or FastAPI services.",
+      "description": "Build React/Next.js front ends and Python/FastAPI services",
+      "terms": [
+        "React",
+        "Next.js",
+        "Python",
+        "FastAPI"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R02",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Design and integrate APIs backed by PostgreSQL.",
+      "description": "Design and integrate APIs on PostgreSQL",
+      "terms": [
+        "APIs",
+        "PostgreSQL"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R03",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Turn product requirements into prototypes, then ship tested features.",
+      "description": "Prototype from product requirements, then ship tested features",
+      "terms": [
+        "prototypes"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R04",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Maintain Docker-based development and CI/CD delivery workflows.",
+      "description": "Maintain Docker and CI/CD workflows",
+      "terms": [
+        "Docker",
+        "CI/CD"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R05",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Collaborate with product and design colleagues on customer-facing SaaS tools.",
+      "description": "Work with product and design on customer-facing SaaS",
+      "terms": [
+        "SaaS"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R06",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "At least three years of professional software development experience.",
+      "description": "3+ years of professional software development",
+      "kind": "years_experience",
+      "min_years": 3,
+      "reviewed": true
+    },
+    {
+      "id": "R07",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "description": "Professional experience with React",
+      "terms": [
+        "React"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R08",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "description": "Professional experience with Python",
+      "terms": [
+        "Python"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R09",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "description": "Professional experience with SQL",
+      "terms": [
+        "SQL"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R10",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "description": "Professional experience with API integration",
+      "terms": [
+        "API integration"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R11",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "description": "Professional experience with automated testing",
+      "terms": [
+        "automated testing"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R12",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "A computer science degree or equivalent practical experience.",
+      "description": "Computer science degree, or equivalent practical experience",
+      "terms": [
+        "computer science"
+      ],
+      "note": "Either path satisfies it; equivalent experience counts.",
+      "reviewed": true
+    },
+    {
+      "id": "R13",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Clear written communication in English.",
+      "description": "Written English",
+      "terms": [
+        "English"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R14",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "description": "Experience with AWS",
+      "terms": [
+        "AWS"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R15",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "description": "Experience with Kubernetes",
+      "terms": [
+        "Kubernetes"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R16",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "description": "Experience with TypeScript",
+      "terms": [
+        "TypeScript"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R17",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "description": "Experience with creator-marketing",
+      "terms": [
+        "creator-marketing"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "R18",
+      "section": "location",
+      "priority": "must_have",
+      "quote": "The role is remote-first and based in Morocco.",
+      "description": "Based in Morocco, remote-first",
+      "terms": [
+        "Morocco"
+      ],
+      "reviewed": true
+    }
+  ]
+}

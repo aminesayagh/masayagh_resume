@@ -38,6 +38,8 @@ Also check contact data (email and phone format, LinkedIn/GitHub/website written
 
 **Build:** Define and validate the `jobs/*.json` schema. Convert `examples/fictional_full_stack_job.txt` into the first structured fixture. Validate source quotes automatically: each quote must appear verbatim (after whitespace normalization) in the posting text. A model may suggest requirements from the start, since a human still confirms the `must_have`/`preferred` priority before scoring. Support a computed requirement type for years of experience, reusing `check_pdf.check_dates` (it already reports `experience_years`), because no quote can prove it. Keep responsibilities, explicit requirements, preferred qualifications, location/work authorization, and screening questions distinguishable. Do not infer a hard gate from vague language.
 
+**Status:** done — `check_job.py` (validator), `jobs/fictional_full_stack.json` (18 requirements: 9 must-have, 9 preferred), `docs/job-file-guide.md`, `test_check_job.py`. Requirements carry `terms` in the posting's exact wording for milestone 3's keyword check. Model suggestion of requirements is not built yet; files are written by hand and the validator catches mistakes.
+
 **Deliverables:** `jobs/fictional_full_stack.json`, schema validation, and a short guide for creating a job file from a posting.
 
 **Done when:** Every scored requirement traces to text in the posting; malformed or unreviewed requirements fail validation; the fictional posting can be reviewed without a model download.

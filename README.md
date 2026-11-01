@@ -76,10 +76,19 @@ Applicant tracking systems (ATS) read your resume by extracting the PDF's text. 
 ```bash
 .venv/bin/python check_pdf.py                       # output/default.pdf + content/default.json
 .venv/bin/python check_pdf.py output/company-role.pdf
-.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style  # self-test
+.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style test_check_job  # self-test
 ```
 
 The JSON report is saved to `analysis/<pdf name>.pdf-check.json`. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).
+
+## Describe a job posting
+
+A job file (`jobs/<job-slug>.json`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. See the [job file guide](docs/job-file-guide.md) and the [fictional example](jobs/fictional_full_stack.json).
+
+```bash
+.venv/bin/python check_job.py jobs/fictional_full_stack.json
+.venv/bin/python check_job.py jobs/company-role.json --draft   # while still reviewing
+```
 
 ## Optional: local cv-matcher example
 
