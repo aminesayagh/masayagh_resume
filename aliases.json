@@ -1,0 +1,15 @@
+{
+  "_about": "Other ways a resume may write a posting's term. Keep only true synonyms: an alias match counts as evidence, reported as 'wording differs'. Keys are compared case-insensitively.",
+  "PostgreSQL": ["Postgres"],
+  "Next.js": ["NextJS", "Next js"],
+  "Node.js": ["NodeJS"],
+  "AWS": ["Amazon Web Services"],
+  "Kubernetes": ["K8s"],
+  "CI/CD": ["continuous integration", "continuous delivery", "continuous deployment"],
+  "SaaS": ["software as a service"],
+  "API integration": ["API integrations", "integrated APIs", "integrating APIs", "integrate APIs"],
+  "APIs": ["API"],
+  "automated testing": ["automated tests", "test automation", "unit tests", "integration tests", "end-to-end tests"],
+  "creator-marketing": ["creator marketing", "influencer marketing"],
+  "prototypes": ["prototype", "prototyping"]
+}

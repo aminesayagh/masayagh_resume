@@ -76,7 +76,7 @@ Applicant tracking systems (ATS) read your resume by extracting the PDF's text. 
 ```bash
 .venv/bin/python check_pdf.py                       # output/default.pdf + content/default.json
 .venv/bin/python check_pdf.py output/company-role.pdf
-.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style test_check_job  # self-test
+.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style test_check_job test_match_job  # self-test
 ```
 
 The JSON report is saved to `analysis/<pdf name>.pdf-check.json`. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).
@@ -89,6 +89,22 @@ A job file (`jobs/<job-slug>.json`) lists what a posting asks for. Each requirem
 .venv/bin/python check_job.py jobs/fictional_full_stack.json
 .venv/bin/python check_job.py jobs/company-role.json --draft   # while still reviewing
 ```
+
+## Match your resume to a job
+
+`match_job.py` checks a validated job file against the resume PDF text. For each requirement it reports two separate things:
+
+- **Keyword:** whether the posting's exact term appears anywhere in the PDF, which is what a recruiter's search sees. The result is `exact`, `alias` (wording differs: use the posting's term), or `absent`.
+- **Evidence:** whether the resume backs the requirement up. `met` means it was found in experience, education, languages or header text. `partial` means it was found only in the skills list or summary (a claim, not proof), or only some of the requirement's terms were met. `missing` means there is no supporting text in this PDF; it does not mean you lack the skill. `uncertain` means the text cannot support a decision.
+
+Every `met` or `partial` result quotes the exact PDF line and its page. "At least N years" requirements are computed from your job dates. Matching is deterministic: no model and no network. Alternative spellings that count as the same term (for example Postgres for PostgreSQL) are in `aliases.json`; keep only true synonyms there.
+
+```bash
+.venv/bin/python match_job.py jobs/fictional_full_stack.json                           # output/default.pdf
+.venv/bin/python match_job.py jobs/company-role.json --cv output/company-role.pdf
+```
+
+The report is saved to `analysis/<job name>.match.json`.
 
 ## Optional: local cv-matcher example
 
