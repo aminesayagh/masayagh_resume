@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Review a resume PDF against one job posting in one command (ATS reviewer, milestone 4).
 
-Usage: python3 review_ats.py --job jobs/<job-slug>.json [--cv output/<job-slug>.pdf]
+Usage: python3 ats/review_ats.py --job jobs/<job-slug>.json [--cv output/<job-slug>.pdf]
                              [--content content/<job-slug>.json] [--out analysis/<job-slug>.review.md] [--no-network]
 
 Runs the spelling, style, PDF-text and job-matching checks and writes a readable Markdown
@@ -26,6 +26,7 @@ import check_style
 import match_job
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
 COVERAGE_VERSION = 1
 COVERAGE_FORMULA = "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0"
 DISCLAIMER = ("This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank "
@@ -34,7 +35,7 @@ DISCLAIMER = ("This is a tailoring aid, not an ATS score: no single number repre
 
 def rel(path: Path) -> str:
     p = path.resolve()
-    return str(p.relative_to(HERE)) if p.is_relative_to(HERE) else str(path)
+    return str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(path)
 
 
 def apply_overrides(results: list[dict], overrides: list[dict], pages: list[str]) -> None:
@@ -178,18 +179,18 @@ def main() -> None:
     job = json.loads(args.job.read_text(encoding="utf-8"))
     problems = [f for f in check_job.validate(job) if f["severity"] == "error"]
     if problems:
-        print(f"The job file is not valid; fix it first (python3 check_job.py {args.job}):")
+        print(f"The job file is not valid; fix it first (python3 ats/check_job.py {args.job}):")
         for f in problems:
             print(f"  [error] {f['message']}")
         sys.exit(1)
-    cv = args.cv or next(p for p in (HERE / "output" / f"{args.job.stem}.pdf", HERE / "output" / "default.pdf")
+    cv = args.cv or next(p for p in (ROOT / "output" / f"{args.job.stem}.pdf", ROOT / "output" / "default.pdf")
                          if p.exists() or p.stem == "default")
-    content_path = args.content or HERE / "content" / f"{cv.stem}.json"
+    content_path = args.content or ROOT / "content" / f"{cv.stem}.json"
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
 
     rep = review(job, cv, content, network=not args.no_network)
     inputs = {"cv": rel(cv), "job": rel(args.job), "content": rel(content_path) if content else "no content file"}
-    md_path = args.out or HERE / "analysis" / f"{args.job.stem}.review.md"
+    md_path = args.out or ROOT / "analysis" / f"{args.job.stem}.review.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(markdown(rep, inputs), encoding="utf-8")
     rep["pdf_check"]["pdf"] = inputs["cv"]

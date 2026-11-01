@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a tailored PDF resume from a JSON content file.
 
-Usage: python3 build_resume.py [content/default.json] [-o output/default.pdf]
+Usage: python3 builder/build_resume.py [content/default.json] [-o output/default.pdf]
 Requires Jinja2 and Google Chrome in WSL.
 """
 
@@ -18,8 +18,9 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
 TEMPLATE_DIR = HERE / "template"
-DEFAULT_DATA = HERE / "content" / "default.json"
+DEFAULT_DATA = ROOT / "content" / "default.json"
 sys.path.insert(0, str(HERE / "vendor"))
 sys.dont_write_bytecode = True
 import qrcode  # bundled so the resume builds without another installation step
@@ -86,7 +87,7 @@ def main() -> None:
     data = load_data(args.data.resolve(strict=True))
     qr_url = data["contact"].get("qr_url") or data["contact"]["website_link"]
     data["contact"]["qr_url"] = qr_url
-    pdf_file = (args.output or HERE / "output" / f"{args.data.stem}.pdf").resolve()
+    pdf_file = (args.output or ROOT / "output" / f"{args.data.stem}.pdf").resolve()
     pdf_file.parent.mkdir(parents=True, exist_ok=True)
     browser = shutil.which("google-chrome")
     if browser is None:

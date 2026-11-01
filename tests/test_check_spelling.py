@@ -1,4 +1,4 @@
-"""Run: .venv/bin/python -m unittest test_check_spelling"""
+"""Run from the repo root: .venv/bin/python -m unittest discover -s tests -t ."""
 
 import unittest
 

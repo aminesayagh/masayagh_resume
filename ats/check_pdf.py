@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that a generated resume PDF reads back as clean text (ATS reviewer, milestone 1).
 
-Usage: python3 check_pdf.py [output/default.pdf] [--content content/default.json] [--out report.json]
+Usage: python3 ats/check_pdf.py [output/default.pdf] [--content content/default.json] [--out report.json]
 
 This checks parseability only: whether the text an ATS parser would extract matches the
 resume content. It never claims compatibility with any employer's ATS.
@@ -20,7 +20,8 @@ from pathlib import Path
 from pypdf import PdfReader
 
 HERE = Path(__file__).resolve().parent
-TEMPLATE = HERE / "template" / "resume.html"
+ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
+TEMPLATE = ROOT / "builder" / "template" / "resume.html"
 
 # Section names most resume parsers recognise. Heading text outside this list may still
 # parse, but it is a gamble, so it is reported as a warning.
@@ -248,19 +249,19 @@ def check(pdf: Path, content: dict | None, headings: list[str], network: bool = 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("pdf", nargs="?", type=Path, default=HERE / "output" / "default.pdf")
+    parser.add_argument("pdf", nargs="?", type=Path, default=ROOT / "output" / "default.pdf")
     parser.add_argument("--content", type=Path, help="content JSON (default: content/<pdf name>.json if present)")
     parser.add_argument("--out", type=Path, help="JSON report path (default: analysis/<pdf name>.pdf-check.json)")
     parser.add_argument("--no-network", action="store_true", help="skip opening the LinkedIn/GitHub/website links")
     args = parser.parse_args()
 
-    content_path = args.content or HERE / "content" / f"{args.pdf.stem}.json"
+    content_path = args.content or ROOT / "content" / f"{args.pdf.stem}.json"
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
     report = check(args.pdf, content, template_headings(TEMPLATE), network=not args.no_network)
-    rel = lambda path: str(path.resolve().relative_to(HERE)) if path.resolve().is_relative_to(HERE) else str(path)
+    rel = lambda path: str(path.resolve().relative_to(ROOT)) if path.resolve().is_relative_to(ROOT) else str(path)
     report["pdf"], report["content"] = rel(args.pdf), rel(content_path) if content else None
 
-    out = args.out or HERE / "analysis" / f"{args.pdf.stem}.pdf-check.json"
+    out = args.out or ROOT / "analysis" / f"{args.pdf.stem}.pdf-check.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 

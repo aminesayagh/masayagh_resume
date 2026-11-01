@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writing-style warnings for a resume content file (ATS reviewer).
 
-Usage: python3 check_style.py [content/default.json] [--out report.json]
+Usage: python3 ats/check_style.py [content/default.json] [--out report.json]
 
 These help the recruiter who reads the resume after the ATS has parsed it. They are
 rule-based advice, never errors: style is your call. Always exits 0.
@@ -14,6 +14,7 @@ from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
 FIRST_PERSON = re.compile(r"\b(I|I'm|I've|me|my|mine|we|our|us)\b")  # case-sensitive: "I" not "i"
 WEAK_OPENERS = ("helped", "contributed", "assisted", "worked on", "participated", "involved in",
                 "responsible for", "tasked with", "in charge of", "supported")
@@ -67,14 +68,14 @@ def check(content: dict) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("content", nargs="?", type=Path, default=HERE / "content" / "default.json")
+    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "content" / "default.json")
     parser.add_argument("--out", type=Path, help="JSON report path (default: analysis/<content name>.style.json)")
     args = parser.parse_args()
 
     report = check(json.loads(args.content.read_text(encoding="utf-8")))
     path = args.content.resolve()
-    report["content"] = str(path.relative_to(HERE)) if path.is_relative_to(HERE) else str(args.content)
-    out = args.out or HERE / "analysis" / f"{args.content.stem}.style.json"
+    report["content"] = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(args.content)
+    out = args.out or ROOT / "analysis" / f"{args.content.stem}.style.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 

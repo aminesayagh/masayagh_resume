@@ -1,4 +1,4 @@
-"""Run: .venv/bin/python -m unittest test_review_ats"""
+"""Run from the repo root: .venv/bin/python -m unittest discover -s tests -t ."""
 
 import copy
 import json
@@ -8,10 +8,10 @@ from pathlib import Path
 import check_job
 import review_ats
 
-HERE = Path(__file__).resolve().parent
-JOB = json.loads((HERE / "jobs" / "fictional_full_stack.json").read_text(encoding="utf-8"))
-CONTENT = json.loads((HERE / "content" / "default.json").read_text(encoding="utf-8"))
-PDF = HERE / "output" / "default.pdf"
+ROOT = Path(__file__).resolve().parents[1]
+JOB = json.loads((ROOT / "jobs" / "fictional_full_stack.json").read_text(encoding="utf-8"))
+CONTENT = json.loads((ROOT / "content" / "default.json").read_text(encoding="utf-8"))
+PDF = ROOT / "output" / "default.pdf"
 
 
 def run(job):

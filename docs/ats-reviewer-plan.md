@@ -6,6 +6,8 @@ For each job posting, produce a review of the **generated PDF** that shows what 
 
 The current `examples/score_cv_matcher.py` remains an optional experiment. Its model-generated percentage is not the acceptance criterion for the new reviewer.
 
+> **Layout note:** the tools now live in `ats/` (reviewer), `builder/` (PDF build, template, vendor) and `tests/`. File names below are unchanged; prefix them with those folders.
+
 ## Working contract
 
 - Resume source stays in `content/<job-slug>.json`; `template/` stays presentation-only; `output/` contains PDFs only.

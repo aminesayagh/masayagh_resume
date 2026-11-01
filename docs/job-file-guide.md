@@ -7,7 +7,7 @@ A job file turns a posting into a list of requirements the reviewer can check yo
 1. Save the posting text as `jobs/<job-slug>.txt` (copy it from the job page). You can also paste it into the job file as `posting_text`.
 2. Create `jobs/<job-slug>.json` using the skeleton below. Use the same slug as your tailored content file, `content/<job-slug>.json`.
 3. Add one requirement per thing the posting asks for. When one line lists several skills ("Experience with React, Python, SQL"), make one requirement per skill. They can all share the same quote.
-4. Validate while you work: `.venv/bin/python check_job.py jobs/<job-slug>.json --draft`
+4. Validate while you work: `.venv/bin/python ats/check_job.py jobs/<job-slug>.json --draft`
 5. Re-read each requirement against the posting, set `"reviewed": true`, and validate again without `--draft`. The file can be used for scoring only when it shows 0 errors.
 
 ## Skeleton
