@@ -44,6 +44,30 @@ class CheckPdfTest(unittest.TestCase):
         report = check_pdf.check(HERE / "output" / "default.pdf", content, [])
         self.assertIn("field_missing", codes(report, "error"))
 
+    def test_dates_years_overlap_and_single_date(self):
+        found = []
+        years = check_pdf.check_dates({"experience": [
+            {"company": "Zed", "dates": "Jan 2020 - Dec 2021"},  # name order != date order
+            {"company": "Alpha", "dates": "Jan 2021 - Dec 2022"},  # overlaps Zed by a year
+            {"company": "C", "dates": "Aug 2023"},              # single month
+            {"company": "D", "dates": "Mar 2024 - Jan 2024"},   # reversed
+        ]}, lambda sev, code, msg, **kw: found.append(code))
+        self.assertEqual(years, {"merged": round(37 / 12, 1), "summed": round(49 / 12, 1)})
+        self.assertTrue({"date_overlap", "date_single", "date_order"} <= set(found))
+
+    def test_contact_icon_only_links_and_phone(self):
+        found = []
+        content = {"contact": {"email": "a@b.com", "phone": "0612345678", "linkedin": "https://linkedin.com/in/x"}}
+        check_pdf.check_contact(content, "a@b.com", {"https://linkedin.com/in/x"},
+                                lambda sev, code, msg, **kw: found.append(code), network=False)
+        self.assertEqual(found, ["phone_country", "link_icon_only"])
+
+    def test_default_pdf_file_name_warns(self):
+        content = json.loads((HERE / "content" / "default.json").read_text(encoding="utf-8"))
+        report = check_pdf.check(HERE / "output" / "default.pdf", content, [])
+        self.assertIn("file_name", codes(report, "warning"))
+        self.assertNotIn("meta_title", codes(report, "warning"))
+
 
 if __name__ == "__main__":
     unittest.main()

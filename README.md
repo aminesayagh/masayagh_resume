@@ -54,14 +54,29 @@ Run this before building. `check_spelling.py` reads your content JSON and lists 
 
 The report is saved to `analysis/<content name>.spelling.json`.
 
+## Check writing style
+
+`check_style.py` reads the content JSON and gives rule-based advice for the recruiter who reads the resume after the ATS: first person ("I", "my"), weak openers ("Helped", "Contributed to"), bullets over 30 words, a summary over 60 words, how many lines include a number or measurable result, and verbs repeated at the start of 3 or more lines. Everything is a warning or info, never an error.
+
+```bash
+.venv/bin/python check_style.py                          # content/default.json
+```
+
+The report is saved to `analysis/<content name>.style.json`.
+
 ## Check the PDF text
 
-Applicant tracking systems (ATS) read your resume by extracting the PDF's text. `check_pdf.py` extracts that text the same way and compares it with your content JSON. It flags image-only pages, missing fields, headings and dates broken across lines, non-standard section names, jobs without a title, and job headers repeated on a continuation page.
+Applicant tracking systems (ATS) read your resume by extracting the PDF's text. `check_pdf.py` extracts that text the same way and compares it with your content JSON. It flags:
+
+- **Readability:** image-only pages, missing fields, headings and dates broken across lines, non-standard section names, jobs without a title, and job headers repeated on a continuation page.
+- **Contact and links:** email and phone format (including a country code), LinkedIn/GitHub/website addresses that exist only as icons and not as text, and links that do not open. Add `--no-network` to skip opening the links.
+- **Dates:** single dates instead of ranges, reversed or future dates, overlapping jobs, and your years of experience counted two ways (overlaps once, and every job added up, as some parsers do).
+- **File:** PDF title and author metadata, and a file name without your name in it.
 
 ```bash
 .venv/bin/python check_pdf.py                       # output/default.pdf + content/default.json
 .venv/bin/python check_pdf.py output/company-role.pdf
-.venv/bin/python -m unittest test_check_pdf test_check_spelling  # self-test
+.venv/bin/python -m unittest test_check_pdf test_check_spelling test_check_style  # self-test
 ```
 
 The JSON report is saved to `analysis/<pdf name>.pdf-check.json`. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).

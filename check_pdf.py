@@ -12,6 +12,9 @@ import argparse
 import json
 import re
 import sys
+import urllib.error
+import urllib.request
+from datetime import date
 from pathlib import Path
 
 from pypdf import PdfReader
@@ -51,14 +54,127 @@ def find(needle: str, lines: list[str], joined: str) -> str:
     return "split" if n in joined else "missing"
 
 
-def check(pdf: Path, content: dict | None, headings: list[str]) -> dict:
+MONTHS = {m: i for i, m in enumerate("jan feb mar apr may jun jul aug sep oct nov dec".split(), 1)}
+DATE = re.compile(r"^(?:([A-Za-z]{3})[a-z]*\.? )?(\d{4})$")
+
+
+def parse_month(text: str, end: bool) -> int | None:
+    """'Jul 2024' -> month index (year*12+month); 'Present' -> this month; '2024' -> Jan/Dec."""
+    text = text.strip()
+    if text.casefold() in {"present", "now", "current"}:
+        return date.today().year * 12 + date.today().month
+    m = DATE.match(text)
+    if not m or (m.group(1) and m.group(1).casefold() not in MONTHS):
+        return None
+    month = MONTHS[m.group(1).casefold()] if m.group(1) else (12 if end else 1)
+    return int(m.group(2)) * 12 + month
+
+
+def check_dates(content: dict, add) -> dict:
+    today = date.today().year * 12 + date.today().month
+    spans = []
+    for job in content.get("experience", []):
+        company, raw = job["company"].strip(" ,"), job["dates"]
+        parts = re.split(r"\s*[-\u2013\u2014]\s*|\s+to\s+", raw)
+        if len(parts) == 1:
+            add("warning", "date_single", f"'{company}' has a single date '{raw}'; parsers expect a range "
+                "('Aug 2021 - Aug 2021' or 'Aug 2021 - Sep 2021') to compute its length.")
+            parts = parts * 2
+        start, end = parse_month(parts[0], False), parse_month(parts[-1], True)
+        if start is None or end is None:
+            add("warning", "date_format", f"'{company}' dates '{raw}' are not in 'Mon YYYY - Mon YYYY' form; a parser may not read them.")
+            continue
+        if start > end:
+            add("warning", "date_order", f"'{company}' starts after it ends: '{raw}'.")
+            continue
+        if start > today or (end > today and "present" not in raw.casefold()):
+            add("warning", "date_future", f"'{company}' has a date in the future: '{raw}'.")
+        spans.append((company, start, end + 1))  # end month is inclusive
+    pairs = [f"{a} / {b}" for i, (a, s1, e1) in enumerate(spans) for b, s2, e2 in spans[i + 1:] if s1 < e2 and s2 < e1]
+    if pairs:
+        add("info", "date_overlap", f"{len(pairs)} overlapping job pair(s): {'; '.join(pairs)}. Fine for parallel work, "
+            "but some parsers add overlapping jobs twice when computing years of experience.", pairs=pairs)
+    merged, cur = 0, None
+    for _, s_, e_ in sorted(spans, key=lambda span: span[1]):
+        if cur and s_ <= cur[1]:
+            cur[1] = max(cur[1], e_)
+        else:
+            merged += cur[1] - cur[0] if cur else 0
+            cur = [s_, e_]
+    merged += cur[1] - cur[0] if cur else 0
+    summed = sum(e_ - s_ for _, s_, e_ in spans)
+    years = {"merged": round(merged / 12, 1), "summed": round(summed / 12, 1)}
+    if spans:
+        add("info", "experience_years", f"Experience from your dates: {years['merged']} years counting overlaps once, "
+            f"{years['summed']} years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these.")
+    return years
+
+
+def check_contact(content: dict, joined: str, uris: set[str], add, network: bool) -> None:
+    c = content.get("contact", {})
+    email, phone = c.get("email", ""), c.get("phone", "")
+    if email and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", email, re.I):
+        add("warning", "email_format", f"Email '{email}' does not look like a valid address.")
+    digits = re.sub(r"\D", "", phone)
+    if phone and not 8 <= len(digits) <= 15:
+        add("warning", "phone_format", f"Phone '{phone}' has {len(digits)} digits; international numbers have 8-15.")
+    elif phone and not phone.lstrip().startswith(("+", "(+", "00")):
+        add("warning", "phone_country", f"Phone '{phone}' has no country code; add it for employers abroad.")
+    for key in ("linkedin", "github", "website_link"):
+        url = c.get(key)
+        if not url:
+            continue
+        bare = re.sub(r"^https?://(www\.)?", "", url).rstrip("/")
+        if norm(bare) not in joined:
+            add("warning", "link_icon_only", f"{key} '{bare}' is not written as text in the PDF (only as a clickable "
+                "icon, if at all). Parsers read text, not icons; write the address out so it is captured.")
+        if url.rstrip("/") not in {u.rstrip("/") for u in uris}:
+            add("info", "link_not_clickable", f"{key} '{url}' is not a clickable link in the PDF.")
+        if network:
+            check_url(key, url, add)
+
+
+def check_url(key: str, url: str, add) -> None:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (resume link check)"})
+    try:
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            status = resp.status
+    except urllib.error.HTTPError as exc:
+        status = exc.code
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        add("warning", "link_unreachable", f"{key} '{url}' could not be opened: {exc}. Check it in a browser.")
+        return
+    if status in (403, 429, 999):  # LinkedIn and others block scripts; not proof the page is broken
+        add("info", "link_unverified", f"{key} '{url}' refused an automated check (HTTP {status}); open it in a browser to confirm.")
+    elif status >= 400:
+        add("warning", "link_broken", f"{key} '{url}' returned HTTP {status}.")
+
+
+def check_metadata(reader: PdfReader, pdf: Path, content: dict | None, add) -> None:
+    meta = reader.metadata or {}
+    name = (content or {}).get("name", "")
+    title = meta.get("/Title") or ""
+    if not title.strip():
+        add("warning", "meta_title", "The PDF has no title; some ATS and email clients show 'Untitled'.")
+    elif name and norm(name) not in norm(title):
+        add("warning", "meta_title", f"PDF title '{title}' does not contain your name.")
+    if not (meta.get("/Author") or "").strip():
+        add("info", "meta_author", "The PDF has no author field; set it to your name.")
+    if name and not any(part.casefold() in pdf.stem.casefold() for part in name.split() if len(part) > 2):
+        add("warning", "file_name", f"File name '{pdf.name}' does not contain your name; recruiters see it on upload. "
+            f"Rename it, e.g. '{'-'.join(name.split())}-Resume.pdf'.")
+
+
+def check(pdf: Path, content: dict | None, headings: list[str], network: bool = False) -> dict:
     findings = []
 
     def add(severity, code, message, **extra):
         findings.append({"severity": severity, "code": code, "message": message, **extra})
 
     try:
-        pages = [p.extract_text() or "" for p in PdfReader(pdf).pages]
+        reader = PdfReader(pdf)
+        pages = [p.extract_text() or "" for p in reader.pages]
+        uris = {str(a.get_object().get("/A", {}).get("/URI", "")) for p in reader.pages for a in (p.get("/Annots") or [])}
     except Exception as exc:  # unreadable file is the one thing every ATS fails on
         add("error", "unreadable", f"PDF could not be read: {exc}")
         return {"pdf": str(pdf), "pages": [], "findings": findings}
@@ -113,6 +229,12 @@ def check(pdf: Path, content: dict | None, headings: list[str]) -> dict:
             require("Degree", entry["degree"])
             require(f"Dates for {entry['degree']}", entry["dates"], "warning")
 
+    years = None
+    if content:
+        check_contact(content, joined, uris, add, network)
+        years = check_dates(content, add)
+    check_metadata(reader, pdf, content, add)
+
     if len(pages) > 1:  # first/last line repeated on every page = header/footer; digits ignored so "P1"/"P2" match
         edges = [[l for l in t.splitlines() if l.strip()] for t in pages]
         per_page = [{re.sub(r"\d+", "#", norm(l)) for l in e[:1] + e[-1:]} for e in edges]
@@ -120,7 +242,8 @@ def check(pdf: Path, content: dict | None, headings: list[str]) -> dict:
             add("info", "repeated_line", f"'{line}' appears on every page (header/footer?). Usually harmless, "
                 "but some parsers fold it into the surrounding section.")
 
-    return {"pdf": str(pdf), "pages": [{"page": i, "chars": len(t)} for i, t in enumerate(pages, 1)], "findings": findings}
+    return {"pdf": str(pdf), "pages": [{"page": i, "chars": len(t)} for i, t in enumerate(pages, 1)],
+            "experience_years": years, "findings": findings}
 
 
 def main() -> None:
@@ -128,11 +251,12 @@ def main() -> None:
     parser.add_argument("pdf", nargs="?", type=Path, default=HERE / "output" / "default.pdf")
     parser.add_argument("--content", type=Path, help="content JSON (default: content/<pdf name>.json if present)")
     parser.add_argument("--out", type=Path, help="JSON report path (default: analysis/<pdf name>.pdf-check.json)")
+    parser.add_argument("--no-network", action="store_true", help="skip opening the LinkedIn/GitHub/website links")
     args = parser.parse_args()
 
     content_path = args.content or HERE / "content" / f"{args.pdf.stem}.json"
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
-    report = check(args.pdf, content, template_headings(TEMPLATE))
+    report = check(args.pdf, content, template_headings(TEMPLATE), network=not args.no_network)
     rel = lambda path: str(path.resolve().relative_to(HERE)) if path.resolve().is_relative_to(HERE) else str(path)
     report["pdf"], report["content"] = rel(args.pdf), rel(content_path) if content else None
 

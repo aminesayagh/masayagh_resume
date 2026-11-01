@@ -14,6 +14,10 @@
       "chars": 1559
     }
   ],
+  "experience_years": {
+    "merged": 5.4,
+    "summed": 9.1
+  },
   "findings": [
     {
       "severity": "warning",
@@ -134,6 +138,53 @@
       "severity": "warning",
       "code": "role_missing",
       "message": "'MySchool' has no job title; parsers expect title, company and dates per entry."
+    },
+    {
+      "severity": "warning",
+      "code": "link_icon_only",
+      "message": "linkedin 'linkedin.com/in/mohamedamine-sayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured."
+    },
+    {
+      "severity": "warning",
+      "code": "link_icon_only",
+      "message": "github 'github.com/aminesayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured."
+    },
+    {
+      "severity": "warning",
+      "code": "date_single",
+      "message": "'Lavish Trading' has a single date 'Aug 2021'; parsers expect a range ('Aug 2021 - Aug 2021' or 'Aug 2021 - Sep 2021') to compute its length."
+    },
+    {
+      "severity": "info",
+      "code": "date_overlap",
+      "message": "10 overlapping job pair(s): LingoWP / Phoenix AI USA Inc.; Cogy Tech / Rich Media; Digital Consulting / Cyber Cohesion; Digital Consulting / Sodiadd; Cyber Cohesion / Jonas Agency; Cyber Cohesion / Sodiadd; Cyber Cohesion / Happy Water NFT; Jonas Agency / Sodiadd; Jonas Agency / Happy Water NFT; Sodiadd / Happy Water NFT. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.",
+      "pairs": [
+        "LingoWP / Phoenix AI USA Inc.",
+        "Cogy Tech / Rich Media",
+        "Digital Consulting / Cyber Cohesion",
+        "Digital Consulting / Sodiadd",
+        "Cyber Cohesion / Jonas Agency",
+        "Cyber Cohesion / Sodiadd",
+        "Cyber Cohesion / Happy Water NFT",
+        "Jonas Agency / Sodiadd",
+        "Jonas Agency / Happy Water NFT",
+        "Sodiadd / Happy Water NFT"
+      ]
+    },
+    {
+      "severity": "info",
+      "code": "experience_years",
+      "message": "Experience from your dates: 5.4 years counting overlaps once, 9.1 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these."
+    },
+    {
+      "severity": "info",
+      "code": "meta_author",
+      "message": "The PDF has no author field; set it to your name."
+    },
+    {
+      "severity": "warning",
+      "code": "file_name",
+      "message": "File name 'default.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'."
     },
     {
       "severity": "info",
