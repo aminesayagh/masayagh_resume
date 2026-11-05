@@ -1,12 +1,12 @@
 {
-  "cv": "output/default.pdf",
-  "job": "jobs/fictional_full_stack.json",
-  "content": "content/default.json",
+  "cv": "jobs/fictional-full-stack-v1/resume.pdf",
+  "job": "jobs/fictional-full-stack-v1/job.json",
+  "content": "jobs/fictional-full-stack-v1/content.json",
   "title": "FICTIONAL — Full Stack Software Developer, Workflow Products",
-  "generated": "2026-11-01",
+  "generated": "2026-11-05",
   "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
   "pdf_check": {
-    "pdf": "output/default.pdf",
+    "pdf": "jobs/fictional-full-stack-v1/resume.pdf",
     "pages": [
       {
         "page": 1,
@@ -191,7 +191,7 @@
       {
         "severity": "warning",
         "code": "file_name",
-        "message": "File name 'default.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'."
+        "message": "File name 'resume.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'."
       },
       {
         "severity": "info",
@@ -457,7 +457,7 @@
       "keyword": null,
       "status": "met",
       "method": "computed",
-      "quote": "Sep 2020 - Jun 2021",
+      "quote": "Sep 2020",
       "page": 3,
       "years": {
         "merged": 5.4,

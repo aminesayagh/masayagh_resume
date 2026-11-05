@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Review a resume PDF against one job posting in one command (ATS reviewer, milestone 4).
 
-Usage: python3 ats/review_ats.py --job jobs/<job-slug>.json [--cv output/<job-slug>.pdf]
-                             [--content content/<job-slug>.json] [--out analysis/<job-slug>.review.md] [--no-network]
+Usage: python3 src/review_ats.py --job jobs/<slug>/job.json [--cv jobs/<slug>/resume.pdf]
+                             [--content jobs/<slug>/content.json] [--out jobs/<slug>/review.md] [--no-network]
 
 Runs the spelling, style, PDF-text and job-matching checks and writes a readable Markdown
 report plus a JSON report next to it. Human overrides in the job file ("overrides") are
@@ -26,7 +26,7 @@ import check_style
 import match_job
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
+ROOT = HERE.parent  # repo root: template/, src/, jobs/
 COVERAGE_VERSION = 1
 COVERAGE_FORMULA = "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0"
 DISCLAIMER = ("This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank "
@@ -170,27 +170,27 @@ def markdown(rep: dict, inputs: dict) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--job", type=Path, required=True)
-    parser.add_argument("--cv", type=Path, help="resume PDF (default: output/<job name>.pdf, else output/default.pdf)")
-    parser.add_argument("--content", type=Path, help="content JSON (default: content/<cv name>.json)")
-    parser.add_argument("--out", type=Path, help="Markdown report (default: analysis/<job name>.review.md); JSON is saved beside it")
+    parser.add_argument("--cv", type=Path, help="resume PDF (default: resume.pdf next to the job file)")
+    parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
+    parser.add_argument("--out", type=Path, help="Markdown report (default: review.md next to the job file); JSON is saved beside it")
     parser.add_argument("--no-network", action="store_true", help="skip opening the LinkedIn/GitHub/website links")
     args = parser.parse_args()
 
     job = json.loads(args.job.read_text(encoding="utf-8"))
     problems = [f for f in check_job.validate(job) if f["severity"] == "error"]
     if problems:
-        print(f"The job file is not valid; fix it first (python3 ats/check_job.py {args.job}):")
+        print(f"The job file is not valid; fix it first (python3 src/check_job.py {args.job}):")
         for f in problems:
             print(f"  [error] {f['message']}")
         sys.exit(1)
-    cv = args.cv or next(p for p in (ROOT / "output" / f"{args.job.stem}.pdf", ROOT / "output" / "default.pdf")
-                         if p.exists() or p.stem == "default")
-    content_path = args.content or ROOT / "content" / f"{cv.stem}.json"
+    cv = args.cv or args.job.parent / "resume.pdf"
+    content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
+                                          if p.exists()), cv.parent / "content.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
 
     rep = review(job, cv, content, network=not args.no_network)
     inputs = {"cv": rel(cv), "job": rel(args.job), "content": rel(content_path) if content else "no content file"}
-    md_path = args.out or ROOT / "analysis" / f"{args.job.stem}.review.md"
+    md_path = args.out or args.job.parent / "review.md"
     md_path.parent.mkdir(parents=True, exist_ok=True)
     md_path.write_text(markdown(rep, inputs), encoding="utf-8")
     rep["pdf_check"]["pdf"] = inputs["cv"]

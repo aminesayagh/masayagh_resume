@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Spell-check a resume content file before building the PDF (ATS reviewer, step 0).
 
-Usage: python3 ats/check_spelling.py [content/default.json] [--out report.json]
+Usage: python3 src/check_spelling.py [template/default.json] [--out report.json]
 
 Every unknown word is a WARNING with suggested fixes, never an error: product names,
 tech terms and proper nouns are often correct even when the dictionary does not know them.
-Add words you have confirmed to ats/spelling-allow.txt (one per line) to silence them.
+Add words you have confirmed to src/spelling-allow.txt (one per line) to silence them.
 Always exits 0.
 """
 
@@ -19,7 +19,7 @@ from spellchecker import SpellChecker
 import check_pdf
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
+ROOT = HERE.parent  # repo root: template/, src/, jobs/
 ALLOW_FILE = HERE / "spelling-allow.txt"
 SKIP_KEYS = {"email", "phone", "phone_link", "website", "website_link", "github", "linkedin", "qr_url", "dates"}
 # Names, not prose: their words are trusted, so a company or skill never warns.
@@ -75,7 +75,7 @@ def check(content: dict, headings: list[str], allow: set[str]) -> dict:
                 "suggestions": suggestions,
                 "message": f"'{word}' in {path} is not in the dictionary"
                 + (f"; did you mean {', '.join(repr(s) for s in suggestions)}?" if suggestions else "; no suggestion.")
-                + " Ignore it if the word is correct (name or term), or add it to ats/spelling-allow.txt.",
+                + " Ignore it if the word is correct (name or term), or add it to src/spelling-allow.txt.",
             })
     return {"findings": findings}
 
@@ -88,8 +88,8 @@ def load_allow() -> set[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "content" / "default.json")
-    parser.add_argument("--out", type=Path, help="JSON report path (default: analysis/<content name>.spelling.json)")
+    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "default.json")
+    parser.add_argument("--out", type=Path, help="JSON report path (default: spelling.json next to the content file)")
     args = parser.parse_args()
 
     content = json.loads(args.content.read_text(encoding="utf-8"))
@@ -97,7 +97,7 @@ def main() -> None:
     path = args.content.resolve()
     report["content"] = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(args.content)
 
-    out = args.out or ROOT / "analysis" / f"{args.content.stem}.spelling.json"
+    out = args.out or args.content.parent / "spelling.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 

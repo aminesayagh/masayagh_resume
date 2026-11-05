@@ -9,9 +9,9 @@ import check_job
 import review_ats
 
 ROOT = Path(__file__).resolve().parents[1]
-JOB = json.loads((ROOT / "jobs" / "fictional_full_stack.json").read_text(encoding="utf-8"))
-CONTENT = json.loads((ROOT / "content" / "default.json").read_text(encoding="utf-8"))
-PDF = ROOT / "output" / "default.pdf"
+JOB = json.loads((ROOT / "jobs" / "fictional-full-stack-v1" / "job.json").read_text(encoding="utf-8"))
+CONTENT = json.loads((ROOT / "template" / "default.json").read_text(encoding="utf-8"))
+PDF = ROOT / "template" / "resume.pdf"
 
 
 def run(job):

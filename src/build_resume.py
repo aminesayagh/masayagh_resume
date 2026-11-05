@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a tailored PDF resume from a JSON content file.
 
-Usage: python3 builder/build_resume.py [content/default.json] [-o output/default.pdf]
+Usage: python3 src/build_resume.py [template/default.json] [-o path/to/resume.pdf]
 Requires Jinja2 and Google Chrome in WSL.
 """
 
@@ -18,9 +18,9 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
-TEMPLATE_DIR = HERE / "template"
-DEFAULT_DATA = ROOT / "content" / "default.json"
+ROOT = HERE.parent  # repo root: template/, src/, jobs/
+TEMPLATE_DIR = ROOT / "template"
+DEFAULT_DATA = TEMPLATE_DIR / "default.json"
 sys.path.insert(0, str(HERE / "vendor"))
 sys.dont_write_bytecode = True
 import qrcode  # bundled so the resume builds without another installation step
@@ -61,6 +61,12 @@ def load_data(path: Path) -> dict:
     return data
 
 
+def experience_date_parts(dates: str) -> tuple[str, str]:
+    """Split a displayed date range into start and end labels."""
+    parts = re.split(r"\s+(?:-|\u2013|\u2014|to)\s+", dates.strip(), maxsplit=1, flags=re.IGNORECASE)
+    return (parts[0], parts[1]) if len(parts) == 2 else (parts[0], "")
+
+
 def chrome_command(browser: str, profile: str, html_file: Path) -> list[str]:
     return [
         browser,
@@ -76,22 +82,16 @@ def chrome_command(browser: str, profile: str, html_file: Path) -> list[str]:
     ]
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("data", nargs="?", type=Path, default=DEFAULT_DATA,
-                        help="JSON file for this job application (default: content/default.json)")
-    parser.add_argument("-o", "--output", type=Path,
-                        help="PDF path (default: output/<JSON filename>.pdf)")
-    args = parser.parse_args()
-
-    data = load_data(args.data.resolve(strict=True))
+def build(data_path: Path, output_path: Path | None = None) -> Path:
+    """Render and print `data_path` to PDF. Returns the PDF path."""
+    data = load_data(data_path.resolve(strict=True))
     qr_url = data["contact"].get("qr_url") or data["contact"]["website_link"]
     data["contact"]["qr_url"] = qr_url
-    pdf_file = (args.output or ROOT / "output" / f"{args.data.stem}.pdf").resolve()
+    pdf_file = (output_path or data_path.resolve().parent / "resume.pdf").resolve()
     pdf_file.parent.mkdir(parents=True, exist_ok=True)
     browser = shutil.which("google-chrome")
     if browser is None:
-        parser.error("Google Chrome is unavailable in WSL")
+        raise RuntimeError("Google Chrome is unavailable in WSL")
     env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
         autoescape=select_autoescape(["html"]),
@@ -104,6 +104,7 @@ def main() -> None:
         html_file.write_text(
             env.get_template("resume.html").render(
                 data=data,
+                experience_date_parts=experience_date_parts,
                 qr_svg=qr_svg(qr_url),
                 font_base=(TEMPLATE_DIR / "fonts").resolve().as_uri() + "/",
                 asset_base=(TEMPLATE_DIR / "assets").resolve().as_uri() + "/",
@@ -124,6 +125,17 @@ def main() -> None:
         shutil.move(str(rendered_pdf), pdf_file)
         page_count = match.group(1)
     print(f"Created {pdf_file} ({page_count} pages)")
+    return pdf_file
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("data", nargs="?", type=Path, default=DEFAULT_DATA,
+                        help="JSON file for this job application (default: template/default.json)")
+    parser.add_argument("-o", "--output", type=Path,
+                        help="PDF path (default: <JSON file's folder>/resume.pdf)")
+    args = parser.parse_args()
+    build(args.data, args.output)
 
 
 if __name__ == "__main__":

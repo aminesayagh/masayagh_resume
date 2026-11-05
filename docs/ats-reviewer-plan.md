@@ -6,7 +6,7 @@ For each job posting, produce a review of the **generated PDF** that shows what 
 
 The current `examples/score_cv_matcher.py` remains an optional experiment. Its model-generated percentage is not the acceptance criterion for the new reviewer.
 
-> **Layout note:** the tools now live in `ats/` (reviewer), `builder/` (PDF build, template, vendor) and `tests/`. File names below are unchanged; prefix them with those folders.
+> **Layout note:** this is a historical plan; paths below (`content/`, `ats/`, `builder/`, `output/`, `analysis/`) describe the layout as milestones 1–4 were built. The repo has since moved to `template/` (master content + layout), `src/` (all tools, including `new_job.py`), and `jobs/<company>-<title>-v<N>/` (one folder per application, holding its own posting, job file, content, PDF and report). See `README.md` and `.claude/skills/ats-review/SKILL.md` for the current layout.
 
 ## Working contract
 

@@ -124,9 +124,9 @@ class ModelOnlyAnalyzer(LocalAIAnalyzer):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cv", type=Path, default=ROOT / "output" / "default.pdf")
-    parser.add_argument("--job", type=Path, default=ROOT / "examples" / "fictional_full_stack_job.txt")
-    parser.add_argument("--out", type=Path, default=ROOT / "analysis" / "fictional_full_stack.json")
+    parser.add_argument("--cv", type=Path, default=ROOT / "template" / "resume.pdf")
+    parser.add_argument("--job", type=Path, default=ROOT / "jobs" / "fictional-full-stack-v1" / "posting.txt")
+    parser.add_argument("--out", type=Path, default=ROOT / "jobs" / "fictional-full-stack-v1" / "cv-matcher-example.json")
     parser.add_argument("--model", default="Qwen/Qwen2.5-1.5B-Instruct")
     parser.add_argument(
         "--skills",

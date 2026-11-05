@@ -1,21 +1,21 @@
 # Creating a job file
 
-A job file turns a posting into a list of requirements the reviewer can check your resume against. Each requirement quotes the posting word for word, so every later finding traces back to what the employer actually wrote. Example: [`jobs/fictional_full_stack.json`](../jobs/fictional_full_stack.json).
+A job file turns a posting into a list of requirements the reviewer can check your resume against. Each requirement quotes the posting word for word, so every later finding traces back to what the employer actually wrote. Example: [`jobs/fictional-full-stack-v1/job.json`](../jobs/fictional-full-stack-v1/job.json).
 
 ## Steps
 
-1. Save the posting text as `jobs/<job-slug>.txt` (copy it from the job page). You can also paste it into the job file as `posting_text`.
-2. Create `jobs/<job-slug>.json` using the skeleton below. Use the same slug as your tailored content file, `content/<job-slug>.json`.
-3. Add one requirement per thing the posting asks for. When one line lists several skills ("Experience with React, Python, SQL"), make one requirement per skill. They can all share the same quote.
-4. Validate while you work: `.venv/bin/python ats/check_job.py jobs/<job-slug>.json --draft`
-5. Re-read each requirement against the posting, set `"reviewed": true`, and validate again without `--draft`. The file can be used for scoring only when it shows 0 errors.
+1. Run `.venv/bin/python src/new_job.py` to scaffold `jobs/<company>-<title>-v<N>/` — it saves the posting as `posting.txt`, copies the master content to `content.json`, builds `resume.pdf`, and writes a `job.json` skeleton with `"posting_file"` already pointing at `posting.txt`.
+2. Add one requirement per thing the posting asks for, in `job.json`. When one line lists several skills ("Experience with React, Python, SQL"), make one requirement per skill. They can all share the same quote.
+3. Validate while you work: `.venv/bin/python src/check_job.py jobs/<slug>/job.json --draft`
+4. Re-read each requirement against the posting, set `"reviewed": true`, and validate again without `--draft`. The file can be used for scoring only when it shows 0 errors.
+5. Run `.venv/bin/python src/review_ats.py --job jobs/<slug>/job.json` to fill in the matching section and evidence coverage.
 
 ## Skeleton
 
 ```json
 {
   "title": "Company — Role",
-  "posting_file": "jobs/<job-slug>.txt",
+  "posting_file": "jobs/<slug>/posting.txt",
   "requirements": [
     {
       "id": "R01",

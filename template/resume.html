@@ -242,6 +242,10 @@
             padding-top: 1px;
         }
 
+        .experience-date p {
+            white-space: nowrap;
+        }
+
         .experience-content {
             max-width: 389px;
         }
@@ -474,8 +478,12 @@
 
   <template id="experience-template">
     {% for job in data.experience %}
+    {% set start_date, end_date = experience_date_parts(job.dates) %}
     <article class="job flex-row gap-10">
-      <div class="experience-date"><p class="paragraph paragraph-content">{{ job.dates }}</p></div>
+      <div class="experience-date">
+        <p class="paragraph paragraph-content">{{ start_date }}</p>
+        {% if end_date %}<p class="paragraph paragraph-content">– {{ end_date }}</p>{% endif %}
+      </div>
       <div class="flex-col gap-6 experience-content">
         <header class="flex-col gap-1">
           <h4 class="label">{{ job.company }}{% if job.detail %} <span class="color-gray">{{ job.detail }}</span>{% endif %}</h4>

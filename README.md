@@ -1,8 +1,8 @@
 # Tailored Resume
 
-Generate a job-specific A4 resume PDF from a JSON content file. The HTML template handles layout, page breaks, fonts, and a portfolio QR code. The only saved build output is a PDF.
+Generate a job-specific A4 resume PDF from a JSON content file, and review it against a job posting. The HTML template handles layout, page breaks, fonts, and a portfolio QR code.
 
-[View the default PDF](output/default.pdf)
+[View the default PDF](template/resume.pdf)
 
 ## Requirements
 
@@ -16,57 +16,69 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
-The QR generator is bundled in `builder/vendor/`, so it needs no additional install.
+The QR generator is bundled in `src/vendor/`, so it needs no additional install.
+
+## Layout
+
+- `template/` — the master resume: `default.json` (content), `resume.html` (layout), `resume.pdf` (baseline build).
+- `jobs/<company>-<title>-v<N>/` — one folder per application: `posting.txt`, `job.json` (requirements), `content.json` (tailored content, starts as a copy of `template/default.json`), `resume.pdf`, and the generated `review.json`/`review.md`.
+- `src/` — all the tools.
+
+## Start a new job application
+
+```bash
+.venv/bin/python src/new_job.py
+```
+
+Prompts for the company, the job title, and the posting text (paste it, then press Ctrl-D). It refuses to run if `template/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting `job.json`'s requirements next.
 
 ## Build a resume
 
-Build the default version:
+Build the baseline version:
 
 ```bash
-.venv/bin/python builder/build_resume.py
+.venv/bin/python src/build_resume.py
 ```
 
-Create a version for a job offer:
+Build one application's tailored version:
 
 ```bash
-cp content/default.json content/company-role.json
-# Edit content/company-role.json
-.venv/bin/python builder/build_resume.py content/company-role.json
+.venv/bin/python src/build_resume.py jobs/company-role-v1/content.json
 ```
 
-The PDF is saved as `output/<JSON filename>.pdf`. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
+The PDF is saved as `resume.pdf` next to the JSON file. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
 
 ## Edit content
 
-All resume content is in `content/default.json`. Copy it before tailoring a resume; keep the template unchanged. Add, remove, or reorder entries in the `experience`, `education`, `skills`, and `languages` lists. The layout adds pages as needed. Long experiences continue between complete bullet points, with the heading and description kept together. The build stops with a fit error if content cannot fit.
+The master resume content is `template/default.json`; each job folder's `content.json` starts as a copy of it. Keep the template unchanged. Add, remove, or reorder entries in the `experience`, `education`, `skills`, and `languages` lists. The layout adds pages as needed. Long experiences continue between complete bullet points, with the heading and description kept together. The build stops with a fit error if content cannot fit.
 
-In `contact`, `website` is the displayed text and `website_link` is the clickable URL in the header, footer, and QR code. `email` sets both the displayed address and its email link. Change these fields in each job-specific JSON file. To give the QR a separate destination, add `qr_url` to that file.
+In `contact`, `website` is the displayed text and `website_link` is the clickable URL in the header, footer, and QR code. `email` sets both the displayed address and its email link. Change these fields in each job's `content.json`. To give the QR a separate destination, add `qr_url` to that file.
 
 ## Check spelling
 
-Run this before building. `ats/check_spelling.py` reads your content JSON and lists every word the English dictionary does not know, with suggested fixes and the field to edit (for example `experience[2].bullets[1]`). Each result is a **warning**, not an error, because product names and tech terms are often correct even when the dictionary does not know them. Company names, skills, institutions and locations are trusted automatically. Add other words you have confirmed to `ats/spelling-allow.txt`.
+Run this before building. `src/check_spelling.py` reads a content JSON and lists every word the English dictionary does not know, with suggested fixes and the field to edit (for example `experience[2].bullets[1]`). Each result is a **warning**, not an error, because product names and tech terms are often correct even when the dictionary does not know them. Company names, skills, institutions and locations are trusted automatically. Add other words you have confirmed to `src/spelling-allow.txt`.
 
 ```bash
 .venv/bin/pip install -r requirements-review.txt
-.venv/bin/python ats/check_spelling.py                       # content/default.json
-.venv/bin/python ats/check_spelling.py content/company-role.json
+.venv/bin/python src/check_spelling.py                              # template/default.json
+.venv/bin/python src/check_spelling.py jobs/company-role-v1/content.json
 ```
 
-The report is saved to `analysis/<content name>.spelling.json`.
+The report is saved to `spelling.json` next to the content file.
 
 ## Check writing style
 
-`ats/check_style.py` reads the content JSON and gives rule-based advice for the recruiter who reads the resume after the ATS: first person ("I", "my"), weak openers ("Helped", "Contributed to"), bullets over 30 words, a summary over 60 words, how many lines include a number or measurable result, and verbs repeated at the start of 3 or more lines. Everything is a warning or info, never an error.
+`src/check_style.py` reads a content JSON and gives rule-based advice for the recruiter who reads the resume after the ATS: first person ("I", "my"), weak openers ("Helped", "Contributed to"), bullets over 30 words, a summary over 60 words, how many lines include a number or measurable result, and verbs repeated at the start of 3 or more lines. Everything is a warning or info, never an error.
 
 ```bash
-.venv/bin/python ats/check_style.py                          # content/default.json
+.venv/bin/python src/check_style.py                                 # template/default.json
 ```
 
-The report is saved to `analysis/<content name>.style.json`.
+The report is saved to `style.json` next to the content file.
 
 ## Check the PDF text
 
-Applicant tracking systems (ATS) read your resume by extracting the PDF's text. `ats/check_pdf.py` extracts that text the same way and compares it with your content JSON. It flags:
+Applicant tracking systems (ATS) read your resume by extracting the PDF's text. `src/check_pdf.py` extracts that text the same way and compares it with the content JSON next to it. It flags:
 
 - **Readability:** image-only pages, missing fields, headings and dates broken across lines, non-standard section names, jobs without a title, and job headers repeated on a continuation page.
 - **Contact and links:** email and phone format (including a country code), LinkedIn/GitHub/website addresses that exist only as icons and not as text, and links that do not open. Add `--no-network` to skip opening the links.
@@ -74,56 +86,56 @@ Applicant tracking systems (ATS) read your resume by extracting the PDF's text. 
 - **File:** PDF title and author metadata, and a file name without your name in it.
 
 ```bash
-.venv/bin/python ats/check_pdf.py                       # output/default.pdf + content/default.json
-.venv/bin/python ats/check_pdf.py output/company-role.pdf
+.venv/bin/python src/check_pdf.py                       # template/resume.pdf + template/default.json
+.venv/bin/python src/check_pdf.py jobs/company-role-v1/resume.pdf
 .venv/bin/python -m unittest discover -s tests -t .  # self-test
 ```
 
-The JSON report is saved to `analysis/<pdf name>.pdf-check.json`. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).
+The JSON report is saved to `pdf-check.json` next to the PDF. The command exits with code 1 on errors; warnings are advice. It checks text extraction only and is not a score from any employer's ATS. Later milestones (job requirements and evidence matching) are described in the [ATS reviewer plan](docs/ats-reviewer-plan.md).
 
 ## Describe a job posting
 
-A job file (`jobs/<job-slug>.json`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `ats/check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. See the [job file guide](docs/job-file-guide.md) and the [fictional example](jobs/fictional_full_stack.json).
+A job file (`jobs/<slug>/job.json`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `src/check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. See the [job file guide](docs/job-file-guide.md) and the [fictional example](jobs/fictional-full-stack-v1/job.json).
 
 ```bash
-.venv/bin/python ats/check_job.py jobs/fictional_full_stack.json
-.venv/bin/python ats/check_job.py jobs/company-role.json --draft   # while still reviewing
+.venv/bin/python src/check_job.py jobs/fictional-full-stack-v1/job.json
+.venv/bin/python src/check_job.py jobs/company-role-v1/job.json --draft   # while still reviewing
 ```
 
 ## Review a resume for a job (one command)
 
-`ats/review_ats.py` runs all the checks for one posting and writes a readable report:
+`src/review_ats.py` runs all the checks for one posting and writes a readable report:
 
 ```bash
-.venv/bin/python ats/review_ats.py --job jobs/fictional_full_stack.json
-.venv/bin/python ats/review_ats.py --job jobs/company-role.json --cv output/company-role.pdf --content content/company-role.json
+.venv/bin/python src/review_ats.py --job jobs/fictional-full-stack-v1/job.json
+.venv/bin/python src/review_ats.py --job jobs/company-role-v1/job.json
 ```
 
-The report, `analysis/<job name>.review.md` (with a `.review.json` beside it), contains these sections in order:
+The report, `review.md` next to the job file (with `review.json` beside it), contains these sections in order:
 
 1. **Decisions for you:** must-haves that are not met, stale overrides, and PDF errors.
-2. **PDF readability:** the `ats/check_pdf.py` findings.
+2. **PDF readability:** the `src/check_pdf.py` findings.
 3. **Content checks:** spelling and style warnings.
 4. **Must-have requirements, then preferred requirements:** gaps first, each with the posting quote, your PDF quote and page, the reason, and a rule-based suggestion such as "the posting says X; your PDF says Y".
 5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: (met + 0.5 × partial) ÷ requirements, per priority. Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
 
-Without `--cv`, the command uses `output/<job name>.pdf` if it exists, otherwise `output/default.pdf`. To correct a result, add an override to the job file (see the [job file guide](docs/job-file-guide.md#overriding-a-result)).
+Without `--cv`/`--content`, the command uses `resume.pdf` and `content.json` next to the job file. To correct a result, add an override to the job file (see the [job file guide](docs/job-file-guide.md#overriding-a-result)).
 
 ## Match your resume to a job
 
-`ats/match_job.py` checks a validated job file against the resume PDF text. For each requirement it reports two separate things:
+`src/match_job.py` checks a validated job file against the resume PDF text. For each requirement it reports two separate things:
 
 - **Keyword:** whether the posting's exact term appears anywhere in the PDF, which is what a recruiter's search sees. The result is `exact`, `alias` (wording differs: use the posting's term), or `absent`.
 - **Evidence:** whether the resume backs the requirement up. `met` means it was found in experience, education, languages or header text. `partial` means it was found only in the skills list or summary (a claim, not proof), or only some of the requirement's terms were met. `missing` means there is no supporting text in this PDF; it does not mean you lack the skill. `uncertain` means the text cannot support a decision.
 
-Every `met` or `partial` result quotes the exact PDF line and its page. "At least N years" requirements are computed from your job dates. Matching is deterministic: no model and no network. Alternative spellings that count as the same term (for example Postgres for PostgreSQL) are in `ats/aliases.json`; keep only true synonyms there.
+Every `met` or `partial` result quotes the exact PDF line and its page. "At least N years" requirements are computed from your job dates. Matching is deterministic: no model and no network. Alternative spellings that count as the same term (for example Postgres for PostgreSQL) are in `src/aliases.json`; keep only true synonyms there.
 
 ```bash
-.venv/bin/python ats/match_job.py jobs/fictional_full_stack.json                           # output/default.pdf
-.venv/bin/python ats/match_job.py jobs/company-role.json --cv output/company-role.pdf
+.venv/bin/python src/match_job.py jobs/fictional-full-stack-v1/job.json
+.venv/bin/python src/match_job.py jobs/company-role-v1/job.json
 ```
 
-The report is saved to `analysis/<job name>.match.json`.
+The report is saved to `match.json` next to the job file.
 
 ## For AI assistants
 
@@ -131,7 +143,7 @@ The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/S
 
 ## Optional: local cv-matcher example
 
-The [fictional job offer](examples/fictional_full_stack_job.txt) and [example result](analysis/fictional_full_stack.json) show a local, model-assisted resume match using [cv-matcher](https://github.com/officialgabzz/cv-matcher). This is an illustrative score for an invented role, not a score from an employer's ATS.
+The [fictional job offer](jobs/fictional-full-stack-v1/posting.txt) and [example result](jobs/fictional-full-stack-v1/cv-matcher-example.json) show a local, model-assisted resume match using [cv-matcher](https://github.com/officialgabzz/cv-matcher). This is an illustrative score for an invented role, not a score from an employer's ATS.
 
 Use Python 3.12 for the local-model environment. With `uv`, install the optional dependencies:
 
@@ -146,28 +158,25 @@ Then run:
 .venv/bin/python examples/score_cv_matcher.py
 ```
 
-The first run downloads [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) to `.hf-cache/` (roughly 3 GB). A CUDA GPU is recommended; no API key is required. The runner uses `cv-matcher` to extract the full PDF text and validate its result. It requests four category ratings from the local model, computes the weighted total (35% skills, 30% experience, 20% education, 15% keywords), and checks skill terms literally in the PDF and posting. It refuses the library's silent rule-based fallback. The result is written to `analysis/`, keeping `output/` PDF-only.
+The first run downloads [Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) to `.hf-cache/` (roughly 3 GB). A CUDA GPU is recommended; no API key is required. The runner uses `cv-matcher` to extract the full PDF text and validate its result. It requests four category ratings from the local model, computes the weighted total (35% skills, 30% experience, 20% education, 15% keywords), and checks skill terms literally in the PDF and posting. It refuses the library's silent rule-based fallback.
 
 For another posting, pass `--cv`, `--job`, `--out`, and a comma-separated `--skills` list. The score is a model judgment and may vary with the model or job wording; review the evidence before editing your resume.
 
 ## Project files
 
-The repo is grouped by service. The tools live in `builder/` and `ats/`; your working files stay at the top level.
-
 | Path | Purpose |
 | --- | --- |
-| `builder/build_resume.py` | Validates content, creates the QR, checks page fit, and exports the PDF |
-| `builder/template/resume.html` | Page layout and print styles |
-| `builder/template/fonts/`, `builder/template/assets/` | Bundled Poppins fonts (OFL license) and SVG logos |
-| `builder/vendor/` | Bundled QR generator and its license |
-| `ats/` | ATS reviewer tools: `check_spelling.py`, `check_style.py`, `check_pdf.py`, `check_job.py`, `match_job.py`, `review_ats.py` |
-| `ats/aliases.json`, `ats/spelling-allow.txt` | Reviewer word lists: true synonyms and confirmed spellings |
+| `template/default.json` | Master resume content |
+| `template/resume.html`, `template/fonts/`, `template/assets/` | Page layout, print styles, bundled Poppins fonts (OFL license) and SVG logos |
+| `template/resume.pdf` | Baseline build |
+| `jobs/<slug>/` | One folder per application: posting, job requirements, tailored content, built PDF, and report |
+| `src/build_resume.py` | Validates content, creates the QR, checks page fit, and exports the PDF |
+| `src/new_job.py` | Scaffolds a new `jobs/<slug>/` folder from a pasted posting |
+| `src/check_spelling.py`, `check_style.py`, `check_pdf.py`, `check_job.py`, `match_job.py`, `review_ats.py` | ATS reviewer tools |
+| `src/aliases.json`, `src/spelling-allow.txt` | Reviewer word lists: true synonyms and confirmed spellings |
+| `src/vendor/` | Bundled QR generator and its license |
 | `tests/` | Tests for the reviewer (`.venv/bin/python -m unittest discover -s tests -t .`) |
-| `content/` | Resume content: `default.json` plus one copy per job |
-| `jobs/` | Job files: one posting's requirements per file |
-| `output/` | Built PDFs only |
-| `analysis/` | Generated reports |
 | `docs/` | Reviewer plan and job file guide |
-| `examples/` | Local cv-matcher runner and fictional job offer |
+| `examples/` | Local cv-matcher runner (unrelated experiment, see `docs/ats-reviewer-plan.md`) |
 | `.claude/skills/ats-review/`, `AGENTS.md` | Instructions for AI assistants |
 

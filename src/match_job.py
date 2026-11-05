@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Match a reviewed job file against the resume PDF text (ATS reviewer, milestone 3).
 
-Usage: python3 ats/match_job.py jobs/<job-slug>.json [--cv output/default.pdf] [--content content/default.json]
+Usage: python3 src/match_job.py jobs/<slug>/job.json [--cv jobs/<slug>/resume.pdf] [--content jobs/<slug>/content.json]
 
 For each requirement it reports two separate things:
   keyword   - does the posting's exact term appear anywhere in the PDF (what recruiter search sees):
@@ -28,7 +28,7 @@ import check_job
 import check_pdf
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
+ROOT = HERE.parent  # repo root: template/, src/, jobs/
 VERSION = 1  # bump when matching rules change, so old reports can be told apart
 EVIDENCE_SECTIONS = {"experience", "education", "languages", "header"}
 CLAIM_SECTIONS = {"skills", "summary"}
@@ -180,31 +180,33 @@ def assess(job: dict, pages: list[str], content: dict | None, headings: list[str
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("job", type=Path)
-    parser.add_argument("--cv", type=Path, default=ROOT / "output" / "default.pdf")
-    parser.add_argument("--content", type=Path, help="content JSON (default: content/<cv name>.json)")
-    parser.add_argument("--out", type=Path, help="JSON report path (default: analysis/<job name>.match.json)")
+    parser.add_argument("--cv", type=Path, help="resume PDF (default: resume.pdf next to the job file)")
+    parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
+    parser.add_argument("--out", type=Path, help="JSON report path (default: match.json next to the job file)")
     args = parser.parse_args()
 
     job = json.loads(args.job.read_text(encoding="utf-8"))
     problems = [f for f in check_job.validate(job) if f["severity"] == "error"]
     if problems:
-        print("The job file is not valid; fix it first (python3 ats/check_job.py " + str(args.job) + "):")
+        print("The job file is not valid; fix it first (python3 src/check_job.py " + str(args.job) + "):")
         for f in problems:
             print(f"  [error] {f['message']}")
         sys.exit(1)
+    cv = args.cv or args.job.parent / "resume.pdf"
     try:
-        pages = [p.extract_text() or "" for p in PdfReader(args.cv).pages]
+        pages = [p.extract_text() or "" for p in PdfReader(cv).pages]
     except Exception as exc:
         print(f"[error] PDF could not be read: {exc}")
         sys.exit(1)
-    content_path = args.content or ROOT / "content" / f"{args.cv.stem}.json"
+    content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
+                                          if p.exists()), cv.parent / "content.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
     aliases = json.loads((HERE / "aliases.json").read_text(encoding="utf-8"))
 
     report = assess(job, pages, content, check_pdf.template_headings(check_pdf.TEMPLATE), aliases)
     rel = lambda p: str(p.resolve().relative_to(ROOT)) if p.resolve().is_relative_to(ROOT) else str(p)
-    report = {"job": rel(args.job), "cv": rel(args.cv), "content": rel(content_path) if content else None, **report}
-    out = args.out or ROOT / "analysis" / f"{args.job.stem}.match.json"
+    report = {"job": rel(args.job), "cv": rel(cv), "content": rel(content_path) if content else None, **report}
+    out = args.out or args.job.parent / "match.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 

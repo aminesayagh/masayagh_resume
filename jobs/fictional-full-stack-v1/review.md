@@ -1,6 +1,6 @@
 # ATS review: FICTIONAL — Full Stack Software Developer, Workflow Products
 
-Generated 2026-11-01 from `output/default.pdf`, `jobs/fictional_full_stack.json` and `content/default.json`.
+Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/fictional-full-stack-v1/job.json` and `jobs/fictional-full-stack-v1/content.json`.
 
 > This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.
 
@@ -43,7 +43,7 @@ Generated 2026-11-01 from `output/default.pdf`, `jobs/fictional_full_stack.json`
 - **warning**: linkedin 'linkedin.com/in/mohamedamine-sayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured.
 - **warning**: github 'github.com/aminesayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured.
 - **warning**: 'Lavish Trading' has a single date 'Aug 2021'; parsers expect a range ('Aug 2021 - Aug 2021' or 'Aug 2021 - Sep 2021') to compute its length.
-- **warning**: File name 'default.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'.
+- **warning**: File name 'resume.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'.
 - **info**: 10 overlapping job pair(s): LingoWP / Phoenix AI USA Inc.; Cogy Tech / Rich Media; Digital Consulting / Cyber Cohesion; Digital Consulting / Sodiadd; Cyber Cohesion / Jonas Agency; Cyber Cohesion / Sodiadd; Cyber Cohesion / Happy Water NFT; Jonas Agency / Sodiadd; Jonas Agency / Happy Water NFT; Sodiadd / Happy Water NFT. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.
 - **info**: Experience from your dates: 5.4 years counting overlaps once, 9.1 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these.
 - **info**: The PDF has no author field; set it to your name.
@@ -109,7 +109,7 @@ Generated 2026-11-01 from `output/default.pdf`, `jobs/fictional_full_stack.json`
 #### R06 · met · 3+ years of professional software development
 
 - **Posting:** "At least three years of professional software development experience."
-- **Your PDF** (page 3): "Sep 2020 - Jun 2021"
+- **Your PDF** (page 3): "Sep 2020"
 - **Keyword:** computed from job dates
 - **Why:** 5.4 years with overlaps counted once (needs 3). Computed from the job dates; the quote is your earliest date range.
 

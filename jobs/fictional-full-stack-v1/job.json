@@ -1,6 +1,6 @@
 {
   "title": "FICTIONAL — Full Stack Software Developer, Workflow Products",
-  "posting_file": "examples/fictional_full_stack_job.txt",
+  "posting_file": "jobs/fictional-full-stack-v1/posting.txt",
   "requirements": [
     {
       "id": "R01",

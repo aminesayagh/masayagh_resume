@@ -12,3 +12,5 @@ venv/
 .DS_Store
 output/*.html
 output/*.png
+.serena
+.code-review-graph

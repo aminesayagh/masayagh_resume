@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate a job requirements file before it is used for scoring (ATS reviewer, milestone 2).
 
-Usage: python3 ats/check_job.py jobs/<job-slug>.json [--draft]
+Usage: python3 src/check_job.py jobs/<slug>/job.json [--draft]
 
 A job file lists what a posting asks for. Every requirement must quote the posting
 verbatim, so each later finding traces back to the employer's own words, and a human
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent  # repo root: content/, jobs/, output/, analysis/
+ROOT = HERE.parent  # repo root: template/, src/, jobs/
 SECTIONS = {"responsibility", "requirement", "preferred", "location", "screening"}
 PRIORITIES = {"must_have", "preferred"}
 KINDS = {"evidence", "years_experience"}
