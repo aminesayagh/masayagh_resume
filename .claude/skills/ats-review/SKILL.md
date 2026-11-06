@@ -26,13 +26,14 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 | `src/spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it |
 | `src/aliases.json` | True synonyms (Postgres = PostgreSQL) | Keep it small; no loose matches |
 
-`src/new_job.py` scaffolds a new `jobs/<slug>/` folder interactively (company, job title, pasted posting). It **refuses to run** if `template/default.json` has any unresolved spelling/style/PDF-readability finding (warning or error) — fix the baseline first, so every new application starts clean.
+`src/new_job.py` scaffolds a new `jobs/<slug>/` folder interactively (company, job title, pasted posting). It **refuses to run** if `template/default.json` has any unresolved spelling/style/PDF-readability finding (warning or error) — fix the baseline first, so every new application starts clean. Run `src/check_template.py` on its own anytime to see that same list without starting a new application.
 
 ## Pipeline
 
 Each tool defaults to its input's own folder: run against `template/default.json` for the baseline, or a `jobs/<slug>/` file for one application. Each step writes its report next to its input.
 
 ```bash
+.venv/bin/python src/check_template.py                        # is template/ ready? lists findings, exit 1 if not
 .venv/bin/python src/new_job.py                               # 0. scaffold jobs/<slug>/ (blocks if template/ has findings)
 .venv/bin/python src/check_spelling.py jobs/<slug>/content.json   # 1. spelling: warnings only
 .venv/bin/python src/check_style.py jobs/<slug>/content.json      # 2. writing style: warnings only

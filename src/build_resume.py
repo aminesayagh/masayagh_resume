@@ -63,7 +63,7 @@ def load_data(path: Path) -> dict:
 
 def experience_date_parts(dates: str) -> tuple[str, str]:
     """Split a displayed date range into start and end labels."""
-    parts = re.split(r"\s+(?:-|\u2013|\u2014|to)\s+", dates.strip(), maxsplit=1, flags=re.IGNORECASE)
+    parts = re.split(r"\s+(?:-|–|—|to)\s+", dates.strip(), maxsplit=1, flags=re.IGNORECASE)
     return (parts[0], parts[1]) if len(parts) == 2 else (parts[0], "")
 
 

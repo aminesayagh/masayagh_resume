@@ -14,31 +14,12 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 
 ## 1. PDF readability
 
-3 page(s): 0 error(s), 28 warning(s), 4 note(s).
+3 page(s): 0 error(s), 9 warning(s), 4 note(s).
 
-- **warning**: Heading 'Summary of Experience' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Heading 'Summary of Experience' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary.
-- **warning**: Heading 'Technical Proficiencies' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Heading 'Technical Proficiencies' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary.
-- **warning**: Heading 'Professional Experience' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Heading 'Academic Education' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Heading 'Academic Education' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary.
-- **warning**: Dates for LingoWP 'Jul 2026 - Present' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
 - **warning**: 'LingoWP' has no job title; parsers expect title, company and dates per entry.
-- **warning**: Dates for Phoenix AI USA Inc. 'Jul 2025 - Present' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: 'Phoenix AI USA Inc.' starts 2 lines; a parser may record it as separate jobs. Avoid repeating the entry header when a job continues on the next page.
-- **warning**: Dates for Cogy Tech 'Nov 2024 - Jun 2025' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Dates for Rich Media 'Nov 2024 - Jan 2025' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Dates for Digital Consulting 'Jun 2024 - Oct 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Dates for Cyber Cohesion 'Apr 2023 - Jul 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: 'Cyber Cohesion' starts 2 lines; a parser may record it as separate jobs. Avoid repeating the entry header when a job continues on the next page.
-- **warning**: Dates for Jonas Agency 'Jun 2022 - Jul 2023' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
-- **warning**: Dates for Sodiadd 'Apr 2023 - Jul 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
 - **warning**: 'Sodiadd' has no job title; parsers expect title, company and dates per entry.
-- **warning**: Dates for Happy Water NFT 'Jun 2022 - Jul 2023' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
 - **warning**: 'Happy Water NFT' has no job title; parsers expect title, company and dates per entry.
 - **warning**: 'Lavish Trading' has no job title; parsers expect title, company and dates per entry.
-- **warning**: Dates for MySchool 'Sep 2020 - Jun 2021' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column).
 - **warning**: 'MySchool' has no job title; parsers expect title, company and dates per entry.
 - **warning**: linkedin 'linkedin.com/in/mohamedamine-sayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured.
 - **warning**: github 'github.com/aminesayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured.
@@ -93,7 +74,7 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 #### R08 · partial · Professional experience with Python
 
 - **Posting:** "Experience with React, Python, SQL, API integration, and automated testing."
-- **Your PDF** (page 1): "JavaScript PHP Python SQL"
+- **Your PDF** (page 1): "Skills JavaScript PHP Python SQL"
 - **Keyword:** exact
 - **Why:** 'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.
 - **Suggestion:** 'Python' is only in your skills list. If you used it in a job, name it in that job's bullet.
@@ -101,7 +82,7 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 #### R09 · partial · Professional experience with SQL
 
 - **Posting:** "Experience with React, Python, SQL, API integration, and automated testing."
-- **Your PDF** (page 1): "JavaScript PHP Python SQL"
+- **Your PDF** (page 1): "Skills JavaScript PHP Python SQL"
 - **Keyword:** exact
 - **Why:** 'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.
 - **Suggestion:** 'SQL' is only in your skills list. If you used it in a job, name it in that job's bullet.
@@ -109,7 +90,7 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 #### R06 · met · 3+ years of professional software development
 
 - **Posting:** "At least three years of professional software development experience."
-- **Your PDF** (page 3): "Sep 2020"
+- **Your PDF** (page 3): "Sep 2020 – Jun 2021 MySchool, Morocco"
 - **Keyword:** computed from job dates
 - **Why:** 5.4 years with overlaps counted once (needs 3). Computed from the job dates; the quote is your earliest date range.
 
@@ -170,8 +151,8 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 - **Posting:** "Design and integrate APIs backed by PostgreSQL."
 - **Your PDF** (page 1): "FastAPI WordPress Odoo PostgreSQL"
 - **Keyword:** alias
-- **Why:** Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.
-- **Suggestion:** The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet.
+- **Why:** Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated'); use the posting's term.
+- **Suggestion:** The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet.
 
 #### R04 · partial · Maintain Docker and CI/CD workflows
 
@@ -184,21 +165,21 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 #### R03 · met · Prototype from product requirements, then ship tested features
 
 - **Posting:** "Turn product requirements into prototypes, then ship tested features."
-- **Your PDF** (page 2): "Designed UI flows and prototypes for Inflauditor to validate product"
+- **Your PDF** (page 2): "Designed UI flows and prototypes for Inflauditor to validate"
 - **Keyword:** exact
 - **Why:** 'prototypes' found in experience text.
 
 #### R05 · met · Work with product and design on customer-facing SaaS
 
 - **Posting:** "Collaborate with product and design colleagues on customer-facing SaaS tools."
-- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS platform"
+- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS"
 - **Keyword:** exact
 - **Why:** 'SaaS' found in experience text.
 
 #### R17 · met · Experience with creator-marketing
 
 - **Posting:** "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products."
-- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS platform"
+- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS"
 - **Keyword:** exact
 - **Why:** 'creator-marketing' found in experience text.
 

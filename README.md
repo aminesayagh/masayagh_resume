@@ -32,6 +32,14 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 
 Prompts for the company, the job title, and the posting text (paste it, then press Ctrl-D). It refuses to run if `template/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting `job.json`'s requirements next.
 
+To check whether the baseline is ready without starting a new application:
+
+```bash
+.venv/bin/python src/check_template.py
+```
+
+Rebuilds `template/resume.pdf` and lists every spelling/style/PDF-readability finding (same checks `new_job.py` gates on). Prints "ready" and exits 0 if there are none.
+
 ## Build a resume
 
 Build the baseline version:
@@ -172,6 +180,7 @@ For another posting, pass `--cv`, `--job`, `--out`, and a comma-separated `--ski
 | `jobs/<slug>/` | One folder per application: posting, job requirements, tailored content, built PDF, and report |
 | `src/build_resume.py` | Validates content, creates the QR, checks page fit, and exports the PDF |
 | `src/new_job.py` | Scaffolds a new `jobs/<slug>/` folder from a pasted posting |
+| `src/check_template.py` | Checks whether `template/` is ready (no spelling/style/PDF findings) to start a new application |
 | `src/check_spelling.py`, `check_style.py`, `check_pdf.py`, `check_job.py`, `match_job.py`, `review_ats.py` | ATS reviewer tools |
 | `src/aliases.json`, `src/spelling-allow.txt` | Reviewer word lists: true synonyms and confirmed spellings |
 | `src/vendor/` | Bundled QR generator and its license |

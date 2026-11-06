@@ -36,7 +36,7 @@ class CheckPdfTest(unittest.TestCase):
         headings = check_pdf.template_headings(check_pdf.TEMPLATE)
         report = check_pdf.check(ROOT / "template" / "resume.pdf", content, headings)
         self.assertEqual(codes(report, "error"), set())
-        self.assertIn("Professional Experience", headings)
+        self.assertIn("Experience", headings)
         self.assertFalse(any("<br" in h for h in headings))
 
     def test_missing_field_is_an_error(self):

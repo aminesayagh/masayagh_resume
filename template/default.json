@@ -4,14 +4,14 @@
   "contact": {
     "phone": "(+212) 616-13 71 24",
     "phone_link": "tel:+212616137124",
-    "email": "contact@masayagh.com",
+    "email": "mohamedamine@masayagh.com",
     "location": "Casablanca, Morocco",
     "website": "masayagh.com",
     "website_link": "https://masayagh.com",
     "github": "https://github.com/aminesayagh",
     "linkedin": "https://linkedin.com/in/mohamedamine-sayagh"
   },
-  "summary": "As a business-oriented software developer, I partner with teams to build product applications that simplify complex processes. By delivering intuitive software and eliminating unproductive workflows, I help companies scale their output, reduce operational costs, and drive measurable productivity.",
+  "summary": "Business-oriented software developer who partners with teams to build product applications that simplify complex processes. Delivers intuitive software and eliminates unproductive workflows to help companies scale output, reduce operational costs, and improve productivity.",
   "skills": [
     [
       "JavaScript",
@@ -51,7 +51,7 @@
       "dates": "Jul 2026 - Present",
       "company": "LingoWP",
       "detail": "",
-      "role": "",
+      "role": "Software Developer",
       "description": "Launched a WordPress multilingual platform that translates content directly from its original sources through a structured extraction pipeline. Delivered to four agency clients before launching commercially.",
       "bullets": []
     },
@@ -60,11 +60,11 @@
       "company": "Phoenix AI USA Inc.",
       "detail": "- Hypeo, MENA",
       "role": "Software Developer",
-      "description": "Contributed to Hypeo, a MENA creator-marketing SaaS platform connecting influencers and media creators with businesses launching online content campaigns.",
+      "description": "Developed product features for Hypeo, a MENA creator-marketing SaaS platform connecting influencers and media creators with businesses launching online content campaigns.",
       "bullets": [
         "Delivered a contextual AI chat that transforms open-ended client conversations into configured marketing campaigns, integrated with the internal influencer database.",
         "Built and refined the front-end experience in close collaboration with a senior technical lead, continuously adapting workflows to backend integration and evolving business requirements.",
-        "Supported data operations by automating manipulation and extraction of influencer data from web-scraping outputs and database-oriented pipelines used across the platform.",
+        "Automated the manipulation and extraction of influencer data from web-scraping outputs and database pipelines used across the platform.",
         "Took ownership of maintenance, deployment support, access/IP handover, and bug-fix coordination during a technical leadership transition.",
         "Documented core business modules, missing implementation areas, and architectural solutions to support future development planning.",
         "Developed an external data-metrics solution for creator audience and professional collaboration insights, later accepted and integrated into the company workflow."
@@ -75,7 +75,7 @@
       "company": "Cogy Tech,",
       "detail": "Morocco",
       "role": "Software Developer",
-      "description": "Helped define and roll out standardized software delivery process, aligning team workflows and contributing to lower shipping costs.",
+      "description": "Co-developed and rolled out a standardized software delivery process, aligning team workflows and contributing to lower shipping costs.",
       "bullets": [
         "Established a reusable prototyping approach to validate business requirements across multiple use cases before development.",
         "Tracked sprint KPIs in Odoo and surfaced bottlenecks to improve planning accuracy and throughput.",
@@ -88,7 +88,7 @@
       "company": "Rich Media,",
       "detail": "Morocco",
       "role": "Software Developer",
-      "description": "Contributed to Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data to support campaign planning.",
+      "description": "Designed and integrated product features for Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data for campaign planning.",
       "bullets": [
         "Designed UI flows and prototypes for Inflauditor to validate product direction and accelerate development decisions.",
         "Integrated data insights such as creator scoring, language detection, and sentiment indicators to support campaign planning."
@@ -128,7 +128,7 @@
       "dates": "Apr 2023 - Jul 2024",
       "company": "Sodiadd,",
       "detail": "France",
-      "role": "",
+      "role": "Software Developer",
       "description": "Developed a responsive subscription website for individual real estate investment plans.",
       "bullets": []
     },
@@ -136,15 +136,15 @@
       "dates": "Jun 2022 - Jul 2023",
       "company": "Happy Water NFT,",
       "detail": "France",
-      "role": "",
+      "role": "Software Developer",
       "description": "Built a rich Web3 NFT experience focused on digital asset presentation and user engagement.",
       "bullets": []
     },
     {
-      "dates": "Aug 2021",
+      "dates": "Aug 2021 - Jun 2022",
       "company": "Lavish Trading,",
       "detail": "London",
-      "role": "",
+      "role": "Software Developer",
       "description": "Developed a subscription website for a London-based trading investment company.",
       "bullets": []
     },
@@ -152,7 +152,7 @@
       "dates": "Sep 2020 - Jun 2021",
       "company": "MySchool,",
       "detail": "Morocco",
-      "role": "",
+      "role": "Software Developer",
       "description": "Built an online course platform for school education during the COVID period.",
       "bullets": []
     }

@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Check whether template/default.json is ready to start a new job application.
+
+Usage: python3 src/check_template.py
+
+Rebuilds template/resume.pdf from template/default.json and runs the spelling,
+style and PDF-readability checks against it -- the same gate src/new_job.py runs
+before scaffolding a new jobs/<slug>/ folder, so you can see what to fix without
+having to start (and abandon) a new application first.
+Exit code: 0 = ready (no findings), 1 = not ready (findings listed).
+"""
+
+import json
+from pathlib import Path
+
+import build_resume
+import review_ats
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+TEMPLATE_DIR = ROOT / "template"
+NON_BLOCKING_TEMPLATE_CODES = {"file_name"}
+
+
+def check() -> list[dict]:
+    """Spelling/style/PDF-readability findings against the template baseline, if
+    any. Reuses review_ats.review() with an empty-requirements job so it only
+    runs the content checks, not job matching. "info" findings don't block."""
+    content_path = TEMPLATE_DIR / "default.json"
+    pdf_path = build_resume.build(content_path, TEMPLATE_DIR / "resume.pdf")
+    content = json.loads(content_path.read_text(encoding="utf-8"))
+    rep = review_ats.review({"title": "template baseline", "requirements": []}, pdf_path, content, network=False)
+    findings = rep["pdf_check"]["findings"] + rep["spelling"]["findings"] + rep["style"]["findings"]
+    # template/resume.pdf is the repository's canonical internal artifact name,
+    # not the filename sent to a recruiter. Keep the upload-name warning in the
+    # general PDF checker, but do not let it block creation of a job workspace.
+    return [
+        f for f in findings
+        if f["severity"] != "info" and f.get("code") not in NON_BLOCKING_TEMPLATE_CODES
+    ]
+
+
+def main() -> None:
+    findings = check()
+    if not findings:
+        print("template/ is ready: no spelling, style or PDF-readability findings.")
+        return
+    print(f"template/ is not ready: {len(findings)} finding(s) to fix first.\n")
+    for f in findings:
+        print(f"[{f['severity']}] {f['message']}")
+    raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

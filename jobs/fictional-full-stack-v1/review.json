@@ -10,15 +10,15 @@
     "pages": [
       {
         "page": 1,
-        "chars": 1763
+        "chars": 1719
       },
       {
         "page": 2,
-        "chars": 2153
+        "chars": 1860
       },
       {
         "page": 3,
-        "chars": 1559
+        "chars": 1680
       }
     ],
     "experience_years": {
@@ -28,103 +28,13 @@
     "findings": [
       {
         "severity": "warning",
-        "code": "field_split",
-        "message": "Heading 'Summary of Experience' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "heading_nonstandard",
-        "message": "Heading 'Summary of Experience' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Heading 'Technical Proficiencies' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "heading_nonstandard",
-        "message": "Heading 'Technical Proficiencies' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Heading 'Professional Experience' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Heading 'Academic Education' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "heading_nonstandard",
-        "message": "Heading 'Academic Education' is not a common section name; parsers look for e.g. Education, Experience, Languages, Profile, Skills, Summary."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for LingoWP 'Jul 2026 - Present' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
         "code": "role_missing",
         "message": "'LingoWP' has no job title; parsers expect title, company and dates per entry."
       },
       {
         "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Phoenix AI USA Inc. 'Jul 2025 - Present' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "entry_repeated",
-        "message": "'Phoenix AI USA Inc.' starts 2 lines; a parser may record it as separate jobs. Avoid repeating the entry header when a job continues on the next page."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Cogy Tech 'Nov 2024 - Jun 2025' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Rich Media 'Nov 2024 - Jan 2025' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Digital Consulting 'Jun 2024 - Oct 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Cyber Cohesion 'Apr 2023 - Jul 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "entry_repeated",
-        "message": "'Cyber Cohesion' starts 2 lines; a parser may record it as separate jobs. Avoid repeating the entry header when a job continues on the next page."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Jonas Agency 'Jun 2022 - Jul 2023' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Sodiadd 'Apr 2023 - Jul 2024' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
-      },
-      {
-        "severity": "warning",
         "code": "role_missing",
         "message": "'Sodiadd' has no job title; parsers expect title, company and dates per entry."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for Happy Water NFT 'Jun 2022 - Jul 2023' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
       },
       {
         "severity": "warning",
@@ -135,11 +45,6 @@
         "severity": "warning",
         "code": "role_missing",
         "message": "'Lavish Trading' has no job title; parsers expect title, company and dates per entry."
-      },
-      {
-        "severity": "warning",
-        "code": "field_split",
-        "message": "Dates for MySchool 'Sep 2020 - Jun 2021' is broken across lines; a parser may read it as two values. Keep it on one line (shorter text or a wider column)."
       },
       {
         "severity": "warning",
@@ -301,7 +206,7 @@
           "keyword": "exact",
           "status": "partial",
           "method": "exact",
-          "quote": "JavaScript PHP Python SQL",
+          "quote": "Skills JavaScript PHP Python SQL",
           "page": 1,
           "section": "skills",
           "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
@@ -331,14 +236,14 @@
       "method": "exact",
       "quote": "FastAPI WordPress Odoo PostgreSQL",
       "page": 1,
-      "rationale": "Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.",
+      "rationale": "Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated'); use the posting's term.",
       "terms": [
         {
           "term": "APIs",
           "keyword": "alias",
           "status": "met",
           "method": "alias",
-          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "quote": "Implemented a Go API service to orchestrate isolated",
           "page": 3,
           "section": "experience",
           "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term."
@@ -355,7 +260,7 @@
         }
       ],
       "kind_years": false,
-      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
       "id": "R03",
@@ -366,7 +271,7 @@
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
+      "quote": "Designed UI flows and prototypes for Inflauditor to validate",
       "page": 2,
       "rationale": "'prototypes' found in experience text.",
       "terms": [
@@ -375,7 +280,7 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
+          "quote": "Designed UI flows and prototypes for Inflauditor to validate",
           "page": 2,
           "section": "experience",
           "rationale": "'prototypes' found in experience text."
@@ -430,7 +335,7 @@
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
       "page": 1,
       "rationale": "'SaaS' found in experience text.",
       "terms": [
@@ -439,7 +344,7 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
           "page": 1,
           "section": "experience",
           "rationale": "'SaaS' found in experience text."
@@ -457,7 +362,7 @@
       "keyword": null,
       "status": "met",
       "method": "computed",
-      "quote": "Sep 2020",
+      "quote": "Sep 2020 – Jun 2021 MySchool, Morocco",
       "page": 3,
       "years": {
         "merged": 5.4,
@@ -504,7 +409,7 @@
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
-      "quote": "JavaScript PHP Python SQL",
+      "quote": "Skills JavaScript PHP Python SQL",
       "page": 1,
       "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
       "terms": [
@@ -513,7 +418,7 @@
           "keyword": "exact",
           "status": "partial",
           "method": "exact",
-          "quote": "JavaScript PHP Python SQL",
+          "quote": "Skills JavaScript PHP Python SQL",
           "page": 1,
           "section": "skills",
           "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
@@ -531,7 +436,7 @@
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
-      "quote": "JavaScript PHP Python SQL",
+      "quote": "Skills JavaScript PHP Python SQL",
       "page": 1,
       "rationale": "'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
       "terms": [
@@ -540,7 +445,7 @@
           "keyword": "exact",
           "status": "partial",
           "method": "exact",
-          "quote": "JavaScript PHP Python SQL",
+          "quote": "Skills JavaScript PHP Python SQL",
           "page": 1,
           "section": "skills",
           "rationale": "'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
@@ -747,7 +652,7 @@
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
       "page": 1,
       "rationale": "'creator-marketing' found in experience text.",
       "terms": [
@@ -756,7 +661,7 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
+          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
           "page": 1,
           "section": "experience",
           "rationale": "'creator-marketing' found in experience text."

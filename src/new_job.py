@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 import build_resume
+import check_template
 import review_ats
 
 HERE = Path(__file__).resolve().parent
@@ -36,22 +37,13 @@ def next_version(slug: str) -> int:
     return max(versions, default=0) + 1
 
 
-def check_template() -> list[str]:
-    """Spelling/style/PDF findings on the baseline, if any. Reuses review_ats.review()
-    with an empty-requirements job so it only runs the content checks."""
-    content_path = TEMPLATE_DIR / "default.json"
-    pdf_path = build_resume.build(content_path, TEMPLATE_DIR / "resume.pdf")
-    content = json.loads(content_path.read_text(encoding="utf-8"))
-    rep = review_ats.review({"title": "template baseline", "requirements": []}, pdf_path, content, network=False)
-    findings = rep["pdf_check"]["findings"] + rep["spelling"]["findings"] + rep["style"]["findings"]
-    return [f"[{f['severity']}] {f['message']}" for f in findings if f["severity"] != "info"]
-
-
 def main() -> None:
-    problems = check_template()
+    problems = check_template.check()
     if problems:
-        print("template/default.json has unresolved findings; fix those before starting a new job:\n")
-        print("\n".join(problems))
+        print("template/default.json has unresolved findings; fix those before starting a new job\n"
+              "(or run src/check_template.py on its own to see this list anytime):\n")
+        for f in problems:
+            print(f"[{f['severity']}] {f['message']}")
         sys.exit(1)
 
     company = input("Company: ").strip()
