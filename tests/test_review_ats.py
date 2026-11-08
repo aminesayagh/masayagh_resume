@@ -23,7 +23,7 @@ class ReviewTest(unittest.TestCase):
         job = copy.deepcopy(JOB)
         job["overrides"] = [
             {"id": "R07", "status": "met", "reason": "React is used daily at Phoenix AI",
-             "pdf_quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony"},
+             "pdf_quote": "React / Next.js Angular Node.js / NestJS Spring Boot"},
             {"id": "R11", "status": "partial", "reason": "Wrote tests at Cogy Tech", "pdf_quote": "A line that is not in the PDF"},
             {"id": "R14", "status": "missing", "reason": "Agree, no AWS", "pdf_quote": None},
         ]

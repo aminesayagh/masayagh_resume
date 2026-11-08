@@ -21,9 +21,9 @@ import check_pdf
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
 ALLOW_FILE = HERE / "spelling-allow.txt"
-SKIP_KEYS = {"email", "phone", "phone_link", "website", "website_link", "github", "linkedin", "qr_url", "dates"}
+SKIP_KEYS = {"email", "phone", "phone_link", "website", "website_link", "github", "linkedin", "qr_url", "dates", "link"}
 # Names, not prose: their words are trusted, so a company or skill never warns.
-TRUSTED_KEYS = {"name", "company", "detail", "institution", "location", "language", "level", "skills"}
+TRUSTED_KEYS = {"name", "company", "detail", "institution", "issuer", "tech", "location", "language", "level", "skills"}
 WORD = re.compile(r"[A-Za-z][A-Za-z'’]*")
 
 

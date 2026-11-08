@@ -1,0 +1,197 @@
+{
+  "name": "Mohamed Amine Sayagh",
+  "role": "Software Engineer Fullstack",
+  "contact": {
+    "phone": "(+212) 616-13 71 24",
+    "phone_link": "tel:+212616137124",
+    "email": "mohamedamine@masayagh.com",
+    "location": "Casablanca, Morocco",
+    "website": "masayagh.com/hire",
+    "website_link": "https://www.masayagh.com/hire",
+    "github": "https://github.com/aminesayagh",
+    "linkedin": "https://linkedin.com/in/mohamedamine-sayagh"
+  },
+  "summary": "Business-oriented software developer, working with teams to build product experiences that simplify complex processes. Combining software development, visual design, and business understanding to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale.",
+  "skills": [
+    [
+      "JavaScript",
+      "PHP",
+      "Python",
+      "Java"
+    ],
+    [
+      "React / Next.js",
+      "Angular",
+      "Node.js / NestJS",
+      "Spring Boot",
+      "FastAPI",
+      "WordPress",
+      "Odoo",
+      "PostgreSQL",
+      "Web scraping",
+      "CI/CD",
+      "Docker",
+      "Testing Practices"
+    ],
+    [
+      "Figma",
+      "Framer",
+      "Interactive design",
+      "Prototyping"
+    ],
+    [
+      "Claude Code / Codex",
+      "LLM Integration",
+      "Obsidian",
+      "Agent Tooling"
+    ]
+  ],
+  "experience": [
+    {
+      "dates": "Jul 2026 - Present",
+      "company": "Technical consulting",
+      "detail": "",
+      "role": "Software Developer",
+      "description": "",
+      "bullets": [
+        "Tarifpublic.fr, provide technical consulting for a French state-supported marketplace for public procurement, supporting standardized product pricing.",
+        "LingoWP, maintain and support a multilingual WordPress plugin deployed across four digital agencies."
+      ]
+    },
+    {
+      "dates": "Jul 2025 - Present",
+      "company": "Phoenix AI USA Inc.",
+      "detail": "- Hypeo, MENA",
+      "role": "Software Developer",
+      "description": "Developed product features for Hypeo, a MENA creator-marketing SaaS platform connecting influencers and media creators with businesses launching online content campaigns.",
+      "bullets": [
+        "Delivered a contextual AI chat that transforms open-ended client conversations into configured marketing campaigns, integrated with the internal influencer database.",
+        "Built and refined the front-end experience in close collaboration with a senior technical lead, continuously adapting workflows to backend integration and evolving business requirements.",
+        "Automated the manipulation and extraction of influencer data from web-scraping outputs and database pipelines used across the platform.",
+        "Took ownership of maintenance, deployment support, access/IP handover, and bug-fix coordination during a technical leadership transition.",
+        "Documented core business modules, missing implementation areas, and architectural solutions to support future development planning.",
+        "Developed an external data-metrics solution for creator audience and professional collaboration insights, later accepted and integrated into the company workflow."
+      ]
+    },
+    {
+      "dates": "Nov 2024 - Jun 2025",
+      "company": "Cogy Tech,",
+      "detail": "Morocco",
+      "role": "Software Developer",
+      "description": "Co-developed and rolled out a standardized software delivery process, aligning team workflows and contributing to lower shipping costs.",
+      "bullets": [
+        "Established a reusable prototyping approach to validate business requirements across multiple use cases before development.",
+        "Tracked sprint KPIs in Odoo and surfaced bottlenecks to improve planning accuracy and throughput.",
+        "Brought 02Book to production, an AI-powered writing assistant for B2B writers, used by clients such as Orange and Le Matin.",
+        "Strengthened software design skills under continuous mentorship, working on client requirements and delivery constraints."
+      ]
+    },
+    {
+      "dates": "Nov 2024 - Jan 2025",
+      "company": "Rich Media,",
+      "detail": "Morocco",
+      "role": "Software Developer",
+      "description": "Designed and integrated product features for Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data for campaign planning.",
+      "bullets": [
+        "Designed UI flows and prototypes for Inflauditor to validate product direction and accelerate development decisions.",
+        "Integrated data insights such as creator scoring, language detection, and sentiment indicators to support campaign planning."
+      ]
+    },
+    {
+      "dates": "Jun 2024 - Oct 2024",
+      "company": "Digital Consulting",
+      "detail": "",
+      "role": "Software Developer",
+      "description": "Delivered high-conversion lead-capture landing pages for Miratti (Morocco), French Dandy (Dubai), and Horde Studio (USA), supporting growth campaigns showcased at regional events (e.g., Forbes Middle East).",
+      "bullets": []
+    },
+    {
+      "dates": "Apr 2023 - Jul 2024",
+      "company": "Cyber Cohesion,",
+      "detail": "Singapore",
+      "role": "Software Developer",
+      "description": "Led web development of a CTF platform for security competitions, used in global events such as OWASP AppSec Days, BSides Singapore, and ISACA.",
+      "bullets": [
+        "Implemented a Go API service to orchestrate isolated application deployments, providing a secure training environment for participants.",
+        "Developed the web experience of Warzone, a dashboard to track team progress, scoring and overall competition gamification."
+      ]
+    },
+    {
+      "dates": "Apr 2023 - Jul 2024",
+      "company": "Sodiadd,",
+      "detail": "France",
+      "role": "Software Developer",
+      "description": "Developed a responsive subscription website for individual real estate investment plans.",
+      "bullets": []
+    },
+    {
+      "dates": "Jun 2022 - Jul 2023",
+      "company": "Jonas Agency,",
+      "detail": "London",
+      "role": "Full Stack Developer",
+      "description": "Delivered client onboarding web experiences for solar energy products, serving as the first digital touchpoint between customers and suppliers.",
+      "bullets": [
+        "Automated the delivery process for new websites by reusing proven experience patterns, helping shorten release cycles.",
+        "Produced lead-capture websites that delivered strong conversion performance for client campaigns."
+      ]
+    },
+    {
+      "dates": "Jun 2022 - Jul 2023",
+      "company": "Happy Water NFT,",
+      "detail": "France",
+      "role": "Software Developer",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "dates": "Aug 2021 - Jun 2022",
+      "company": "Lavish Trading,",
+      "detail": "London",
+      "role": "Software Developer",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "dates": "Sep 2020 - Jun 2021",
+      "company": "MySchool,",
+      "detail": "Morocco",
+      "role": "Software Developer",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "dates": "2016 - 2020",
+      "company": "Freelance,",
+      "detail": "Morocco",
+      "role": "Web Designer",
+      "description": "",
+      "bullets": []
+    }
+  ],
+  "education": [
+    {
+      "dates": "2023 - 2025",
+      "degree": "Master's in Big Data & Cloud Computing",
+      "institution": "University of Hassan 2, Casablanca"
+    },
+    {
+      "dates": "2020 - 2023",
+      "degree": "Bachelor's in Computer Science",
+      "institution": "University of Hassan 2, Casablanca"
+    }
+  ],
+  "languages": [
+    {
+      "language": "Arabic",
+      "level": "Native"
+    },
+    {
+      "language": "French",
+      "level": "Professional"
+    },
+    {
+      "language": "English",
+      "level": "Professional"
+    }
+  ]
+}

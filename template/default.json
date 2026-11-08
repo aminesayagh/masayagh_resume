@@ -1,29 +1,29 @@
 {
   "name": "Mohamed Amine Sayagh",
-  "role": "Software Developer",
+  "role": "Software Engineer",
   "contact": {
     "phone": "(+212) 616-13 71 24",
     "phone_link": "tel:+212616137124",
     "email": "mohamedamine@masayagh.com",
     "location": "Casablanca, Morocco",
-    "website": "masayagh.com",
-    "website_link": "https://masayagh.com",
+    "website": "masayagh.com/hire",
+    "website_link": "https://www.masayagh.com/hire",
     "github": "https://github.com/aminesayagh",
     "linkedin": "https://linkedin.com/in/mohamedamine-sayagh"
   },
-  "summary": "Business-oriented software developer who partners with teams to build product applications that simplify complex processes. Delivers intuitive software and eliminates unproductive workflows to help companies scale output, reduce operational costs, and improve productivity.",
+  "summary": "Business-oriented software developer building product experiences that simplify complex processes. Combining software development, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale.",
   "skills": [
     [
       "JavaScript",
       "PHP",
       "Python",
-      "SQL"
+      "Java"
     ],
     [
       "React / Next.js",
-      "Vue.js / Nuxt.js",
-      "Node.js / Express",
-      "Symfony",
+      "Angular",
+      "Node.js / NestJS",
+      "Spring Boot",
       "FastAPI",
       "WordPress",
       "Odoo",
@@ -40,20 +40,23 @@
       "Prototyping"
     ],
     [
-      "Claude / Codex",
+      "Claude Code / Codex",
+      "LLM Integration",
       "Obsidian",
-      "Hermes",
-      "Harness Eng"
+      "Agent Tooling"
     ]
   ],
   "experience": [
     {
       "dates": "Jul 2026 - Present",
-      "company": "LingoWP",
+      "company": "Technical consulting",
       "detail": "",
       "role": "Software Developer",
-      "description": "Launched a WordPress multilingual platform that translates content directly from its original sources through a structured extraction pipeline. Delivered to four agency clients before launching commercially.",
-      "bullets": []
+      "description": "",
+      "bullets": [
+        "Tarifpublic.fr, provide technical consulting for a French state-supported marketplace for public procurement, supporting standardized product pricing.",
+        "LingoWP, maintain and support a multilingual WordPress plugin deployed across four digital agencies."
+      ]
     },
     {
       "dates": "Jul 2025 - Present",
@@ -114,17 +117,6 @@
       ]
     },
     {
-      "dates": "Jun 2022 - Jul 2023",
-      "company": "Jonas Agency,",
-      "detail": "London",
-      "role": "Full Stack Developer",
-      "description": "Delivered client onboarding web experiences for solar energy products, serving as the first digital touchpoint between customers and suppliers.",
-      "bullets": [
-        "Automated the delivery process for new websites by reusing proven experience patterns, helping shorten release cycles.",
-        "Produced lead-capture websites that delivered strong conversion performance for client campaigns."
-      ]
-    },
-    {
       "dates": "Apr 2023 - Jul 2024",
       "company": "Sodiadd,",
       "detail": "France",
@@ -134,10 +126,21 @@
     },
     {
       "dates": "Jun 2022 - Jul 2023",
+      "company": "Jonas Agency,",
+      "detail": "London",
+      "role": "Full Stack Developer",
+      "description": "",
+      "bullets": [
+        "Automated the delivery process for new websites by reusing proven experience patterns, helping shorten release cycles.",
+        "Produced lead-capture websites that delivered strong conversion performance for client campaigns."
+      ]
+    },
+    {
+      "dates": "Jun 2022 - Jul 2023",
       "company": "Happy Water NFT,",
       "detail": "France",
       "role": "Software Developer",
-      "description": "Built a rich Web3 NFT experience focused on digital asset presentation and user engagement.",
+      "description": "",
       "bullets": []
     },
     {
@@ -145,7 +148,7 @@
       "company": "Lavish Trading,",
       "detail": "London",
       "role": "Software Developer",
-      "description": "Developed a subscription website for a London-based trading investment company.",
+      "description": "",
       "bullets": []
     },
     {
@@ -153,8 +156,30 @@
       "company": "MySchool,",
       "detail": "Morocco",
       "role": "Software Developer",
-      "description": "Built an online course platform for school education during the COVID period.",
+      "description": "",
       "bullets": []
+    },
+    {
+      "dates": "2016 - 2020",
+      "company": "Freelance,",
+      "detail": "Morocco",
+      "role": "Web Designer",
+      "description": "",
+      "bullets": []
+    }
+  ],
+  "projects": [
+    {
+      "dates": "21 working days",
+      "name": "OrbitRows CLI",
+      "tech": "SQLite · SQL · JEV · GLiNER2",
+      "link": "https://www.masayagh.com/work/orbitrows/"
+    },
+    {
+      "dates": "43 working days",
+      "name": "LingoWP",
+      "tech": "WordPress · React · FastAPI · PostgreSQL · FreeBSD",
+      "link": "https://www.masayagh.com/work/lingowp/"
     }
   ],
   "education": [
@@ -167,6 +192,23 @@
       "dates": "2020 - 2023",
       "degree": "Bachelor's in Computer Science",
       "institution": "University of Hassan 2, Casablanca"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Building with the Claude API",
+      "issuer": "Anthropic",
+      "link": "https://www.masayagh.com/badge/claude-api"
+    },
+    {
+      "name": "Model Context Protocol: Advanced Topics",
+      "issuer": "Anthropic",
+      "link": "https://www.masayagh.com/badge/mcp-advanced-topics"
+    },
+    {
+      "name": "Fundamentals of Agents",
+      "issuer": "Hugging Face",
+      "link": "https://www.masayagh.com/badge/fundamentals-of-agents"
     }
   ],
   "languages": [

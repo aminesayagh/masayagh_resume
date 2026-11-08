@@ -15,10 +15,12 @@ import json
 import re
 import shutil
 import sys
+import unicodedata
 from pathlib import Path
 
 import build_resume
 import check_template
+import publish_resume
 import review_ats
 
 HERE = Path(__file__).resolve().parent
@@ -29,6 +31,13 @@ JOBS_DIR = ROOT / "jobs"
 
 def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def pdf_name(*parts: str) -> str:
+    """'Mohamed Amine Sayagh', 'Software Engineer', 'theodo' -> 'Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf'.
+    ASCII only: accents and symbols get mangled by some upload forms."""
+    text = unicodedata.normalize("NFKD", " ".join(parts)).encode("ascii", "ignore").decode()
+    return "-".join(w[:1].upper() + w[1:] for w in re.findall(r"[A-Za-z0-9]+", text)) + ".pdf"
 
 
 def next_version(slug: str) -> int:
@@ -60,11 +69,15 @@ def main() -> None:
     (folder / "posting.txt").write_text(posting + "\n", encoding="utf-8")
     content_path = folder / "content.json"
     shutil.copyfile(TEMPLATE_DIR / "default.json", content_path)
-    job = {"title": f"{company} — {title}", "posting_file": f"jobs/{folder.name}/posting.txt", "requirements": []}
+    name = json.loads(content_path.read_text(encoding="utf-8"))["name"]
+    job = {"title": f"{company} — {title}", "posting_file": f"jobs/{folder.name}/posting.txt",
+           "pdf_name": pdf_name(name, title, company),
+           "company": slugify(company),
+           "requirements": []}
     job_path = folder / "job.json"
     job_path.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
-    pdf_path = build_resume.build(content_path, folder / "resume.pdf")
+    pdf_path = build_resume.build(content_path)
     content = json.loads(content_path.read_text(encoding="utf-8"))
     rep = review_ats.review(job, pdf_path, content, network=False)
     inputs = {"cv": review_ats.rel(pdf_path), "job": review_ats.rel(job_path), "content": review_ats.rel(content_path)}
@@ -73,11 +86,14 @@ def main() -> None:
     (folder / "review.json").write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     print(f"\nCreated {folder}")
+    publish_resume.publish(job_path)
     print(f"Report so far: PDF readability + spelling + style (no job requirements yet, so no matching).")
     print(f"Next: draft {job_path.relative_to(ROOT)}'s requirements from posting.txt (see "
           f".claude/skills/ats-review/SKILL.md), then rerun:\n"
           f"  .venv/bin/python src/review_ats.py --job {job_path.relative_to(ROOT)}")
 
+
+assert pdf_name("Mohamed Amine Sayagh", "Développeur Full-Stack", "theodo") == "Mohamed-Amine-Sayagh-Developpeur-Full-Stack-Theodo.pdf"
 
 if __name__ == "__main__":
     main()

@@ -170,7 +170,7 @@ def markdown(rep: dict, inputs: dict) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--job", type=Path, required=True)
-    parser.add_argument("--cv", type=Path, help="resume PDF (default: resume.pdf next to the job file)")
+    parser.add_argument("--cv", type=Path, help="resume PDF (default: the job file's pdf_name, else resume.pdf, next to it)")
     parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
     parser.add_argument("--out", type=Path, help="Markdown report (default: review.md next to the job file); JSON is saved beside it")
     parser.add_argument("--no-network", action="store_true", help="skip opening the LinkedIn/GitHub/website links")
@@ -183,7 +183,7 @@ def main() -> None:
         for f in problems:
             print(f"  [error] {f['message']}")
         sys.exit(1)
-    cv = args.cv or args.job.parent / "resume.pdf"
+    cv = args.cv or args.job.parent / job.get("pdf_name", "resume.pdf")
     content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
                                           if p.exists()), cv.parent / "content.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None

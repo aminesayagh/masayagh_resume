@@ -31,6 +31,8 @@ STANDARD_HEADINGS = {
     "experience": {"experience", "work experience", "professional experience"},
     "education": {"education"},
     "languages": {"languages"},
+    "projects": {"projects", "personal projects"},
+    "certifications": {"certifications", "certificates", "licenses & certifications"},
 }
 MIN_CHARS_PER_PAGE = 50  # below this a page is almost certainly an image or empty
 

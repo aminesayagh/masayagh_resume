@@ -82,12 +82,20 @@ def chrome_command(browser: str, profile: str, html_file: Path) -> list[str]:
     ]
 
 
+def default_pdf(data_path: Path) -> Path:
+    """<folder>/<job.json's pdf_name> for a job folder, else <folder>/resume.pdf."""
+    folder = data_path.resolve().parent
+    job_file = folder / "job.json"
+    name = json.loads(job_file.read_text(encoding="utf-8")).get("pdf_name") if job_file.exists() else None
+    return folder / (name or "resume.pdf")
+
+
 def build(data_path: Path, output_path: Path | None = None) -> Path:
     """Render and print `data_path` to PDF. Returns the PDF path."""
     data = load_data(data_path.resolve(strict=True))
     qr_url = data["contact"].get("qr_url") or data["contact"]["website_link"]
     data["contact"]["qr_url"] = qr_url
-    pdf_file = (output_path or data_path.resolve().parent / "resume.pdf").resolve()
+    pdf_file = (output_path or default_pdf(data_path)).resolve()
     pdf_file.parent.mkdir(parents=True, exist_ok=True)
     browser = shutil.which("google-chrome")
     if browser is None:
@@ -133,7 +141,7 @@ def main() -> None:
     parser.add_argument("data", nargs="?", type=Path, default=DEFAULT_DATA,
                         help="JSON file for this job application (default: template/default.json)")
     parser.add_argument("-o", "--output", type=Path,
-                        help="PDF path (default: <JSON file's folder>/resume.pdf)")
+                        help="PDF path (default: job.json's pdf_name in the JSON file's folder, else resume.pdf)")
     args = parser.parse_args()
     build(args.data, args.output)
 

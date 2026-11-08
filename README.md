@@ -21,7 +21,7 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 ## Layout
 
 - `template/` — the master resume: `default.json` (content), `resume.html` (layout), `resume.pdf` (baseline build).
-- `jobs/<company>-<title>-v<N>/` — one folder per application: `posting.txt`, `job.json` (requirements), `content.json` (tailored content, starts as a copy of `template/default.json`), `resume.pdf`, and the generated `review.json`/`review.md`.
+- `jobs/<company>-<title>-v<N>/` — one folder per application: `posting.txt`, `job.json` (requirements), `content.json` (tailored content, starts as a copy of `template/default.json`), the PDF (named `<Your-Name>-<Job-Title>-<Company>.pdf`, set by `pdf_name` in `job.json`), and the generated `review.json`/`review.md`.
 - `src/` — all the tools.
 
 ## Start a new job application
@@ -40,6 +40,14 @@ To check whether the baseline is ready without starting a new application:
 
 Rebuilds `template/resume.pdf` and lists every spelling/style/PDF-readability finding (same checks `new_job.py` gates on). Prints "ready" and exits 0 if there are none.
 
+## Publish a resume to the portfolio
+
+```bash
+.venv/bin/python src/publish_resume.py jobs/company-role-v1/job.json
+```
+
+Pushes the job's PDF to the portfolio repo's `main` branch (from a dedicated clone at `/home/amine/projects/portfolio-publish`). It goes live at `https://www.masayagh.com/resume/<company>/<pdf_name>`, so a download keeps the PDF's real name. Each publish replaces the previous PDF at that link. `new_job.py` publishes automatically; rerun this after every rebuild of a job's PDF.
+
 ## Build a resume
 
 Build the baseline version:
@@ -54,7 +62,7 @@ Build one application's tailored version:
 .venv/bin/python src/build_resume.py jobs/company-role-v1/content.json
 ```
 
-The PDF is saved as `resume.pdf` next to the JSON file. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
+The PDF is saved next to the JSON file: in a job folder it uses `job.json`'s `pdf_name`, otherwise `resume.pdf`. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
 
 ## Edit content
 

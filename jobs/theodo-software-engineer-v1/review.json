@@ -1,0 +1,100 @@
+{
+  "cv": "jobs/theodo-software-engineer-v1/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf",
+  "job": "jobs/theodo-software-engineer-v1/job.json",
+  "content": "jobs/theodo-software-engineer-v1/content.json",
+  "title": "Theodo — Software Engineer",
+  "generated": "2026-11-08",
+  "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
+  "pdf_check": {
+    "pdf": "jobs/theodo-software-engineer-v1/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf",
+    "pages": [
+      {
+        "page": 1,
+        "chars": 1904
+      },
+      {
+        "page": 2,
+        "chars": 2235
+      },
+      {
+        "page": 3,
+        "chars": 1536
+      }
+    ],
+    "experience_years": {
+      "merged": 10.8,
+      "summed": 14.9
+    },
+    "findings": [
+      {
+        "severity": "info",
+        "code": "date_overlap",
+        "message": "13 overlapping job pair(s): Technical consulting / Phoenix AI USA Inc.; Cogy Tech / Rich Media; Digital Consulting / Cyber Cohesion; Digital Consulting / Sodiadd; Cyber Cohesion / Sodiadd; Cyber Cohesion / Jonas Agency; Cyber Cohesion / Happy Water NFT; Sodiadd / Jonas Agency; Sodiadd / Happy Water NFT; Jonas Agency / Happy Water NFT; Jonas Agency / Lavish Trading; Happy Water NFT / Lavish Trading; MySchool / Freelance. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.",
+        "pairs": [
+          "Technical consulting / Phoenix AI USA Inc.",
+          "Cogy Tech / Rich Media",
+          "Digital Consulting / Cyber Cohesion",
+          "Digital Consulting / Sodiadd",
+          "Cyber Cohesion / Sodiadd",
+          "Cyber Cohesion / Jonas Agency",
+          "Cyber Cohesion / Happy Water NFT",
+          "Sodiadd / Jonas Agency",
+          "Sodiadd / Happy Water NFT",
+          "Jonas Agency / Happy Water NFT",
+          "Jonas Agency / Lavish Trading",
+          "Happy Water NFT / Lavish Trading",
+          "MySchool / Freelance"
+        ]
+      },
+      {
+        "severity": "info",
+        "code": "experience_years",
+        "message": "Experience from your dates: 10.8 years counting overlaps once, 14.9 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these."
+      },
+      {
+        "severity": "info",
+        "code": "meta_author",
+        "message": "The PDF has no author field; set it to your name."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_line",
+        "message": "'mohamed amine sayagh resume | p# masayagh.com/hire' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section."
+      }
+    ]
+  },
+  "spelling": {
+    "findings": []
+  },
+  "style": {
+    "findings": [
+      {
+        "severity": "info",
+        "code": "measurable",
+        "field": "experience",
+        "message": "experience: 2 of 24 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_opener",
+        "field": "experience",
+        "message": "experience: 4 lines start with 'Developed'; vary the verbs."
+      }
+    ]
+  },
+  "match_version": 1,
+  "results": [],
+  "counts": {
+    "met": 0,
+    "partial": 0,
+    "missing": 0,
+    "uncertain": 0
+  },
+  "overridden": 0,
+  "evidence_coverage": {
+    "version": 1,
+    "formula": "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0",
+    "must_have": null,
+    "preferred": null
+  }
+}

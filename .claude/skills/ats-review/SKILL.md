@@ -21,7 +21,7 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 | `jobs/<slug>/posting.txt` | The pasted job posting text | Written once when the folder is created |
 | `jobs/<slug>/job.json` | One posting as structured requirements | You draft it, the user reviews it |
 | `jobs/<slug>/content.json` | Tailored resume content for this application, starts as a copy of `template/default.json` | The user, or you with approval |
-| `jobs/<slug>/resume.pdf` | Built PDF for this application | `src/build_resume.py` |
+| `jobs/<slug>/<pdf_name>` | Built PDF for this application, named by `job.json`'s `pdf_name` (your name, job title, company) | `src/build_resume.py` |
 | `jobs/<slug>/review.json`, `review.md` | Generated report | The tools only, never edited by hand |
 | `src/spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it |
 | `src/aliases.json` | True synonyms (Postgres = PostgreSQL) | Keep it small; no loose matches |
@@ -37,13 +37,16 @@ Each tool defaults to its input's own folder: run against `template/default.json
 .venv/bin/python src/new_job.py                               # 0. scaffold jobs/<slug>/ (blocks if template/ has findings)
 .venv/bin/python src/check_spelling.py jobs/<slug>/content.json   # 1. spelling: warnings only
 .venv/bin/python src/check_style.py jobs/<slug>/content.json      # 2. writing style: warnings only
-.venv/bin/python src/build_resume.py jobs/<slug>/content.json     # 3. build jobs/<slug>/resume.pdf
-.venv/bin/python src/check_pdf.py jobs/<slug>/resume.pdf           # 4. PDF text: exit 1 on errors
+.venv/bin/python src/build_resume.py jobs/<slug>/content.json     # 3. build jobs/<slug>/<pdf_name>
+.venv/bin/python src/check_pdf.py jobs/<slug>/<pdf_name>           # 4. PDF text: exit 1 on errors
 .venv/bin/python src/check_job.py jobs/<slug>/job.json             # 5. validate the job file
 .venv/bin/python src/review_ats.py --job jobs/<slug>/job.json      # 6. full review, runs 1, 2, 4 and matching
+.venv/bin/python src/publish_resume.py jobs/<slug>/job.json        # 7. push the PDF to the portfolio (main)
 ```
 
-`src/new_job.py` already runs 1, 2, 3 and a partial version of 6 (no matching yet, since `job.json` has empty `requirements`). To review a posting once requirements are drafted, step 6 is enough: it finds `resume.pdf` and `content.json` next to the job file. Add `--no-network` when offline. Otherwise the tool opens the LinkedIn, GitHub and website links.
+**Publishing (step 7):** run it after every rebuild of a job's PDF. Details and rules: [`../publish-resume/SKILL.md`](../publish-resume/SKILL.md).
+
+`src/new_job.py` already runs 1, 2, 3 and a partial version of 6 (no matching yet, since `job.json` has empty `requirements`). To review a posting once requirements are drafted, step 6 is enough: it finds the PDF (`job.json`'s `pdf_name`) and `content.json` next to the job file. Add `--no-network` when offline. Otherwise the tool opens the LinkedIn, GitHub and website links.
 
 ## Creating a job file from a posting
 
