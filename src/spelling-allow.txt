@@ -13,3 +13,5 @@ Inflauditor
 Miratti
 Warzone
 Fullstack
+Odoo
+agentic

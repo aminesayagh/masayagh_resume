@@ -1,0 +1,93 @@
+Job Description
+Leads one or more platform teams; defines tactical and key strategic elements for middleware evolution serving multiple consumers. Accountable for performance, cost control, and reliability outcomes; escalations for distributed debugging and upgrade safety. Drives significant cross-team improvements to observability, SLOs, and resilience patterns. Engages stakeholders inside and outside the group; socializes migration plans and adoption playbooks.
+Responsibilities
+We are looking for a Senior Manager of Software Development to build, lead and develop a multidisciplinary engineering team in Morocco.
+
+Your team will work on strategic engineering capabilities spanning artificial intelligence, application infrastructure, UI frameworks and AI development tooling. Engineers will work in a matrixed model, partnering with domain leaders responsible for products and solutions including Nitro AI Development Framework, AI Fabric and AI Agent Studio.
+
+This is a role for an engineering leader who enjoys building both high-performing teams and technology. You will combine people leadership with strong technical judgement, helping engineers turn rapidly evolving AI technologies into secure, reliable and usable platforms and services.
+
+What you’ll do:
+
+Build and lead the Morocco engineering team
+
+Build, lead and develop a high-performing software engineering organisation in Morocco.
+
+Recruit and retain engineers across AI, full-stack development, application infrastructure, developer tooling and UI frameworks.
+
+Set clear goals and provide ongoing coaching, feedback, career development and performance management.
+
+Develop technical leaders and create growth opportunities for engineers at different career stages.
+
+Build an inclusive, collaborative and accountable engineering culture.
+
+Provide technical and delivery leadership
+
+Provide technical direction across AI-enabled applications, full-stack services, application infrastructure, UI frameworks and developer platforms.
+
+Guide teams in designing and delivering scalable, secure and reliable software and services.
+
+Establish strong engineering standards across architecture, APIs, testing, observability, reliability and software development.
+
+Help teams solve complex technical issues across distributed systems and services.
+
+Balance rapid experimentation with the engineering rigour required for enterprise-grade services.
+
+Drive improvements in platform performance, resilience, operational readiness and engineering quality.
+
+Work across teams and organisations
+
+Lead engineers working in a matrixed model with functional and domain leaders.
+
+Partner with domain leaders to align assignments, priorities, deliverables, staffing needs and performance expectations.
+
+Build trusted relationships across engineering, industry teams and other partner organisations.
+
+Represent the Morocco engineering organisation in planning, architecture, delivery and operational reviews.
+
+Communicate technical decisions, priorities and risks clearly to engineering and business stakeholders.
+
+Adapt as business priorities, customer needs and AI technologies evolve.
+
+Required experience:
+
+Strong full-stack software development expertise, including modern front-end technologies, service development, APIs, data integration and cloud-based application architectures.
+
+Experience hiring, developing, coaching and retaining high-performing software engineers.
+
+Demonstrated success managing teams in a matrixed organisation, with shared accountability across functional and delivery leaders.
+
+Experience delivering enterprise software, cloud services, developer platforms, frameworks or shared engineering capabilities.
+
+Experience establishing and improving engineering standards and practices.
+
+Strong written and verbal communication skills, with the ability to explain complex technical and organisational topics clearly.
+
+Bachelor’s degree in computer science, engineering or a related technical field, or equivalent practical experience.
+
+Preferred experience:
+
+Experience in one or more of the following would be valuable:
+
+Building AI-enabled products, agentic systems, generative AI platforms or AI-assisted developer tools.
+
+Large language models, agent orchestration, prompt and context management, model evaluation, AI guardrails, feedback systems or AI observability.
+
+Building reusable SDKs, frameworks, APIs, developer tools or internal engineering platforms.
+
+Managing geographically distributed or multicultural engineering teams.
+
+Service management, site reliability engineering, incident management or operational readiness.
+
+Master’s degree in computer science, engineering, business administration or a related discipline.
+
+Career Level: M3
+
+Qualifications
+Career Level - M3
+
+Required Skills
+Application Platforms
+Platform Development
+Software Management
+Software Platform Development

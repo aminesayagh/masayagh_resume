@@ -11,13 +11,13 @@
     "github": "https://github.com/aminesayagh",
     "linkedin": "https://linkedin.com/in/mohamedamine-sayagh"
   },
-  "summary": "Business-oriented software developer building product experiences that simplify complex processes. Combining software development, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale.",
+  "summary": "Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale.",
   "skills": [
     [
       "JavaScript",
-      "PHP",
+      "Java",
       "Python",
-      "Java"
+      "PHP"
     ],
     [
       "React / Next.js",
@@ -28,7 +28,7 @@
       "WordPress",
       "Odoo",
       "PostgreSQL",
-      "Web scraping",
+      "Data scraping",
       "CI/CD",
       "Docker",
       "Testing Practices"
@@ -40,26 +40,26 @@
       "Prototyping"
     ],
     [
-      "Claude Code / Codex",
-      "LLM Integration",
-      "Obsidian",
-      "Agent Tooling"
+      "Claude Code & Codex",
+      "MCP Integrations",
+      "LLM API Integration",
+      "AI Agent Workflows"
     ]
   ],
   "experience": [
     {
-      "dates": "Jul 2026 - Present",
-      "company": "Technical consulting",
-      "detail": "",
+      "dates": "Sep 2026 - Present",
+      "company": "Technical Consultant,",
+      "detail": "France",
       "role": "Software Developer",
       "description": "",
       "bullets": [
         "Tarifpublic.fr, provide technical consulting for a French state-supported marketplace for public procurement, supporting standardized product pricing.",
-        "LingoWP, maintain and support a multilingual WordPress plugin deployed across four digital agencies."
+        "Develop AI agent workflows to automate business decisions for international agency engagements."
       ]
     },
     {
-      "dates": "Jul 2025 - Present",
+      "dates": "Jul 2025 - Sep 2026",
       "company": "Phoenix AI USA Inc.",
       "detail": "- Hypeo, MENA",
       "role": "Software Developer",
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "dates": "Nov 2024 - Jun 2025",
+      "dates": "Feb 2025 - Jun 2025",
       "company": "Cogy Tech,",
       "detail": "Morocco",
       "role": "Software Developer",
@@ -98,7 +98,7 @@
       ]
     },
     {
-      "dates": "Jun 2024 - Oct 2024",
+      "dates": "Aug 2024 - Oct 2024",
       "company": "Digital Consulting",
       "detail": "",
       "role": "Software Developer",
@@ -106,7 +106,7 @@
       "bullets": []
     },
     {
-      "dates": "Apr 2023 - Jul 2024",
+      "dates": "Aug 2023 - Jul 2024",
       "company": "Cyber Cohesion,",
       "detail": "Singapore",
       "role": "Software Developer",
@@ -117,7 +117,7 @@
       ]
     },
     {
-      "dates": "Apr 2023 - Jul 2024",
+      "dates": "May 2023 - Jul 2023",
       "company": "Sodiadd,",
       "detail": "France",
       "role": "Software Developer",
@@ -125,7 +125,7 @@
       "bullets": []
     },
     {
-      "dates": "Jun 2022 - Jul 2023",
+      "dates": "Oct 2022 - Apr 2023",
       "company": "Jonas Agency,",
       "detail": "London",
       "role": "Full Stack Developer",
@@ -136,7 +136,7 @@
       ]
     },
     {
-      "dates": "Jun 2022 - Jul 2023",
+      "dates": "Jul 2022 - Sep 2022",
       "company": "Happy Water NFT,",
       "detail": "France",
       "role": "Software Developer",
@@ -152,7 +152,7 @@
       "bullets": []
     },
     {
-      "dates": "Sep 2020 - Jun 2021",
+      "dates": "Jan 2021 - Jun 2021",
       "company": "MySchool,",
       "detail": "Morocco",
       "role": "Software Developer",
@@ -172,13 +172,13 @@
     {
       "dates": "21 working days",
       "name": "OrbitRows CLI",
-      "tech": "SQLite · SQL · JEV · GLiNER2",
+      "tech": "Python · CLI · AI Agent · SQLite · SQL · JEV · GLiNER2",
       "link": "https://www.masayagh.com/work/orbitrows/"
     },
     {
       "dates": "43 working days",
       "name": "LingoWP",
-      "tech": "WordPress · React · FastAPI · PostgreSQL · FreeBSD",
+      "tech": "WordPress · React · Python · FastAPI · PostgreSQL · FreeBSD",
       "link": "https://www.masayagh.com/work/lingowp/"
     }
   ],
