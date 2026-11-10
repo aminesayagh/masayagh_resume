@@ -27,10 +27,17 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 ## Start a new job application
 
 ```bash
-.venv/bin/python src/new_job.py
+.venv/bin/python src/new_job.py --url <job posting link>      # reads title, company, posting, location
+.venv/bin/python src/new_job.py                               # or paste the posting
 ```
 
-Prompts for the company, the job title, and the posting text (paste it, then press Ctrl-D). It refuses to run if `template/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting `job.json`'s requirements next.
+`--url` reads the posting with `src/fetch_posting.py` (works with LinkedIn, Greenhouse, Lever, Teamtailor, Oracle careers, SAP SuccessFactors; try `src/fetch_posting.py <link>` alone to preview) and compares the job's location with yours. Without it, the script prompts for the company, the job title, and the posting text (paste it, then press Ctrl-D).
+
+Version 1 workflow after the folder exists:
+
+1. **Draft requirements** with the `job-requirements` agent (`.claude/agents/job-requirements.md`, Haiku). It uses `src/draft_job.py` (`lines`, `apply`, `missed`): quotes are copied from line numbers, terms must be short, the location and degree lines must be covered, and every technology-looking word is covered or skipped with a reason.
+2. **Review** with `src/review_ats.py --job jobs/<slug>/job.json`: report, `interview.json` (prep topics) and `dashboard.html` (one page per job), labelled draft until requirements are reviewed. `--preview` prints the match and compares with the last saved report (verdict: no regression / REGRESSION).
+3. **Tailor** `content.json` within the rules in `.claude/skills/ats-review/SKILL.md` (3 pages, 6 skill rows of 4, experience edits proposed and confirmed first), rebuild, publish. It refuses to run if `template/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting `job.json`'s requirements next.
 
 To check whether the baseline is ready without starting a new application:
 

@@ -22,7 +22,8 @@ PRIORITIES = {"must_have", "preferred"}
 KINDS = {"evidence", "years_experience"}
 STATUSES = {"met", "partial", "missing", "uncertain"}
 OVERRIDE_FIELDS = {"id", "status", "reason", "pdf_quote"}
-FIELDS = {"id", "section", "priority", "quote", "description", "terms", "kind", "min_years", "reviewed", "note"}
+FIELDS = {"id", "section", "priority", "quote", "description", "terms", "kind", "min_years", "reviewed", "note", "targets"}
+TARGETS = {"summary", "skills", "experience"}  # where on the resume the terms should appear
 # Wording that signals a wish, not a gate. A must_have quoting it is an inferred hard gate.
 SOFT_WORDING = re.compile(r"\b(nice to have|a plus|bonus|ideally|preferred|preferably|desirable)\b", re.I)
 
@@ -99,6 +100,10 @@ def validate(job: dict, root: Path = ROOT, draft: bool = False) -> list[dict]:
             for t in terms:
                 if norm(t) not in norm(quote):
                     add("error", "term_not_in_quote", f"term '{t}' is not in the quote; use the posting's exact wording.", rid)
+
+        targets = r.get("targets")
+        if targets is not None and (not isinstance(targets, list) or not targets or set(targets) - TARGETS):
+            add("error", "targets", f"'targets' must be a non-empty list from {sorted(TARGETS)}.", rid)
 
         kind = r.get("kind", "evidence")
         if kind not in KINDS:

@@ -1,0 +1,332 @@
+{
+  "job": "Y Strategie — Senior Front-End Developer",
+  "generated": "2026-11-09",
+  "draft_requirements_unreviewed": 25,
+  "summary": {
+    "prove_claim": 15,
+    "prepare_story": 7,
+    "gap": 3
+  },
+  "how_to_prepare": {
+    "source": "General interview-prep guidance (STAR: situation, task, action, result), the same for every job. Only 'topics' comes from this posting and this resume.",
+    "prepare_story": "Interviewers ask about what's written. Prepare the story behind the line: the situation, what you built, your choices, the result, and what you'd do differently.",
+    "prove_claim": "Your resume only claims this (skills, summary, or some of the terms). Prepare one concrete example that turns the claim into proof: scope, your role, a decision, the result.",
+    "gap": "Not on your resume. Prepare an honest answer: related experience, or how you would learn it."
+  },
+  "topics": [
+    {
+      "id": "R02",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Vue 3 in production",
+      "posting_says": "2+ years working with Vue 3 composition API in production applications",
+      "your_resume_says": [
+        "Vue 3 / Pinia React / Next.js Angular jQuery"
+      ],
+      "terms_not_met": [
+        "Vue 3"
+      ]
+    },
+    {
+      "id": "R05",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Valid, accessible HTML",
+      "posting_says": "Strong understanding of HTML markup Making sure the HTML is valid, confirms wc3 rules and is accessible for users.",
+      "your_resume_says": [
+        "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade"
+      ],
+      "terms_not_met": [
+        "HTML",
+        "accessible"
+      ]
+    },
+    {
+      "id": "R06",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Reusable component libraries or design systems",
+      "posting_says": "Proven experience creating reusable component libraries or design systems",
+      "your_resume_says": [
+        "Tailwind CSS, creating reusable component libraries on Radix UI, in"
+      ],
+      "terms_not_met": [
+        "design systems"
+      ]
+    },
+    {
+      "id": "R07",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Laravel Blade templating",
+      "posting_says": "Laravel Blade templating experience you'll need to navigate and enhance existing Blade views",
+      "your_resume_says": [
+        "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade"
+      ],
+      "terms_not_met": [
+        "Laravel",
+        "Blade"
+      ]
+    },
+    {
+      "id": "R09",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "jQuery",
+      "posting_says": "jQuery experience you'll be migrating it, so you need to understand what you're replacing",
+      "your_resume_says": [
+        "Vue 3 / Pinia React / Next.js Angular jQuery"
+      ],
+      "terms_not_met": [
+        "jQuery"
+      ]
+    },
+    {
+      "id": "R01",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "5+ years of front-end development",
+      "posting_says": "5+ years of professional front end development experience",
+      "your_resume_says": [],
+      "terms_not_met": []
+    },
+    {
+      "id": "R04",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Tailwind CSS",
+      "posting_says": "Strong Tailwind CSS skills building responsive, maintainable UIs at scale",
+      "your_resume_says": [
+        "Tailwind CSS, creating reusable component libraries on Radix UI, in"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R08",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "API development with Laravel or backend collaboration",
+      "posting_says": "API development - comfortable writing Laravel endpoints or strong ability to collaborate with backend developers on API design",
+      "your_resume_says": [
+        "Implemented a Go API service to orchestrate isolated application"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R25",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Role based in Casablanca",
+      "posting_says": "Casablanca, Morocco",
+      "your_resume_says": [
+        "Casablanca, Morocco"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R03",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Vue composition API",
+      "posting_says": "2+ years working with Vue 3 composition API in production applications",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "composition API"
+      ]
+    },
+    {
+      "id": "R10",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Coaching or mentoring developers",
+      "posting_says": "Coaching or mentoring experience supporting junior to mid-level developers",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "Coaching",
+        "mentoring"
+      ]
+    },
+    {
+      "id": "R11",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "JavaScript",
+      "posting_says": "JavaScript/TypeScript (ES6+)",
+      "your_resume_says": [
+        "Skills JavaScript (ES6+) TypeScript PHP Python"
+      ],
+      "terms_not_met": [
+        "JavaScript"
+      ]
+    },
+    {
+      "id": "R13",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "HTML5 and modern CSS/SCSS/SASS",
+      "posting_says": "HTML5 and modern CSS/SCSS/SASS",
+      "your_resume_says": [
+        "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+        "Tailwind CSS, creating reusable component libraries on Radix UI, in"
+      ],
+      "terms_not_met": [
+        "HTML5",
+        "SCSS"
+      ]
+    },
+    {
+      "id": "R14",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Git",
+      "posting_says": "Using Version control Git (how to merge, resolve merge conflicts and create and push branches)",
+      "your_resume_says": [
+        "Vite Git / CI/CD Docker Jest / Vitest / Cypress"
+      ],
+      "terms_not_met": [
+        "Git"
+      ]
+    },
+    {
+      "id": "R15",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "CI/CD",
+      "posting_says": "Git workflow and CI/CD basics",
+      "your_resume_says": [
+        "Vite Git / CI/CD Docker Jest / Vitest / Cypress"
+      ],
+      "terms_not_met": [
+        "CI/CD"
+      ]
+    },
+    {
+      "id": "R17",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Laravel ecosystem incl. Vite",
+      "posting_says": "Experience with Laravel ecosystem (e.g., Laravel Mix, Vite, Sanctum)",
+      "your_resume_says": [
+        "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+        "Vite Git / CI/CD Docker Jest / Vitest / Cypress"
+      ],
+      "terms_not_met": [
+        "Laravel",
+        "Vite"
+      ]
+    },
+    {
+      "id": "R18",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Docker",
+      "posting_says": "Docker/ WAMP/LAMP",
+      "your_resume_says": [
+        "Vite Git / CI/CD Docker Jest / Vitest / Cypress"
+      ],
+      "terms_not_met": [
+        "Docker"
+      ]
+    },
+    {
+      "id": "R19",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Pinia / Vue state management",
+      "posting_says": "Pinia or other Vue state management",
+      "your_resume_says": [
+        "Vue 3 / Pinia React / Next.js Angular jQuery"
+      ],
+      "terms_not_met": [
+        "Pinia",
+        "state management"
+      ]
+    },
+    {
+      "id": "R20",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Accessibility (WCAG)",
+      "posting_says": "Accessibility (WCAG) expertise",
+      "your_resume_says": [
+        "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade"
+      ],
+      "terms_not_met": [
+        "Accessibility",
+        "WCAG"
+      ]
+    },
+    {
+      "id": "R22",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "UI design background",
+      "posting_says": "UI Design experience background",
+      "your_resume_says": [
+        "Figma Tailwind CSS UI Design Prototyping"
+      ],
+      "terms_not_met": [
+        "UI Design"
+      ]
+    },
+    {
+      "id": "R24",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Testing frameworks",
+      "posting_says": "Testing frameworks (Jest, Vitest, or Cypress)",
+      "your_resume_says": [
+        "Vite Git / CI/CD Docker Jest / Vitest / Cypress"
+      ],
+      "terms_not_met": [
+        "Jest",
+        "Vitest",
+        "Cypress"
+      ]
+    },
+    {
+      "id": "R12",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "TypeScript",
+      "posting_says": "JavaScript/TypeScript (ES6+)",
+      "your_resume_says": [
+        "Built and refined the front-end experience in Next.js, TypeScript and"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R21",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "AI application interfaces",
+      "posting_says": "AI/ML application interfaces",
+      "your_resume_says": [
+        "Develop AI agent workflows to automate business decisions for"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R23",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Rapid prototyping",
+      "posting_says": "Able to rapidly prototype",
+      "your_resume_says": [
+        "Designed UI flows and prototypes for Inflauditor to validate product"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R16",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Performance optimisation",
+      "posting_says": "Understanding of performance optimisation techniques",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "performance optimisation"
+      ]
+    }
+  ]
+}

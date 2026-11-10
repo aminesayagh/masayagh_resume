@@ -50,7 +50,8 @@ class ReviewTest(unittest.TestCase):
         rep = run(JOB)
         r = {x["id"]: x for x in rep["results"]}
         self.assertIn("only in your skills list", r["R07"]["suggestion"])
-        self.assertIn("does not appear", r["R10"]["suggestion"])
+        missing = next(x for x in rep["results"] if x["status"] == "missing")  # any: depends on template wording
+        self.assertIn("does not appear", missing["suggestion"])
         self.assertIn("The posting says 'APIs'", r["R02"]["suggestion"])   # wording differs
         self.assertIsNone(r["R12"]["suggestion"])                         # met, exact
 

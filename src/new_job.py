@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """Scaffold a new job application folder from a posting.
 
-Usage: python3 src/new_job.py
+Usage: python3 src/new_job.py --url JOB_URL
+       python3 src/new_job.py [--company NAME] [--title TITLE] [--posting FILE]
 
-Prompts for the company, the job title, and the posting text (paste it, then press
-Ctrl-D). Refuses to run if template/default.json has any unresolved spelling, style
+--url reads the title, company, description and location from the posting page
+(src/fetch_posting.py); --company/--title override what it found.
+
+Prompts for anything not given: the company, the job title, and the posting text
+(paste it, then press Ctrl-D). Refuses to run if template/default.json has any unresolved spelling, style
 or PDF-readability finding — every new application starts from that baseline, so it
 must be clean first. Creates jobs/<company>-<title>-v<N>/ with the posting, a job.json
 skeleton (no requirements yet), a copy of the default content, the built resume, and a
 partial report (no job-matching section until requirements are drafted).
 """
 
+import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -20,6 +26,8 @@ from pathlib import Path
 
 import build_resume
 import check_template
+import dashboard
+import fetch_posting
 import publish_resume
 import review_ats
 
@@ -47,6 +55,16 @@ def next_version(slug: str) -> int:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--company")
+    parser.add_argument("--title")
+    parser.add_argument("--posting", type=Path, help="text file with the job posting")
+    parser.add_argument("--url", help="job posting URL: fills company, title, posting and location")
+    args = parser.parse_args()
+    found = fetch_posting.fetch(args.url) if args.url else {}
+    if found:
+        print(f"Found: {found['title']} at {found['company']}, {found['location'] or 'no location'} ({found['location_match']})")
+
     problems = check_template.check()
     if problems:
         print("template/default.json has unresolved findings; fix those before starting a new job\n"
@@ -55,10 +73,15 @@ def main() -> None:
             print(f"[{f['severity']}] {f['message']}")
         sys.exit(1)
 
-    company = input("Company: ").strip()
-    title = input("Job title: ").strip()
-    print("Paste the job posting, then press Ctrl-D:")
-    posting = sys.stdin.read().strip()
+    company = (args.company or found.get("company") or input("Company: ")).strip()
+    title = (args.title or found.get("title") or input("Job title: ")).strip()
+    if found:
+        posting = f"Source: {found['url']}\nLocation: {found['location']}\n\n{found['description']}"
+    elif args.posting:
+        posting = args.posting.read_text(encoding="utf-8").strip()
+    else:
+        print("Paste the job posting, then press Ctrl-D:")
+        posting = sys.stdin.read().strip()
     if not company or not title or not posting:
         sys.exit("Company, job title and posting text are all required.")
 
@@ -73,6 +96,8 @@ def main() -> None:
     job = {"title": f"{company} — {title}", "posting_file": f"jobs/{folder.name}/posting.txt",
            "pdf_name": pdf_name(name, title, company),
            "company": slugify(company),
+           **({"url": found["url"], "location": found["location"], "location_match": found["location_match"]} if found else {}),
+           "template_sha": hashlib.sha256(content_path.read_bytes()).hexdigest(),
            "requirements": []}
     job_path = folder / "job.json"
     job_path.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -86,6 +111,9 @@ def main() -> None:
     (folder / "review.json").write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     print(f"\nCreated {folder}")
+    if rep.get("job_title") and not rep["job_title"]["match"]:
+        print(f"[warning] {rep['job_title']['message']}")
+    print(f"Dashboard: {dashboard.build(folder)}")
     publish_resume.publish(job_path)
     print(f"Report so far: PDF readability + spelling + style (no job requirements yet, so no matching).")
     print(f"Next: draft {job_path.relative_to(ROOT)}'s requirements from posting.txt (see "

@@ -14,6 +14,7 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from pathlib import Path
 
@@ -133,8 +134,14 @@ def check_contact(content: dict, joined: str, uris: set[str], add, network: bool
                 "icon, if at all). Parsers read text, not icons; write the address out so it is captured.")
         if url.rstrip("/") not in {u.rstrip("/") for u in uris}:
             add("info", "link_not_clickable", f"{key} '{url}' is not a clickable link in the PDF.")
-        if network:
-            check_url(key, url, add)
+
+
+def check_links(urls: set[str], add) -> None:
+    """Open every web link at once (projects, badges, contact); redirects are followed, so a
+    badge counts as working only when its final page does. mailto:/tel: are skipped."""
+    web = sorted(u for u in urls if u.startswith(("http://", "https://")))
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(lambda u: check_url("link", u, add), web))
 
 
 def check_url(key: str, url: str, add) -> None:
@@ -145,7 +152,8 @@ def check_url(key: str, url: str, add) -> None:
     except urllib.error.HTTPError as exc:
         status = exc.code
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        add("warning", "link_unreachable", f"{key} '{url}' could not be opened: {exc}. Check it in a browser.")
+        # info, not warning: being offline must not block src/new_job.py
+        add("info", "link_unreachable", f"{key} '{url}' could not be opened: {exc}. Check it in a browser (or you are offline).")
         return
     if status in (403, 429, 999):  # LinkedIn and others block scripts; not proof the page is broken
         add("info", "link_unverified", f"{key} '{url}' refused an automated check (HTTP {status}); open it in a browser to confirm.")
@@ -235,6 +243,9 @@ def check(pdf: Path, content: dict | None, headings: list[str], network: bool = 
     years = None
     if content:
         check_contact(content, joined, uris, add, network)
+    if network:
+        contact = (content or {}).get("contact", {})
+        check_links(uris | {contact.get(k, "") for k in ("linkedin", "github", "website_link")}, add)
         years = check_dates(content, add)
     check_metadata(reader, pdf, content, add)
 
@@ -254,7 +265,7 @@ def main() -> None:
     parser.add_argument("pdf", nargs="?", type=Path, default=ROOT / "template" / "resume.pdf")
     parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
     parser.add_argument("--out", type=Path, help="JSON report path (default: pdf-check.json next to the PDF)")
-    parser.add_argument("--no-network", action="store_true", help="skip opening the LinkedIn/GitHub/website links")
+    parser.add_argument("--no-network", action="store_true", help="skip opening the links in the PDF")
     args = parser.parse_args()
 
     content_path = args.content or next((p for p in (args.pdf.parent / "content.json", args.pdf.parent / "default.json")

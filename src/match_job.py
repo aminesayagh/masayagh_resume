@@ -112,7 +112,8 @@ def match_term(term: str, lines: list[dict], aliases: dict) -> dict:
         rationale += " A skills-list or summary mention is a claim, not proof of professional experience."
     return {"term": term, "keyword": keyword, "status": status, "method": "exact" if exact else "alias" if alias_hits else None,
             "quote": best["quote"] if best else None, "page": best["page"] if best else None,
-            "section": best["section"] if best else None, "rationale": rationale}
+            "section": best["section"] if best else None, "rationale": rationale,
+            "found_in": sorted({h["section"] for h in hits})}
 
 
 def summarize(terms: list[dict]) -> str:
@@ -163,6 +164,9 @@ def assess(job: dict, pages: list[str], content: dict | None, headings: list[str
             results.append({**base, "keyword": None, **r, "terms": []})
             continue
         terms = [match_term(t, lines, aliases) for t in req["terms"]]
+        for t in terms:  # where the job file wants this term on the resume vs where it is
+            t["missing_from"] = [x for x in req.get("targets", []) if x not in t["found_in"]]
+        base["targets"] = req.get("targets")
         statuses = {t["status"] for t in terms}
         status = ("met" if statuses == {"met"} else "missing" if statuses == {"missing"} else "partial")
         keyword = ("exact" if all(t["keyword"] == "exact" for t in terms) else

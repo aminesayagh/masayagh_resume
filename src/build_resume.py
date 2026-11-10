@@ -21,6 +21,19 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
 TEMPLATE_DIR = ROOT / "template"
 DEFAULT_DATA = TEMPLATE_DIR / "default.json"
+MAX_PAGES = 3  # the user's limit; going over warns, it doesn't fail
+SKILL_ROWS = 6  # languages, 3 rows of development technologies, design tools, AI
+
+
+def skills_problem(skills: list) -> str | None:
+    """The user's limit: 6 rows, and as many skills per row as template/default.json."""
+    template = [len(r) for r in json.loads(DEFAULT_DATA.read_text(encoding="utf-8"))["skills"]]
+    shape = [len(r) for r in skills]
+    if len(shape) != SKILL_ROWS:
+        return f"skills have {len(shape)} rows; the layout is {SKILL_ROWS} (languages, 3x development, design, AI)"
+    if shape != template:
+        return f"skills per row are {shape}; the template's are {template}. Replace skills, don't add or remove"
+    return None
 sys.path.insert(0, str(HERE / "vendor"))
 sys.dont_write_bytecode = True
 import qrcode  # bundled so the resume builds without another installation step
@@ -133,6 +146,12 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
         shutil.move(str(rendered_pdf), pdf_file)
         page_count = match.group(1)
     print(f"Created {pdf_file} ({page_count} pages)")
+    if problem := skills_problem(data["skills"]):
+        print(f"WARNING: {problem}.")
+    if int(page_count) > MAX_PAGES:
+        from pypdf import PdfReader
+        spill = " ".join(PdfReader(pdf_file).pages[-1].extract_text().split())[:160]
+        print(f"WARNING: over {MAX_PAGES} pages. Last page starts with: {spill}")
     return pdf_file
 
 

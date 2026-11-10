@@ -5,7 +5,7 @@ Usage: python3 src/check_spelling.py [template/default.json] [--out report.json]
 
 Every unknown word is a WARNING with suggested fixes, never an error: product names,
 tech terms and proper nouns are often correct even when the dictionary does not know them.
-Add words you have confirmed to src/spelling-allow.txt (one per line) to silence them.
+Add words you have confirmed with --add WORD [WORD ...] (writes src/spelling-allow.txt).
 Always exits 0.
 """
 
@@ -86,11 +86,24 @@ def load_allow() -> set[str]:
     return {l.strip() for l in ALLOW_FILE.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")}
 
 
+def add_allow(words: list[str], path: Path = ALLOW_FILE) -> None:
+    """Append new words, one per line, even if the file lacks a final newline."""
+    text = path.read_text(encoding="utf-8") if path.exists() else ""
+    new = [w for w in dict.fromkeys(words) if w not in text.splitlines()]
+    if new:
+        path.write_text(text + ("\n" if text and not text.endswith("\n") else "") + "\n".join(new) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "default.json")
     parser.add_argument("--out", type=Path, help="JSON report path (default: spelling.json next to the content file)")
+    parser.add_argument("--add", nargs="+", metavar="WORD", help="add confirmed words to src/spelling-allow.txt and exit")
     args = parser.parse_args()
+    if args.add:
+        add_allow(args.add)
+        print(f"Added to {ALLOW_FILE.name}: {', '.join(args.add)}")
+        return
 
     content = json.loads(args.content.read_text(encoding="utf-8"))
     report = check(content, check_pdf.template_headings(check_pdf.TEMPLATE), load_allow())

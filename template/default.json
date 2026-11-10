@@ -23,11 +23,15 @@
       "React / Next.js",
       "Angular",
       "Node.js / NestJS",
-      "Spring Boot",
+      "Spring Boot"
+    ],
+    [
       "FastAPI",
       "WordPress",
       "Odoo",
-      "PostgreSQL",
+      "PostgreSQL"
+    ],
+    [
       "Data scraping",
       "CI/CD",
       "Docker",

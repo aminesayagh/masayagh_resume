@@ -3,9 +3,16 @@
 
 Usage: python3 src/review_ats.py --job jobs/<slug>/job.json [--cv jobs/<slug>/resume.pdf]
                              [--content jobs/<slug>/content.json] [--out jobs/<slug>/review.md] [--no-network]
+       python3 src/review_ats.py --job jobs/<slug>/job.json --preview
+
+--preview prints one line per requirement term (met/partial/missing and the PDF line it
+matched) and writes nothing. It accepts unreviewed requirements, so it works while drafting.
+It then compares against the last saved review.json: what changed, and any regression
+(a term losing status, lower coverage, more pages or findings). Save a new baseline by
+running without --preview.
 
 Runs the spelling, style, PDF-text and job-matching checks and writes a readable Markdown
-report plus a JSON report next to it. Human overrides in the job file ("overrides") are
+report plus a JSON report next to it, and interview.json: one prep topic per requirement. Human overrides in the job file ("overrides") are
 applied, with the automated finding kept visible. This is a tailoring aid: it never
 predicts an employer's ATS score or a hiring outcome.
 Exit code: 0 = report written, 1 = invalid job file, unreadable PDF, or PDF errors.
@@ -13,6 +20,7 @@ Exit code: 0 = report written, 1 = invalid job file, unreadable PDF, or PDF erro
 
 import argparse
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -22,6 +30,7 @@ from pypdf import PdfReader
 import check_job
 import check_pdf
 import check_spelling
+import dashboard
 import check_style
 import match_job
 
@@ -81,6 +90,31 @@ def coverage(results: list[dict], priority: str) -> float | None:
     return round((sum(r["status"] == "met" for r in rs) + 0.5 * sum(r["status"] == "partial" for r in rs)) / len(rs), 2)
 
 
+SENIORITY = {"senior", "sr", "junior", "jr", "lead", "principal", "staff", "mid", "level", "i", "ii", "iii"}
+SAME_ROLE = {"developer": "engineer", "dev": "engineer", "programmer": "engineer"}  # ponytail: extend when a real title needs it
+
+
+def title_core(title: str) -> set[str]:
+    """'Senior Front-End Developer' -> {'front', 'end', 'engineer'}: seniority dropped, developer = engineer."""
+    words = re.findall(r"[a-z0-9]+", title.casefold())
+    return {SAME_ROLE.get(w, w) for w in words if w not in SENIORITY}
+
+
+def title_check(job: dict, content: dict | None) -> dict | None:
+    """Recruiters and ATS searches match the job title first: warn when the resume's role is a different
+    role. Seniority and developer/engineer wording may differ; the role itself (front-end, data...) may not."""
+    if " — " not in job["title"]:  # job titles are "Company — Title"; the template baseline has none
+        return None
+    posting = job["title"].split(" — ", 1)[1].strip()
+    resume = (content or {}).get("role", "")
+    same = bool(title_core(posting)) and title_core(posting) == title_core(resume)
+    return {"posting": posting, "resume": resume, "match": same, "severity": "ok" if same else "warning",
+            "message": f"Resume title '{resume}' matches the posting's '{posting}' (seniority and developer/engineer wording aside)."
+            if same else
+            f"Resume title '{resume}' differs from the posting's title '{posting}'. Recruiters and ATS searches "
+            f"match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you."}
+
+
 def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
     headings = check_pdf.template_headings(check_pdf.TEMPLATE)
     pdf_report = check_pdf.check(pdf, content, headings, network=network)
@@ -97,6 +131,8 @@ def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
     counts = {s: sum(r["status"] == s for r in results) for s in ("met", "partial", "missing", "uncertain")}
     return {
         "title": job["title"], "generated": date.today().isoformat(), "disclaimer": DISCLAIMER,
+        "unreviewed": sum(not r.get("reviewed") for r in job["requirements"]),
+        "job_title": title_check(job, content),
         "pdf_check": pdf_report,
         "spelling": check_spelling.check(content, headings, check_spelling.load_allow()) if content else None,
         "style": check_style.check(content) if content else None,
@@ -105,6 +141,13 @@ def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
         "evidence_coverage": {"version": COVERAGE_VERSION, "formula": COVERAGE_FORMULA,
                               "must_have": coverage(results, "must_have"), "preferred": coverage(results, "preferred")},
     }
+
+
+def placement_gaps(rep: dict) -> list[dict]:
+    """Terms missing from a resume section the job file targets (job.json "targets")."""
+    return [{"id": r["id"], "priority": r["priority"], "term": t["term"], "targets": r["targets"],
+             "found_in": t["found_in"], "missing_from": t["missing_from"]}
+            for r in rep["results"] if r.get("targets") for t in r.get("terms", []) if t.get("missing_from")]
 
 
 def md_requirement(r: dict) -> list[str]:
@@ -132,7 +175,18 @@ def markdown(rep: dict, inputs: dict) -> str:
     L = [f"# ATS review: {rep['title']}", "",
          f"Generated {rep['generated']} from `{inputs['cv']}`, `{inputs['job']}` and `{inputs['content']}`.", "",
          f"> {rep['disclaimer']}", ""]
+    if rep.get("unreviewed"):
+        L += [f"**Draft:** {rep['unreviewed']} requirement(s) not reviewed yet; quotes and priorities may change.", ""]
+    if rep.get("job_title") and not rep["job_title"]["match"]:
+        L += [f"**Warning, job title:** {rep['job_title']['message']}", ""]
 
+    gaps = placement_gaps(rep)
+    if gaps:
+        L += ["## Placement gaps", "", "Terms the job file targets for a resume section where they are not yet found.", "",
+              "| Req | Term | Wanted in | Found in | Missing from |", "|---|---|---|---|---|"]
+        L += [f"| {g['id']} | {g['term']} | {', '.join(g['targets'])} | {', '.join(g['found_in']) or '-'} | "
+              f"{', '.join(g['missing_from'])} |" for g in gaps]
+        L.append("")
     decisions = [f"- **{r['id']}** must-have is **{r['status']}**: {r['description']}" for r in must if r["status"] != "met"]
     decisions += [f"- **{r['id']}** override is **stale**: re-check it against the current PDF" for r in results
                   if r.get("override", {}).get("stale")]
@@ -167,17 +221,101 @@ def markdown(rep: dict, inputs: dict) -> str:
     return "\n".join(L)
 
 
+def print_preview(rep: dict) -> None:
+    for r in rep["results"]:
+        print(f"{r['id']} {r['priority']:<9} {r['status']:<9} {r.get('description', '')}")
+        for t in r.get("terms", []):
+            quote = f'  "{t["quote"][:70]}"' if t.get("quote") else ""
+            print(f"    {t['term']}: {t['status']} ({t['keyword']}){quote}")
+    for g in placement_gaps(rep):
+        print(f"  placement: {g['id']} {g['term']} missing from {', '.join(g['missing_from'])} "
+              f"(found in {', '.join(g['found_in']) or 'nothing'})")
+    spelling = len(rep["spelling"]["findings"])
+    pdf = sum(f["severity"] != "info" for f in rep["pdf_check"]["findings"])
+    cov = rep["evidence_coverage"]
+    if rep.get("job_title") and not rep["job_title"]["match"]:
+        print(f"\n[warning] {rep['job_title']['message']}")
+    print(f"\nPreview, nothing written. Spelling warnings: {spelling}. PDF errors/warnings: {pdf}.")
+    print(f"Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} "
+          f"= {cov['formula']} (not an ATS score)")
+
+
+FOCUS = {"met": "prepare_story", "partial": "prove_claim", "uncertain": "prove_claim", "missing": "gap"}
+HOW_TO_PREPARE = {
+    "source": "General interview-prep guidance (STAR: situation, task, action, result), the same for every job. "
+              "Only 'topics' comes from this posting and this resume.",
+    "prepare_story": "Interviewers ask about what's written. Prepare the story behind the line: the situation, "
+                     "what you built, your choices, the result, and what you'd do differently.",
+    "prove_claim": "Your resume only claims this (skills, summary, or some of the terms). Prepare one concrete "
+                   "example that turns the claim into proof: scope, your role, a decision, the result.",
+    "gap": "Not on your resume. Prepare an honest answer: related experience, or how you would learn it.",
+}
+
+
+def interview(rep: dict, job: dict) -> dict:
+    """Prep sheet: the review's facts per requirement, most important first. No generated advice."""
+    posting = {q["id"]: q.get("quote", "") for q in job.get("requirements", [])}
+    order = {"prove_claim": 0, "prepare_story": 1, "gap": 2}
+    topics = [{"id": r["id"], "priority": r["priority"], "focus": FOCUS[r["status"]],
+               "requirement": r.get("description", ""), "posting_says": posting.get(r["id"], ""),
+               "your_resume_says": list(dict.fromkeys(t["quote"] for t in r.get("terms", []) if t.get("quote"))),
+               "terms_not_met": [t["term"] for t in r.get("terms", []) if t["status"] != "met"]}
+              for r in rep["results"]]
+    topics.sort(key=lambda t: (t["priority"] != "must_have", order[t["focus"]]))
+    return {"job": rep["title"], "generated": rep["generated"], "draft_requirements_unreviewed": rep.get("unreviewed", 0),
+            "summary": {f: sum(t["focus"] == f for t in topics) for f in order},
+            "how_to_prepare": HOW_TO_PREPARE, "topics": topics}
+
+
+RANK = {"missing": 0, "uncertain": 0, "partial": 1, "met": 2}
+
+
+def summary(rep: dict) -> dict:
+    """The numbers compared between a saved report and a preview."""
+    return {"terms": {(r["id"], t["term"]): t["status"] for r in rep["results"] for t in r.get("terms", [])},
+            "must_have": rep["evidence_coverage"]["must_have"], "preferred": rep["evidence_coverage"]["preferred"],
+            "pages": len(rep["pdf_check"]["pages"]), "spelling": len(rep["spelling"]["findings"]),
+            "pdf": sum(f["severity"] != "info" for f in rep["pdf_check"]["findings"]),
+            "title_mismatch": int(bool(rep.get("job_title") and not rep["job_title"]["match"]))}
+
+
+def compare(old: dict, new: dict) -> tuple[list[str], list[str]]:
+    """(changes, regressions) between two summary() results."""
+    changes, regressions = [], []
+    for key, status in new["terms"].items():
+        before = old["terms"].get(key)
+        if before is not None and before != status:
+            line = f"{key[0]} {key[1]}: {before} → {status}"
+            changes.append(line)
+            if RANK[status] < RANK[before]:
+                regressions.append(line)
+    for k in ("must_have", "preferred"):
+        if (old[k] or 0) != (new[k] or 0):
+            changes.append(f"{k} coverage {old[k]} → {new[k]}")
+            if (new[k] or 0) < (old[k] or 0):
+                regressions.append(f"{k} coverage {old[k]} → {new[k]}")
+    for k in ("pages", "spelling", "pdf", "title_mismatch"):
+        if old.get(k, 0) != new.get(k, 0):
+            changes.append(f"{k} {old.get(k, 0)} → {new.get(k, 0)}")
+            if new.get(k, 0) > old.get(k, 0):
+                regressions.append(f"{k} {old.get(k, 0)} → {new.get(k, 0)}")
+    return changes, regressions
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--job", type=Path, required=True)
     parser.add_argument("--cv", type=Path, help="resume PDF (default: the job file's pdf_name, else resume.pdf, next to it)")
     parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
     parser.add_argument("--out", type=Path, help="Markdown report (default: review.md next to the job file); JSON is saved beside it")
-    parser.add_argument("--no-network", action="store_true", help="skip opening the LinkedIn/GitHub/website links")
+    parser.add_argument("--no-network", action="store_true", help="skip opening the links in the PDF")
+    parser.add_argument("--preview", action="store_true",
+                        help="print the match per requirement and write no report; unreviewed requirements allowed")
     args = parser.parse_args()
 
     job = json.loads(args.job.read_text(encoding="utf-8"))
-    problems = [f for f in check_job.validate(job) if f["severity"] == "error"]
+    # Unreviewed requirements are allowed; the report is then labelled draft everywhere.
+    problems = [f for f in check_job.validate(job, draft=True) if f["severity"] == "error"]
     if problems:
         print(f"The job file is not valid; fix it first (python3 src/check_job.py {args.job}):")
         for f in problems:
@@ -188,6 +326,18 @@ def main() -> None:
                                           if p.exists()), cv.parent / "content.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
 
+    if args.preview:
+        rep = review(job, cv, content, network=False)
+        print_preview(rep)
+        saved = args.job.parent / "review.json"
+        if not saved.exists():
+            print("No saved review.json to compare with; run without --preview to save a baseline.")
+            return
+        changes, regressions = compare(summary(json.loads(saved.read_text(encoding="utf-8"))), summary(rep))
+        print(f"\nCompared with {rel(saved)}:")
+        print("\n".join(f"  {c}" for c in changes) or "  no change")
+        print(f"Verdict: {'REGRESSION: ' + '; '.join(regressions) if regressions else 'no regression'}")
+        return
     rep = review(job, cv, content, network=not args.no_network)
     inputs = {"cv": rel(cv), "job": rel(args.job), "content": rel(content_path) if content else "no content file"}
     md_path = args.out or args.job.parent / "review.md"
@@ -195,15 +345,22 @@ def main() -> None:
     md_path.write_text(markdown(rep, inputs), encoding="utf-8")
     rep["pdf_check"]["pdf"] = inputs["cv"]
     md_path.with_suffix(".json").write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    interview_path = md_path.parent / "interview.json"
+    interview_path.write_text(json.dumps(interview(rep, job), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     c, cov = rep["counts"], rep["evidence_coverage"]
     errors = sum(f["severity"] == "error" for f in rep["pdf_check"]["findings"])
     print(f"{rep['title']}\n  PDF: {errors} error(s), "
           f"{sum(f['severity'] == 'warning' for f in rep['pdf_check']['findings'])} warning(s)")
+    if rep.get("unreviewed"):
+        print(f"  Draft: {rep['unreviewed']} requirement(s) not reviewed yet; quotes and priorities may change.")
+    if rep.get("job_title") and not rep["job_title"]["match"]:
+        print(f"  [warning] {rep['job_title']['message']}")
     print(f"  Requirements: {c['met']} met, {c['partial']} partial, {c['missing']} missing, {c['uncertain']} uncertain "
           f"({rep['overridden']} overridden)")
     print(f"  Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} (not an ATS score)")
-    print(f"  Report: {rel(md_path)} (+ .json)")
+    print(f"  Report: {rel(md_path)} (+ .json); interview prep: {rel(interview_path)}")
+    print(f"  Dashboard: {rel(dashboard.build(args.job.parent))}")
     sys.exit(1 if errors or not rep["pdf_check"]["pages"] else 0)
 
 
