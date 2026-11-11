@@ -8,10 +8,10 @@
     "_clone": "git: a clone only the pipeline touches; default <repo>-publish next to the repo",
     "branch": "main",
     "folder": "~/Public/resumes",
-    "path": "public/resume/{company}/{version}{file}",
-    "_path": "where each file goes inside the repo or folder; {version} is empty for v1, 'v2/' for v2",
+    "path": "public/resume/{company}/{file}",
+    "_path": "where each file goes inside the repo or folder; every version of an application goes to the same place",
     "site": "https://example.com",
-    "url": "{site}/resume/{company}/{version}{file}",
+    "url": "{site}/resume/{company}/{file}",
     "_url": "the public link of each file, recorded on the offer; leave '' if files aren't served anywhere"
   }
 }

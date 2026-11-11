@@ -268,6 +268,13 @@ CREATE TABLE languages (
 INSERT INTO "languages" VALUES(1,1,'Arabic','Arabe','Native','Langue maternelle');
 INSERT INTO "languages" VALUES(2,2,'French','Français','Professional','Professionnel');
 INSERT INTO "languages" VALUES(3,3,'English','Anglais','Professional','Professionnel');
+CREATE TABLE offer_lines (
+  offer_id INTEGER NOT NULL REFERENCES offers(id),
+  experience_id INTEGER NOT NULL REFERENCES experiences(id),
+  position INTEGER NOT NULL,
+  description_id INTEGER NOT NULL REFERENCES descriptions(id),
+  PRIMARY KEY (offer_id, experience_id, position)
+);
 CREATE TABLE offer_results (
   offer_id INTEGER NOT NULL REFERENCES offers(id),
   requirement_id INTEGER NOT NULL REFERENCES requirements(id),
@@ -487,6 +494,43 @@ INSERT INTO "offer_results" VALUES(5,286,'component library','missing',NULL,NULL
 INSERT INTO "offer_results" VALUES(5,287,'accessibility','partial','skills',NULL,'2026-11-11');
 INSERT INTO "offer_results" VALUES(5,287,'performance','met','experience',NULL,'2026-11-11');
 INSERT INTO "offer_results" VALUES(5,288,'Casablanca','met','header',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(2,289,'Casablanca','met','header',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,290,'Casablanca','met','header',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,291,'Tech Lead','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,292,'conception','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,293,'équipe de développement','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,294,'qualité','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,295,'articles de blog','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,295,'formations','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,296,'veille technique','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,296,'craftsmanship','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,297,'école d''ingénieur','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,299,'développement de logiciels','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,300,'fullstack','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(3,302,'gestion d’une équipe','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,303,'Fullstack','met','header',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,304,'déploiement','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,305,'tests','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,305,'refactoring','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,306,'débugger','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,307,'résolution de problèmes','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,308,'LLM','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,309,'Java','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,309,'Spring Boot','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,310,'Angular','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,311,'Node','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,311,'Nest','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,312,'React','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,312,'Next','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,313,'Python','partial','skills',NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,314,'école d’ingénieur','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,315,'revues de code','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,315,'pair programming','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,316,'IA','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,316,'GenAI','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,316,'veille technique','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,317,'qualité','missing',NULL,NULL,'2026-11-11');
+INSERT INTO "offer_results" VALUES(1,318,'amélioration continue','missing',NULL,NULL,'2026-11-11');
 CREATE TABLE offers (
   id INTEGER PRIMARY KEY,
   company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -506,8 +550,8 @@ CREATE TABLE offers (
   created_at TEXT NOT NULL,
   sent_at TEXT,
   previous_offer_id INTEGER REFERENCES offers(id)
-, company_slug TEXT, template_sha TEXT, skipped_terms TEXT);
-INSERT INTO "offers" VALUES(1,12,'Software Engineer',NULL,'jobs/theodo-software-engineer-fullstack-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','https://www.masayagh.com/resume/theodo/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf',NULL,NULL,'fr',0,NULL,NULL,'L’histoire du groupe Theodo et son succès
+, company_slug TEXT, template_sha TEXT, skipped_terms TEXT, composed_at TEXT);
+INSERT INTO "offers" VALUES(1,12,'Software Engineer',NULL,'jobs/theodo-software-engineer-fullstack-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','https://www.masayagh.com/resume/theodo/Mohamed-Amine-Sayagh-Software-Engineer-Fullstack-Theodo.pdf',NULL,'2026-11-06','fr',0,NULL,NULL,'L’histoire du groupe Theodo et son succès
 Theodo accompagne depuis 2009 les entreprises innovantes dans la conception, le développement et le déploiement de produits digitaux ingénieux - tels que la plateforme TF1+, l''application LCL Pro ou l''application France Identité Numérique - en tirant parti du meilleur de la technologie et de l’approche Lean.
  
 Theodo connait une croissance exceptionnelle depuis 15 ans : nos équipes rassemblent plus de 750 Theodoers, principalement des Software Engineers, passionnés de technologie et d’amélioration continue. En 2025, le groupe Theodo génère 100M€ de CA.
@@ -583,8 +627,8 @@ Le package :
 🧒 Aides et places en crèche réservées
  
 Prêt à nous rejoindre ?
-','sent','2026-11-06','2026-11-11',NULL,'theodo',NULL,'{}');
-INSERT INTO "offers" VALUES(2,13,'Software Engineer',NULL,'jobs/theodo-software-engineer-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','https://www.masayagh.com/resume/theodo/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf',NULL,NULL,'fr',0,NULL,NULL,'L’histoire du groupe Theodo et son succès
+','sent','2026-11-06','2026-11-11',NULL,'theodo',NULL,'{"CA": "company introduction, not a requirement", "En 2025": "company introduction, not a requirement", "Engineers": "company introduction, not a requirement", "France": "company introduction, not a requirement", "LCL": "company introduction, not a requirement", "TF1": "company introduction, not a requirement", "Theodo": "company introduction, not a requirement", "Theodoer": "company introduction, not a requirement", "Theodoers": "company introduction, not a requirement", "Software": "company introduction, not a requirement", "Engineer": "company introduction, not a requirement", "Lead": "company introduction, not a requirement", "Manager": "company introduction, not a requirement", "Product": "company introduction, not a requirement", "Des": "company introduction, not a requirement", "Chaque": "company introduction, not a requirement", "iDealwine": "company introduction, not a requirement", "System": "company introduction, not a requirement", "Actionnariat": "benefit or career perk, not a requirement", "Ada": "benefit or career perk, not a requirement", "Article 1": "benefit or career perk, not a requirement", "cross-entités": "benefit or career perk, not a requirement", "CSE": "benefit or career perk, not a requirement", "Epsor": "benefit or career perk, not a requirement", "Fondation": "benefit or career perk, not a requirement", "GreenIT": "benefit or career perk, not a requirement", "Gymlib": "benefit or career perk, not a requirement", "Lean": "benefit or career perk, not a requirement", "Participation": "benefit or career perk, not a requirement", "Performance": "benefit or career perk, not a requirement", "Phoenix": "benefit or career perk, not a requirement", "Rejoindre": "benefit or career perk, not a requirement", "School": "benefit or career perk, not a requirement", "Serverless": "benefit or career perk, not a requirement"}',NULL);
+INSERT INTO "offers" VALUES(2,13,'Software Engineer','https://jobs.lever.co/theodo/8f75eabb-5b64-4920-9630-1007429d1c9e','jobs/theodo-software-engineer-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','https://www.masayagh.com/resume/theodo/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf',NULL,'2026-11-08','fr',0,'Casablanca, Morocco','same city','L’histoire du groupe Theodo et son succès
 Theodo accompagne depuis 2009 les entreprises innovantes dans la conception, le développement et le déploiement de produits digitaux ingénieux - tels que la plateforme TF1+, l''application LCL Pro ou l''application France Identité Numérique - en tirant parti du meilleur de la technologie et de l’approche Lean.
  
  
@@ -611,8 +655,8 @@ Chez Theodo Morocco, l’amélioration continue est au cœur de notre culture. D
 - Des perspectives de carrière : développez vos compétences techniques et transversales (coaching, marketing technique, recrutement) et accédez à des opportunités d’évolution vers des rôles de leadership.
  
 Prêt à nous rejoindre ?
-','sent','2026-11-08','2026-11-11',NULL,'theodo',NULL,'{}');
-INSERT INTO "offers" VALUES(3,13,'Software Engineer',NULL,'jobs/theodo-software-engineer-v2','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','https://www.masayagh.com/resume/theodo/v2/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf',NULL,NULL,'fr',0,NULL,NULL,'L’histoire du groupe Theodo et son succès
+','sent','2026-11-08','2026-11-11',NULL,'theodo',NULL,'{"CTO": "company introduction, not a requirement", "En 2019": "company introduction, not a requirement", "En 2025": "company introduction, not a requirement", "Engineers": "company introduction, not a requirement", "France": "company introduction, not a requirement", "LCL": "company introduction, not a requirement", "Londres": "company introduction, not a requirement", "Maroc": "company introduction, not a requirement", "Morocco": "company introduction, not a requirement", "Nimbleways": "company introduction, not a requirement", "Paris": "company introduction, not a requirement", "Pro": "company introduction, not a requirement", "TF1": "company introduction, not a requirement", "Theodo": "company introduction, not a requirement", "Theodoers": "company introduction, not a requirement", "UK": "company introduction, not a requirement", "Software": "company introduction, not a requirement", "GreenIT": "benefit or career perk, not a requirement", "Lean": "benefit or career perk, not a requirement", "Serverless": "benefit or career perk, not a requirement"}',NULL);
+INSERT INTO "offers" VALUES(3,13,'Software Engineer',NULL,'jobs/theodo-software-engineer-v2','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','https://www.masayagh.com/resume/theodo/Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf',NULL,'2026-11-09','fr',0,'Casablanca, Morocco','same city','L’histoire du groupe Theodo et son succès
 Theodo accompagne depuis 2009 les entreprises innovantes dans la conception, le développement et le déploiement de produits digitaux ingénieux - tels que la plateforme TF1+, l''application LCL Pro ou l''application France Identité Numérique - en tirant parti du meilleur de la technologie et de l’approche Lean.
  
  
@@ -658,8 +702,8 @@ Chez Theodo Morocco, l’amélioration continue est au cœur de notre culture. D
 - Des perspectives de carrière : développez vos compétences techniques et transversales (coaching, marketing technique, recrutement) et accédez à des opportunités d’évolution vers des rôles de leadership.
  
 Prêt à nous rejoindre ?
-','sent','2026-11-08','2026-11-11',NULL,'theodo','dfcf8ca573bf37c22de25c4f50f025b39c716ee3dc3b1083f35b37f4fea076c5','{}');
-INSERT INTO "offers" VALUES(4,14,'Senior Manager, Platform Software Engineering',NULL,'jobs/oracle-senior-manager-platform-software-engineering-v1','Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf','https://www.masayagh.com/resume/oracle/Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf',NULL,NULL,'en',0,NULL,NULL,'Job Description
+','sent','2026-11-08','2026-11-11',2,'theodo','dfcf8ca573bf37c22de25c4f50f025b39c716ee3dc3b1083f35b37f4fea076c5','{"CTO": "company introduction, not a requirement", "Depuis 7": "company introduction, not a requirement", "En 2019": "company introduction, not a requirement", "En 2025": "company introduction, not a requirement", "Engineers": "company introduction, not a requirement", "France": "company introduction, not a requirement", "LCL": "company introduction, not a requirement", "Londres": "company introduction, not a requirement", "Maroc": "company introduction, not a requirement", "Morocco": "company introduction, not a requirement", "Nimbleways": "company introduction, not a requirement", "Paris": "company introduction, not a requirement", "Pro": "company introduction, not a requirement", "TF1": "company introduction, not a requirement", "Theodo": "company introduction, not a requirement", "Theodoers": "company introduction, not a requirement", "UK": "company introduction, not a requirement", "Software": "company introduction, not a requirement", "GreenIt": "benefit or career perk, not a requirement", "Lean": "benefit or career perk, not a requirement", "Serverless": "benefit or career perk, not a requirement", "Performance": "benefit or career perk, not a requirement"}',NULL);
+INSERT INTO "offers" VALUES(4,14,'Senior Manager, Platform Software Engineering',NULL,'jobs/oracle-senior-manager-platform-software-engineering-v1','Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf','https://www.masayagh.com/resume/oracle/Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf',NULL,'2026-11-09','en',0,NULL,NULL,'Job Description
 Leads one or more platform teams; defines tactical and key strategic elements for middleware evolution serving multiple consumers. Accountable for performance, cost control, and reliability outcomes; escalations for distributed debugging and upgrade safety. Drives significant cross-team improvements to observability, SLOs, and resilience patterns. Engages stakeholders inside and outside the group; socializes migration plans and adoption playbooks.
 Responsibilities
 We are looking for a Senior Manager of Software Development to build, lead and develop a multidisciplinary engineering team in Morocco.
@@ -752,8 +796,8 @@ Application Platforms
 Platform Development
 Software Management
 Software Platform Development
-','sent','2026-11-09','2026-11-11',NULL,'oracle',NULL,'{}');
-INSERT INTO "offers" VALUES(5,15,'Senior Front-End Developer','https://ystrategie.teamtailor.com/jobs/8670374-senior-front-end-developer','jobs/y-strategie-senior-front-end-developer-v1','Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf','https://www.masayagh.com/resume/y-strategie/Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf',NULL,NULL,'en',0,'Casablanca, Morocco','same city','Source: https://ystrategie.teamtailor.com/jobs/8670374-senior-front-end-developer
+','sent','2026-11-09','2026-11-11',NULL,'oracle',NULL,'{}',NULL);
+INSERT INTO "offers" VALUES(5,15,'Senior Front-End Developer','https://ystrategie.teamtailor.com/jobs/8670374-senior-front-end-developer','jobs/y-strategie-senior-front-end-developer-v1','Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf','https://www.masayagh.com/resume/y-strategie/Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf',NULL,'2026-11-11','en',0,'Casablanca, Morocco','same city','Source: https://ystrategie.teamtailor.com/jobs/8670374-senior-front-end-developer
 Location: Casablanca, Morocco
 
 The Role
@@ -820,8 +864,8 @@ Desirable (Nice to Have)
 · UX Making sure the experience for the user is as slick as possible
 · Able to rapidly prototype
 · Testing frameworks (Jest, Vitest, or Cypress)
-','sent','2026-11-09','2026-11-11',NULL,'y-strategie','31dbade20293397aa6b1c43e776afedcfd5edd33e96411cc264be9e678293ba7','{"CDO": "company context (reporting line), not a skill", "Digital": "company context, not a skill", "Transformation": "company context (Digital Transformation Manager title), not a skill", "Manager": "reporting-line title, not a skill", "Developer": "role title, handled by the title check", "Development": "role title, handled by the title check", "Senior": "seniority, handled by the title check", "Front": "role title, covered by the front-end years requirement", "FE": "abbreviation of front end, covered by the years requirement", "Experience": "generic word from ''experience'' wording, not a technology", "jQuery-based": "adjective for the legacy code, covered by the jQuery requirement", "Version": "part of ''Version control Git'', covered by the Git requirement", "UIs": "generic word from the Tailwind line, covered by Tailwind CSS", "Making": "word from the HTML line''s prose, no technology"}');
-INSERT INTO "offers" VALUES(6,14,'Software Development Manager','https://careers.oracle.com/en/sites/jobsearch/job/344557/?utm_source=external%20referral&utm_medium=referral','jobs/oracle-software-development-manager-v1','Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf','https://www.masayagh.com/resume/oracle/Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf',NULL,NULL,'en',0,'Casablanca, Morocco','same city','Source: https://careers.oracle.com/en/sites/jobsearch/job/344557/?utm_source=external%20referral&utm_medium=referral
+','sent','2026-11-09','2026-11-11',NULL,'y-strategie','31dbade20293397aa6b1c43e776afedcfd5edd33e96411cc264be9e678293ba7','{"CDO": "company context (reporting line), not a skill", "Digital": "company context, not a skill", "Transformation": "company context (Digital Transformation Manager title), not a skill", "Manager": "reporting-line title, not a skill", "Developer": "role title, handled by the title check", "Development": "role title, handled by the title check", "Senior": "seniority, handled by the title check", "Front": "role title, covered by the front-end years requirement", "FE": "abbreviation of front end, covered by the years requirement", "Experience": "generic word from ''experience'' wording, not a technology", "jQuery-based": "adjective for the legacy code, covered by the jQuery requirement", "Version": "part of ''Version control Git'', covered by the Git requirement", "UIs": "generic word from the Tailwind line, covered by Tailwind CSS", "Making": "word from the HTML line''s prose, no technology"}',NULL);
+INSERT INTO "offers" VALUES(6,14,'Software Development Manager','https://careers.oracle.com/en/sites/jobsearch/job/344557/?utm_source=external%20referral&utm_medium=referral','jobs/oracle-software-development-manager-v1','Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf','https://www.masayagh.com/resume/oracle/Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf',NULL,'2026-11-10','en',0,'Casablanca, Morocco','same city','Source: https://careers.oracle.com/en/sites/jobsearch/job/344557/?utm_source=external%20referral&utm_medium=referral
 Location: Casablanca, Morocco
 
 We are seeking an experienced Software Development Manager to lead and scale a multidisciplinary engineering organization of 30+ engineers at our Morocco Development Center. This leader will be accountable for people leadership, engineering execution, operational excellence, and talent development across work spanning Oracle Support, Oracle Operations, AI data platforms, AI-enabled capabilities, and related software engineering initiatives.
@@ -883,8 +927,8 @@ Preferred Qualifications
 - Experience with workforce planning, organizational design, and budget management.
 
 Career Level - M2
-','sent','2026-11-10','2026-11-11',NULL,'oracle','9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f','{"AI-enabled": "product-area description in the intro (Oracle AI-enabled capabilities), not a skill the candidate uses", "AI-related": "appears in the Required line about delivering initiatives; covered by the delivery requirement wording, no tool named", "and/or": "grammar word, not a technology", "Center": "part of the location name ''Morocco Development Center''", "Development": "title and location words, handled by the title check", "Manager": "seniority/title word, handled by the title check", "Operations": "Oracle Operations is a product area in the intro, not a tool", "Software": "title word, handled by the title check", "Morocco": "covered by the Casablanca location requirement", "Support": "part of the product name ''Oracle Support'', covered by Oracle products"}');
-INSERT INTO "offers" VALUES(7,14,'Senior AI Software Engineer','https://careers.oracle.com/en/sites/jobsearch/job/338502/?utm_source=external%20referral&utm_medium=referral','jobs/oracle-senior-ai-software-engineer-v1','Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf','https://www.masayagh.com/resume/oracle/Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf',NULL,NULL,'en',0,'Casablanca, Morocco','same city','Source: https://careers.oracle.com/en/sites/jobsearch/job/338502/?utm_source=external%20referral&utm_medium=referral
+','sent','2026-11-10','2026-11-11',NULL,'oracle','9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f','{"AI-enabled": "product-area description in the intro (Oracle AI-enabled capabilities), not a skill the candidate uses", "AI-related": "appears in the Required line about delivering initiatives; covered by the delivery requirement wording, no tool named", "and/or": "grammar word, not a technology", "Center": "part of the location name ''Morocco Development Center''", "Development": "title and location words, handled by the title check", "Manager": "seniority/title word, handled by the title check", "Operations": "Oracle Operations is a product area in the intro, not a tool", "Software": "title word, handled by the title check", "Morocco": "covered by the Casablanca location requirement", "Support": "part of the product name ''Oracle Support'', covered by Oracle products"}',NULL);
+INSERT INTO "offers" VALUES(7,14,'Senior AI Software Engineer','https://careers.oracle.com/en/sites/jobsearch/job/338502/?utm_source=external%20referral&utm_medium=referral','jobs/oracle-senior-ai-software-engineer-v1','Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf','https://www.masayagh.com/resume/oracle/Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf',NULL,'2026-11-11','en',0,'Casablanca, Morocco','same city','Source: https://careers.oracle.com/en/sites/jobsearch/job/338502/?utm_source=external%20referral&utm_medium=referral
 Location: Casablanca, Morocco
 
 We are looking for a senior engineer with strong coding ability, sound technical judgment, and the ability to lead engineering work from design through delivery. The ideal candidate is comfortable owning complex technical areas, reviewing code, mentoring others, and driving execution across teams.
@@ -925,8 +969,8 @@ Preferred Qualifications
 
 As a member of the software engineering division, you will assist in defining and developing software for tasks associated with the developing, debugging or designing of software applications or operating systems. Provide technical leadership to other software developers. Specify, design and implement modest changes to existing software architecture to meet changing needs.
 Career Level - IC3
-','sent','2026-11-10','2026-11-11',NULL,'oracle','9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f','{"MADC": "employer division name, not a skill", "Oracle": "employer name, not a skill", "Senior": "seniority, handled by the title check", "Master": "degree level, covered by the degree requirement on line 17"}');
-INSERT INTO "offers" VALUES(8,16,'Senior AI Engineer / Java Spring Boot (H/F)','https://www.linkedin.com/jobs/view/4489607316?_l=en_US','jobs/cgi-senior-ai-engineer-java-spring-boot-h-f-v1','Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf','https://www.masayagh.com/resume/cgi/Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf',NULL,NULL,'fr',1,'Casablanca, Morocco','same city','Source: https://www.linkedin.com/jobs/view/4489607316?_l=en_US
+','sent','2026-11-10','2026-11-11',NULL,'oracle','9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f','{"MADC": "employer division name, not a skill", "Oracle": "employer name, not a skill", "Senior": "seniority, handled by the title check", "Master": "degree level, covered by the degree requirement on line 17"}',NULL);
+INSERT INTO "offers" VALUES(8,16,'Senior AI Engineer / Java Spring Boot (H/F)','https://www.linkedin.com/jobs/view/4489607316?_l=en_US','jobs/cgi-senior-ai-engineer-java-spring-boot-h-f-v1','Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf','https://www.masayagh.com/resume/cgi/Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf',NULL,'2026-11-11','fr',1,'Casablanca, Morocco','same city','Source: https://www.linkedin.com/jobs/view/4489607316?_l=en_US
 Location: Casablanca, Morocco
 
 Description de poste
@@ -1004,7 +1048,7 @@ Vous ferez évoluer votre carrière en vous joignant à une entreprise bâtie po
 Ce même engagement envers l’équité s’étend à notre utilisation des technologies. Afin de soutenir notre équipe de recrutement, des outils d’IA peuvent être utilisés pour aider à l’évaluation des candidatures, sans jamais remplacer le jugement humain. Toutes les décisions d’embauche demeurent entièrement entre les mains de nos professionnels du recrutement.
 
 Joignez-vous à nous, l’une des plus importantes entreprises de conseil en technologie de l’information (TI) et en management au monde.
-','sent','2026-11-11','2026-11-11',NULL,'cgi','f3335ecb511d9b8dde24a9b92287bb5825b7ebf9084420c6201fceca3ab4a401','{"Bac+5": "degree level, covered by the degree requirement on line 19", "Minimum 10": "covered by the 10+ years years_experience pick", "Minimum 2": "covered by the 2+ years years_experience pick", "Senior": "seniority, handled by the title check", "Engineer": "job title, handled by the title check", "CGI": "company name, not a skill", "Joignez-vous": "company introduction wording", "bien-être": "company culture and benefits line (33 onward), skipped"}');
+','sent','2026-11-11','2026-11-11',NULL,'cgi','f3335ecb511d9b8dde24a9b92287bb5825b7ebf9084420c6201fceca3ab4a401','{"Bac+5": "degree level, covered by the degree requirement on line 19", "Minimum 10": "covered by the 10+ years years_experience pick", "Minimum 2": "covered by the 2+ years years_experience pick", "Senior": "seniority, handled by the title check", "Engineer": "job title, handled by the title check", "CGI": "company name, not a skill", "Joignez-vous": "company introduction wording", "bien-être": "company culture and benefits line (33 onward), skipped"}',NULL);
 CREATE TABLE profile (id INTEGER PRIMARY KEY, key TEXT NOT NULL UNIQUE, text_en TEXT NOT NULL, text_fr TEXT);
 INSERT INTO "profile" VALUES(1,'summary','Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted development to turn inefficient workflows into practical tools that help teams get more done. Looking to join a team that ships products at scale.','Développeur logiciel qui conçoit des expériences produit simplifiant des processus complexes. J''allie ingénierie, design visuel, sens métier et développement assisté par l''IA pour transformer des workflows inefficaces en outils concrets qui rendent les équipes plus efficaces. Je souhaite rejoindre une équipe qui livre des produits à grande échelle.');
 INSERT INTO "profile" VALUES(2,'role','Software Engineer','Ingénieur logiciel');
@@ -1236,6 +1280,43 @@ INSERT INTO "requirement_terms" VALUES(286,'component library',NULL);
 INSERT INTO "requirement_terms" VALUES(287,'accessibility',1);
 INSERT INTO "requirement_terms" VALUES(287,'performance',NULL);
 INSERT INTO "requirement_terms" VALUES(288,'Casablanca',NULL);
+INSERT INTO "requirement_terms" VALUES(289,'Casablanca',NULL);
+INSERT INTO "requirement_terms" VALUES(290,'Casablanca',NULL);
+INSERT INTO "requirement_terms" VALUES(291,'Tech Lead',NULL);
+INSERT INTO "requirement_terms" VALUES(292,'conception',NULL);
+INSERT INTO "requirement_terms" VALUES(293,'équipe de développement',NULL);
+INSERT INTO "requirement_terms" VALUES(294,'qualité',NULL);
+INSERT INTO "requirement_terms" VALUES(295,'articles de blog',NULL);
+INSERT INTO "requirement_terms" VALUES(295,'formations',NULL);
+INSERT INTO "requirement_terms" VALUES(296,'veille technique',NULL);
+INSERT INTO "requirement_terms" VALUES(296,'craftsmanship',NULL);
+INSERT INTO "requirement_terms" VALUES(297,'école d''ingénieur',NULL);
+INSERT INTO "requirement_terms" VALUES(299,'développement de logiciels',NULL);
+INSERT INTO "requirement_terms" VALUES(300,'fullstack',NULL);
+INSERT INTO "requirement_terms" VALUES(302,'gestion d’une équipe',NULL);
+INSERT INTO "requirement_terms" VALUES(303,'Fullstack',NULL);
+INSERT INTO "requirement_terms" VALUES(304,'déploiement',NULL);
+INSERT INTO "requirement_terms" VALUES(305,'tests',75);
+INSERT INTO "requirement_terms" VALUES(305,'refactoring',NULL);
+INSERT INTO "requirement_terms" VALUES(306,'débugger',NULL);
+INSERT INTO "requirement_terms" VALUES(307,'résolution de problèmes',NULL);
+INSERT INTO "requirement_terms" VALUES(308,'LLM',NULL);
+INSERT INTO "requirement_terms" VALUES(309,'Java',25);
+INSERT INTO "requirement_terms" VALUES(309,'Spring Boot',50);
+INSERT INTO "requirement_terms" VALUES(310,'Angular',4);
+INSERT INTO "requirement_terms" VALUES(311,'Node',NULL);
+INSERT INTO "requirement_terms" VALUES(311,'Nest',NULL);
+INSERT INTO "requirement_terms" VALUES(312,'React',45);
+INSERT INTO "requirement_terms" VALUES(312,'Next',NULL);
+INSERT INTO "requirement_terms" VALUES(313,'Python',43);
+INSERT INTO "requirement_terms" VALUES(314,'école d’ingénieur',NULL);
+INSERT INTO "requirement_terms" VALUES(315,'revues de code',9);
+INSERT INTO "requirement_terms" VALUES(315,'pair programming',NULL);
+INSERT INTO "requirement_terms" VALUES(316,'IA',NULL);
+INSERT INTO "requirement_terms" VALUES(316,'GenAI',NULL);
+INSERT INTO "requirement_terms" VALUES(316,'veille technique',NULL);
+INSERT INTO "requirement_terms" VALUES(317,'qualité',NULL);
+INSERT INTO "requirement_terms" VALUES(318,'amélioration continue',NULL);
 CREATE TABLE requirements (
   id INTEGER PRIMARY KEY,
   offer_id INTEGER NOT NULL REFERENCES offers(id),
@@ -1414,6 +1495,36 @@ INSERT INTO "requirements" VALUES(285,5,'responsibility','preferred','Migrate ou
 INSERT INTO "requirements" VALUES(286,5,'responsibility','preferred','Build a component library, with references and documenting components for the team to use.','Build and document a component library','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
 INSERT INTO "requirements" VALUES(287,5,'responsibility','preferred','Champion best practices in component architecture, performance, and accessibility','Champion accessibility and performance best practices','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
 INSERT INTO "requirements" VALUES(288,5,'location','must_have','Location: Casablanca, Morocco','Role based in Casablanca','evidence',NULL,NULL,0,'Location kept must-have: the role is on site in Casablanca (checked by the reviewer, not Haiku).',NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(289,2,'location','must_have','Aujourd’hui, Theodo compte plus de 80 Theodoers à Casablanca. Nous partageons la même mission que nos homologues à Paris ou Londres : accompagner des scales-ups et de grandes entreprises au Maroc et à l''international dans la conception, le développement et la maintenance de produits digitaux ingénieux.','Role based in Casablanca (Theodo Morocco)','evidence',NULL,'summary',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(290,3,'location','must_have','Aujourd’hui, Theodo compte plus de 80 Theodoers à Casablanca. Nous partageons la même mission que nos homologues à Paris ou Londres : accompagner des scales-ups et de grandes entreprises au Maroc et à l''international dans la conception, le développement et la maintenance de produits digitaux ingénieux.','Role based in Casablanca (Theodo Morocco)','evidence',NULL,'summary',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(291,3,'responsibility','preferred','Pour faire réussir les projets de nos clients, nous recherchons des Tech Lead qui auront pour mission de:','Tech Lead role','evidence',NULL,'summary',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(292,3,'responsibility','preferred','Accompagner le client dans la conception du meilleur produit qui répondra à ses besoins business','Help the client design the right product for their business needs','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(293,3,'responsibility','preferred','Piloter une équipe de développement, en participant au code avec un focus sur la qualité','Lead a development team while coding','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(294,3,'responsibility','preferred','Piloter une équipe de développement, en participant au code avec un focus sur la qualité','Hands-on coding with a focus on quality','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(295,3,'responsibility','preferred','Tu partages tes apprentissages au sein de Theodo et à l’extérieur, grâce aux articles de blog et aux formations hebdomadaires','Share learnings through blog articles and trainings','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(296,3,'responsibility','preferred','Tu fais de la veille technique pour améliorer le craftsmanship au sein de Theodo.','Technology watch to improve craftsmanship','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(297,3,'requirement','must_have','Tu es diplômé·e d''une école d''ingénieur ou équivalent','Engineering school degree or equivalent','evidence',NULL,'summary',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(298,3,'requirement','must_have','Avoir un minimum de 5ans d’expérience dans le développement de logiciels, idéalement fullstack','5+ years of software development','years_experience',5.0,NULL,0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(299,3,'requirement','must_have','Avoir un minimum de 5ans d’expérience dans le développement de logiciels, idéalement fullstack','Software development experience','evidence',NULL,'summary,experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(300,3,'preferred','preferred','Avoir un minimum de 5ans d’expérience dans le développement de logiciels, idéalement fullstack','Ideally full-stack','evidence',NULL,'summary,experience',0,'''idéalement'': preferred',NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(301,3,'requirement','must_have','Tu as au moins 1 année d’expérience dans la gestion d’une équipe de développeurs','1+ year managing a development team','years_experience',1.0,NULL,0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(302,3,'requirement','must_have','Tu as au moins 1 année d’expérience dans la gestion d’une équipe de développeurs','Managing a team of developers','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(303,1,'responsibility','preferred','En tant que Software Engineer Fullstack chez Theodo, ta mission sera de concevoir et développer des produits digitaux utiles, performants et durables pour répondre aux problématiques de nos clients et de leurs utilisateurs.','Full-stack software engineer role','evidence',NULL,'summary',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(304,1,'responsibility','preferred','Comprendre le problème de ton client et y répondre avec un produit performant, maintenable et orienté valeur, en intervenant sur tout le cycle de production, de la conception au déploiement.','Work across the whole lifecycle, from design to deployment','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(305,1,'responsibility','preferred','Produire du code de qualité dans les délais, en intégrant tests, refactoring et standards techniques de l’équipe, quelle que soit la technologie utilisée.','Quality code with tests and refactoring','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(306,1,'responsibility','preferred','Mener des investigations techniques, débugger efficacement et corriger les défauts de manière pérenne, dans tout type d’environnement.','Investigate and debug efficiently','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(307,1,'responsibility','preferred','Analyser en profondeur des problèmes dans le code pour développer son esprit de résolution de problèmes','Problem solving in the code','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(308,1,'responsibility','preferred','Travailler avec un LLM pour accélérer les développements','Work with an LLM to speed up development','evidence',NULL,'skills,experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(309,1,'responsibility','preferred','Parmi les technos les plus représentées sur nos projets, tu pourras être amené à travailler avec : Java (Spring Boot), Angular, Node (Nest), React (Next), Python…','Java (Spring Boot), one of the common stacks','evidence',NULL,'skills',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(310,1,'responsibility','preferred','Parmi les technos les plus représentées sur nos projets, tu pourras être amené à travailler avec : Java (Spring Boot), Angular, Node (Nest), React (Next), Python…','Angular, one of the common stacks','evidence',NULL,'skills',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(311,1,'responsibility','preferred','Parmi les technos les plus représentées sur nos projets, tu pourras être amené à travailler avec : Java (Spring Boot), Angular, Node (Nest), React (Next), Python…','Node (Nest), one of the common stacks','evidence',NULL,'skills',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(312,1,'responsibility','preferred','Parmi les technos les plus représentées sur nos projets, tu pourras être amené à travailler avec : Java (Spring Boot), Angular, Node (Nest), React (Next), Python…','React (Next), one of the common stacks','evidence',NULL,'skills',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(313,1,'responsibility','preferred','Parmi les technos les plus représentées sur nos projets, tu pourras être amené à travailler avec : Java (Spring Boot), Angular, Node (Nest), React (Next), Python…','Python, one of the common stacks','evidence',NULL,'skills',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(314,1,'requirement','must_have','Tu es diplômé·e d’une top école d’ingénieur','Degree from a top engineering school','evidence',NULL,'summary',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(315,1,'requirement','preferred','Tu aimes travailler en équipe et intéragir avec des profils et des métiers variés, en faisant preuve de pédagogie et d’esprit constructif (revues de code, pair programming)','Teamwork through code reviews and pair programming','evidence',NULL,'experience',0,'soft-skill line (''Tu aimes''): preferred',NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(316,1,'requirement','preferred','Tu es promoteur de l’IA, notamment sur les sujets de GenAI, et tu cherches à progresser en continu grâce à la veille technique','Promotes AI, especially GenAI, and keeps up with tech','evidence',NULL,'skills,experience',0,'soft-skill line: preferred',NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(317,1,'requirement','preferred','Tu fais preuve d’exigence sur la qualité du travail produit et sais questionner, voire interrompre, la chaîne de production lorsque nécessaire (#jidoka)','High standards on quality (jidoka)','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
+INSERT INTO "requirements" VALUES(318,1,'requirement','preferred','Tu aimes travailler de manière structurée et appliques naturellement des principes d’organisation et d’amélioration continue (inspirés du 5S)','Structured work and continuous improvement (5S)','evidence',NULL,'experience',0,NULL,NULL,NULL,NULL);
 CREATE TABLE skill_keywords (
   skill_id INTEGER NOT NULL REFERENCES skills(id),
   keyword TEXT NOT NULL,

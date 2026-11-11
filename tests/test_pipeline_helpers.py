@@ -40,6 +40,7 @@ class PublishModesTest(unittest.TestCase):
         offers.save(self.job, self.offer)
         (self.job / "pdf" / "A.pdf").write_bytes(b"resume")
         (self.job / "pdf" / "A-Cover-Letter.pdf").write_bytes(b"letter")
+        (self.job / "pdf" / "A-Resume-and-Cover-Letter.pdf").write_bytes(b"resume+letter")
         self.saved = config.FILE
         config.FILE = root / "config.json"
 
@@ -51,14 +52,17 @@ class PublishModesTest(unittest.TestCase):
     def test_none_publishes_nothing(self):
         self.assertIsNone(self.publish.publish(self.job / "job.json"))  # no config.json at all
 
-    def test_folder_copies_resume_and_letter_under_the_version(self):
+    def test_folder_copies_every_version_to_the_same_link(self):
         out = Path(self.tmp.name) / "out"
         self.config.FILE.write_text(self.json.dumps({"publish": {
             "mode": "folder", "folder": str(out), "site": "https://x.dev"}}), encoding="utf-8")
         url = self.publish.publish(self.job / "job.json")
-        self.assertEqual((out / "resume/acme/v2/A.pdf").read_bytes(), b"resume")
-        self.assertTrue((out / "resume/acme/v2/A-Cover-Letter.pdf").exists())
-        self.assertEqual(url, "https://x.dev/resume/acme/v2/A.pdf")
+        self.assertEqual((out / "resume/acme/A.pdf").read_bytes(), b"resume+letter")  # one PDF, the resume's link
+        self.assertEqual([p.name for p in (out / "resume/acme").iterdir()], ["A.pdf"])
+        self.assertEqual(url, "https://x.dev/resume/acme/A.pdf")
+        (self.job / "pdf" / "A-Resume-and-Cover-Letter.pdf").rename(self.job / "pdf" / "_A-Resume-and-Cover-Letter.pdf")
+        self.publish.publish(self.job / "job.json")  # letter not ready: the resume alone
+        self.assertEqual((out / "resume/acme/A.pdf").read_bytes(), b"resume")
 
     def test_sent_jobs_are_never_published(self):
         self.offers.save(self.job, {**self.offer, "sent": "2026-11-11"})

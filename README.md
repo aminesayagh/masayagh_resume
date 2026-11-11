@@ -62,7 +62,7 @@ Publishing is set in `config.json` (copy `config.example.json`; `config.json` is
 | `folder` | The English resume and cover letter are copied to a folder (any static host or sync tool can serve it). |
 | `git` | They are committed to your portfolio repository through a dedicated clone and pushed to a branch. |
 
-`path` sets where files go and `url` their public link (`{site}`, `{company}`, `{version}`, `{file}`). Sent jobs, not-ready (`_`) files and the French version are never published; version 2+ of a job goes under `v2/` so earlier links never change. Details: `.claude/skills/publish-resume/SKILL.md`.
+`path` sets where files go and `url` their public link (`{site}`, `{company}`, `{file}`). Sent jobs, not-ready (`_`) files and the French version are never published. An application has one public link: every version publishes to the same place, so the link always serves the latest version. Details: `.claude/skills/publish-resume/SKILL.md`.
 
 ## Build a resume
 
