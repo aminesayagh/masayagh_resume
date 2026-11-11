@@ -11,7 +11,7 @@ Usage: python3 src/new_job.py --url JOB_URL
 Prompts for anything not given: the company, the job title, and the posting text
 (paste it, then press Ctrl-D). Refuses to run if template/content/default.json has any unresolved spelling, style
 or PDF-readability finding — every new application starts from that baseline, so it
-must be clean first. Creates jobs/<company>-<title>-v<N>/ with the posting, a job.json
+must be clean first. Creates jobs/<company>-<title>-v<N>/ and its offer in data/resume.db (posting, no requirements yet), a
 skeleton (no requirements yet), a copy of the default content, the built resume, and a
 partial report (no job-matching section until requirements are drafted).
 """
@@ -26,6 +26,8 @@ import unicodedata
 from pathlib import Path
 
 import build_resume
+import offers
+import paths
 import build_fr
 import check_template
 import fetch_posting
@@ -55,7 +57,7 @@ def next_version(slug: str) -> int:
     return max(versions, default=0) + 1
 
 
-COPIED = ("job.json", "posting.txt", "content.json", "cover.json", "cover-fr.json")
+COPIED = ("content/content.json", "content/cover.json", "content/cover-fr.json")  # the offer is copied in the db
 
 
 def new_version(source: Path) -> Path:
@@ -66,15 +68,15 @@ def new_version(source: Path) -> Path:
     folder.mkdir()
     for name in COPIED:
         if (source / name).exists():
+            (folder / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source / name, folder / name)
-    job = json.loads((folder / "job.json").read_text(encoding="utf-8"))
+    job = offers.load(source)
     job.pop("sent", None)
     job.pop("template_sha", None)  # tailored content, not a template copy
-    job["posting_file"] = f"jobs/{folder.name}/posting.txt"
     job["previous_version"] = source.name
-    (folder / "job.json").write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    offers.save(folder, job)
     print(f"Created {folder.relative_to(ROOT)} from {source.name} (not sent; edit, then run src/tailor.py).")
-    build_resume.build(folder / "content.json")
+    build_resume.build(paths.content(folder))
     return folder
 
 
@@ -116,36 +118,36 @@ def main() -> None:
     folder = JOBS_DIR / f"{slug}-v{next_version(slug)}"
     folder.mkdir(parents=True)
 
-    (folder / "posting.txt").write_text(posting + "\n", encoding="utf-8")
-    content_path = folder / "content.json"
+    content_path = paths.content(folder)
+    content_path.parent.mkdir(parents=True, exist_ok=True)
+    paths.review_md(folder).parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(TEMPLATE_DIR / "content" / "default.json", content_path)
     name = json.loads(content_path.read_text(encoding="utf-8"))["name"]
-    job = {"title": f"{company} — {title}", "posting_file": f"jobs/{folder.name}/posting.txt",
+    job = {"title": f"{company} — {title}", "posting_text": posting,
            "pdf_name": pdf_name(name, title, company),
            "company": slugify(company),
            **({"url": found["url"], "location": found["location"], "location_match": found["location_match"]} if found else {}),
            "french_version": build_fr.is_french_only(posting),
            "template_sha": hashlib.sha256(content_path.read_bytes()).hexdigest(),
            "requirements": []}
-    job_path = folder / "job.json"
-    job_path.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    job_path = paths.job(folder)
+    offers.save(folder, job)  # the offer lives in data/resume.db
 
     pdf_path = build_resume.build(content_path)
     content = json.loads(content_path.read_text(encoding="utf-8"))
     rep = review_ats.review(job, pdf_path, content, network=False)
     inputs = {"cv": review_ats.rel(pdf_path), "job": review_ats.rel(job_path), "content": review_ats.rel(content_path)}
-    (folder / "review.md").write_text(review_ats.markdown(rep, inputs), encoding="utf-8")
+    paths.review_md(folder).write_text(review_ats.markdown(rep, inputs), encoding="utf-8")
     rep["pdf_check"]["pdf"] = inputs["cv"]
-    (folder / "review.json").write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    paths.review_json(folder).write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
     print(f"\nCreated {folder}")
     if rep.get("job_title") and not rep["job_title"]["match"]:
         print(f"[warning] {rep['job_title']['message']}")
     publish_resume.publish(job_path)
     print(f"Report so far: PDF readability + spelling + style (no job requirements yet, so no matching).")
-    print(f"Next: draft {job_path.relative_to(ROOT)}'s requirements from posting.txt (see "
-          f".claude/skills/ats-review/SKILL.md), then rerun:\n"
-          f"  .venv/bin/python src/review_ats.py --job {job_path.relative_to(ROOT)}")
+    print(f"Next: draft the requirements (job-requirements agent, .claude/skills/ats-review/SKILL.md), then run:\n"
+          f"  .venv/bin/python src/compose.py jobs/{folder.name} && .venv/bin/python src/tailor.py jobs/{folder.name}")
 
 
 assert pdf_name("Mohamed Amine Sayagh", "Développeur Full-Stack", "theodo") == "Mohamed-Amine-Sayagh-Developpeur-Full-Stack-Theodo.pdf"

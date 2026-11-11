@@ -8,7 +8,7 @@ from pathlib import Path
 import check_job
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = json.loads((ROOT / "jobs" / "fictional-full-stack-v1" / "job.json").read_text(encoding="utf-8"))
+FIXTURE = json.loads((ROOT / "tests" / "fixtures" / "fictional-job.json").read_text(encoding="utf-8"))
 
 
 def errors(job, **kw):

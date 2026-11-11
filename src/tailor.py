@@ -14,6 +14,8 @@ import sys
 from pathlib import Path
 
 import build_resume
+import paths
+import offers
 import publish_resume
 
 
@@ -35,13 +37,14 @@ def main() -> None:
     if len(sys.argv) != 2:
         sys.exit(__doc__)
     folder = Path(sys.argv[1])
-    job_path = folder / "job.json"
-    job = json.loads(job_path.read_text(encoding="utf-8"))
+    folder = paths.folder_arg(folder)
+    job_path = paths.job(folder)
+    job = offers.load(folder)
     if not job.get("requirements"):
         sys.exit("No requirements yet: draft them first (job-requirements agent).")
 
-    build_resume.build(folder / "content.json")
-    review = json.loads((folder / "review.json").read_text(encoding="utf-8"))
+    build_resume.build(paths.content(folder))
+    review = json.loads(paths.review_json(folder).read_text(encoding="utf-8"))
     pages = len(review["pdf_check"]["pages"])
     errors = sum(f["severity"] == "error" for f in review["pdf_check"]["findings"])
     if pages > build_resume.MAX_PAGES or errors:

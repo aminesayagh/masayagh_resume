@@ -15,6 +15,8 @@ import json
 from pathlib import Path
 
 import build_resume
+import offers
+import paths
 import review_ats
 
 HERE = Path(__file__).resolve().parent
@@ -49,15 +51,15 @@ def check() -> list[dict]:
 
 def stale_jobs() -> list[Path]:
     """Job folders whose content.json is still the untouched template copy (its hash equals
-    job.json's template_sha) but the template has changed since. Safe to refresh."""
+    the offer's template_sha) but the template has changed since. Safe to refresh."""
     current = hashlib.sha256((TEMPLATE_DIR / "content" / "default.json").read_bytes()).hexdigest()
     stale = []
-    for job_file in sorted((ROOT / "jobs").glob("*/job.json")):
-        job = json.loads(job_file.read_text(encoding="utf-8"))
+    for folder in offers.all_folders():
+        job = offers.load(folder)
         sha = None if job.get("sent") else job.get("template_sha")  # sent jobs are frozen
-        content = job_file.parent / "content.json"
+        content = paths.content(folder)
         if sha and sha != current and content.exists() and hashlib.sha256(content.read_bytes()).hexdigest() == sha:
-            stale.append(job_file.parent)
+            stale.append(folder)
     return stale
 
 

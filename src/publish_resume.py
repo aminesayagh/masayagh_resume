@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Publish a job's English resume and cover letter, as set in config.json ("publish").
 
-Usage: python3 src/publish_resume.py jobs/<slug>/job.json
+Usage: python3 src/publish_resume.py jobs/<slug>
 
 Modes (config.example.json documents them):
   none    nothing is published (the default, no config.json needed)
@@ -21,6 +21,8 @@ from pathlib import Path
 
 import config
 import db
+import paths
+import offers
 
 
 def git(clone: Path, *args: str) -> str:
@@ -34,13 +36,13 @@ def files_to_publish(job_path: Path, job: dict) -> tuple[str, int, list[Path]]:
     company = job.get("company")
     if not (isinstance(company, str) and re.fullmatch(r"[a-z0-9-]+", company)):
         sys.exit(f"{job_path} needs 'company' ([a-z0-9-]+) to publish.")
-    pdf = job_path.parent / job.get("pdf_name", "resume.pdf")
+    pdf = paths.resume_pdf(job_path.parent)
     if not pdf.exists():
-        draft = pdf.with_name("_" + pdf.name)
+        draft = paths.not_ready(pdf)
         sys.exit(f"Not published: only {draft.name} exists, which is NOT READY to send (see the build warnings)."
                  if draft.exists() else f"{pdf} does not exist; build it first.")
     version = int(m[1]) if (m := re.search(r"-v(\d+)$", job_path.parent.name)) else 1
-    cover = pdf.with_name(f"{pdf.stem}-Cover-Letter.pdf")  # a not-ready letter is '_'-prefixed, so it's skipped
+    cover = paths.cover_pdf(job_path.parent)  # a not-ready letter is '_'-prefixed, so it's skipped
     if not cover.exists():
         print(f"Cover letter not published: {cover.name} is missing or NOT READY.")
     return company, version, [pdf] + ([cover] if cover.exists() else [])
@@ -55,7 +57,8 @@ def publish(job_path: Path) -> str | None:
     if settings["mode"] == "none":
         print("Publishing is off (no config.json, or publish.mode = none): the PDFs stay in the job folder.")
         return None
-    job = json.loads(job_path.read_text(encoding="utf-8"))
+    job_path = paths.job(paths.folder_arg(job_path))
+    job = offers.load(job_path.parent)
     company, version, files = files_to_publish(job_path, job)
 
     if settings["mode"] == "folder":

@@ -15,6 +15,7 @@ import re
 import sys
 from pathlib import Path
 
+import offers
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
 SECTIONS = {"responsibility", "requirement", "preferred", "location", "screening"}
@@ -150,7 +151,7 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        job = json.loads(args.job.read_text(encoding="utf-8"))
+        job = offers.read(args.job)
     except (OSError, json.JSONDecodeError) as exc:
         print(f"[error] {args.job}: {exc}")
         sys.exit(1)

@@ -11,7 +11,7 @@ DRAFT.json is a list of picks; the script copies each quote from its line, so qu
     "targets": ["skills", "experience"], "description": "Vue 3 in production"},
    {"line": 9, "kind": "years_experience", "min_years": 5, "priority": "must_have",
     "section": "requirement", "description": "5+ years of front-end development"}]
-Optional per pick: "note". Terms the drafter decides to leave out go in job.json's "skipped_terms"
+Optional per pick: "note". Terms the drafter decides to leave out go in the offer's "skipped_terms"
 ({"term": "reason"}), so `missed` stops listing them.
 """
 
@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 import check_job
+import offers
 
 ROOT = Path(__file__).resolve().parent.parent
 BULLET = re.compile(r"^\s*(?:[·•\-\*–—]|\d+[.)])\s*")
@@ -129,7 +130,7 @@ def main() -> None:
     if len(sys.argv) < 3 or sys.argv[1] not in {"lines", "apply", "missed"}:
         sys.exit(__doc__)
     path = Path(sys.argv[2])
-    job = json.loads(path.read_text(encoding="utf-8"))
+    job = offers.read(path)
     if sys.argv[1] == "lines":
         for l in posting_lines(job):
             print(f"{'#' if l['is_heading'] else ' '}{l['line']:>3} [{l['heading']}] {l['text']}")
@@ -138,7 +139,7 @@ def main() -> None:
             job["requirements"] = apply(job, json.loads(Path(sys.argv[3]).read_text(encoding="utf-8")))
         except ValueError as exc:
             sys.exit(f"[error] {exc}")
-        path.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        offers.write(path, job)
         errors = [f["message"] for f in check_job.validate(job, ROOT, draft=True) if f["severity"] == "error"]
         errors += coverage_errors(job, job["requirements"])
         print(f"{len(job['requirements'])} requirement(s) written to {path}; {len(errors)} error(s).")

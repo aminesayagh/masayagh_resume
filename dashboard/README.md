@@ -17,4 +17,4 @@ Install once: `VIRTUAL_ENV=$PWD/.venv uv pip install -r dashboard/requirements.t
 
 **Actions** (each asks for confirmation): Mark as sent (freezes the job), Tailor (`src/tailor.py`), Build French version (`src/build_fr.py`), New version from this job (`src/new_job.py --from`).
 
-The app reads `jobs/` and never writes there itself: every action runs the `src/` scripts, so their rules hold (sent jobs are frozen, `_` = not ready, 3 pages). The one direct write is "Mark as sent", which adds `"sent"` to `job.json`. Steps that need judgement (drafting requirements, proposing edits, writing cover letters) are not in the app.
+The app reads `jobs/` and never writes there itself: every action runs the `src/` scripts, so their rules hold (sent jobs are frozen, `_` = not ready, 3 pages). The one direct write is "Mark as sent", which adds `"sent"` to the offer (`data/resume.db`). Steps that need judgement (drafting requirements, proposing edits, writing cover letters) are not in the app.

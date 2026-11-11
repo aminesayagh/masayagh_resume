@@ -1,6 +1,5 @@
 {
   "title": "FICTIONAL — Full Stack Software Developer, Workflow Products",
-  "posting_file": "jobs/fictional-full-stack-v1/posting.txt",
   "requirements": [
     {
       "id": "R01",
@@ -205,5 +204,6 @@
       ],
       "reviewed": true
     }
-  ]
+  ],
+  "posting_text": "FICTIONAL EXAMPLE — Full Stack Software Developer, Workflow Products\n\nA small B2B software team is hiring a developer to build workflow and AI-assisted\nfeatures for web applications. The role is remote-first and based in Morocco.\n\nResponsibilities:\n- Build accessible React or Next.js interfaces and Python or FastAPI services.\n- Design and integrate APIs backed by PostgreSQL.\n- Turn product requirements into prototypes, then ship tested features.\n- Maintain Docker-based development and CI/CD delivery workflows.\n- Collaborate with product and design colleagues on customer-facing SaaS tools.\n\nRequirements:\n- At least three years of professional software development experience.\n- Experience with React, Python, SQL, API integration, and automated testing.\n- A computer science degree or equivalent practical experience.\n- Clear written communication in English.\n\nNice to have:\n- Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.\n"
 }

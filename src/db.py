@@ -36,9 +36,17 @@ CREATE TABLE IF NOT EXISTS experiences (
   end_at TEXT,
   sort_order INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS activities (
+  id INTEGER PRIMARY KEY,
+  experience_id INTEGER NOT NULL REFERENCES experiences(id),
+  label TEXT NOT NULL,
+  sort_order INTEGER NOT NULL,
+  active INTEGER NOT NULL DEFAULT 1
+);
 CREATE TABLE IF NOT EXISTS descriptions (
   id INTEGER PRIMARY KEY,
   experience_id INTEGER NOT NULL REFERENCES experiences(id),
+  activity_id INTEGER REFERENCES activities(id),
   kind TEXT NOT NULL CHECK (kind IN ('description', 'bullet')),
   text_en TEXT NOT NULL,
   text_fr TEXT,
@@ -133,7 +141,10 @@ CREATE TABLE IF NOT EXISTS offers (
   status TEXT NOT NULL CHECK (status IN ('draft', 'ready', 'sent')),
   created_at TEXT NOT NULL,
   sent_at TEXT,
-  previous_offer_id INTEGER REFERENCES offers(id)
+  previous_offer_id INTEGER REFERENCES offers(id),
+  company_slug TEXT,
+  template_sha TEXT,
+  skipped_terms TEXT
 );
 CREATE TABLE IF NOT EXISTS requirements (
   id INTEGER PRIMARY KEY,
@@ -148,7 +159,8 @@ CREATE TABLE IF NOT EXISTS requirements (
   reviewed INTEGER NOT NULL DEFAULT 0,
   note TEXT,
   override_status TEXT,
-  override_reason TEXT
+  override_reason TEXT,
+  override_quote TEXT
 );
 CREATE TABLE IF NOT EXISTS requirement_terms (
   requirement_id INTEGER NOT NULL REFERENCES requirements(id),
@@ -168,8 +180,10 @@ CREATE TABLE IF NOT EXISTS offer_results (
 """
 
 
-def connect(path: Path = DB, empty: bool = False) -> sqlite3.Connection:
-    """empty=True: start from no data (the migration); otherwise a missing db is rebuilt from data/resume.sql."""
+def connect(path: Path | None = None, empty: bool = False) -> sqlite3.Connection:
+    """empty=True: start from no data; otherwise a missing db is rebuilt from data/resume.sql.
+    DB and DUMP are read at call time, so tests can point them at a temporary database."""
+    path = path or DB
     path.parent.mkdir(parents=True, exist_ok=True)
     if empty:
         path.unlink(missing_ok=True)
@@ -179,6 +193,11 @@ def connect(path: Path = DB, empty: bool = False) -> sqlite3.Connection:
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA foreign_keys = ON")
     con.executescript(SCHEMA)
+    for table, column, kind in (("descriptions", "activity_id", "INTEGER REFERENCES activities(id)"),
+                                ("offers", "company_slug", "TEXT"), ("offers", "template_sha", "TEXT"),
+                                ("offers", "skipped_terms", "TEXT"), ("requirements", "override_quote", "TEXT")):
+        if column not in [c[1] for c in con.execute(f"PRAGMA table_info({table})")]:  # databases made before it
+            con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
     return con
 
 

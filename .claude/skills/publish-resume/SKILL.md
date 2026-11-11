@@ -1,58 +1,46 @@
 ---
 name: publish-resume
-description: Publish a job's tailored resume PDF to the portfolio site (masayagh.com) so the user can share or download it. Use after any rebuild of a job's PDF, when the user asks to send/upload/publish a resume to the portfolio or website, or asks for a resume link for a company.
+description: Publish a job's English resume and cover letter as configured in config.json (portfolio repo, folder, or nothing) so the user can share a link. Use after a job's PDF is rebuilt, when the user asks to publish/upload/send a resume to their portfolio or website, or asks for a resume link.
 ---
 
-# Publish a resume to the portfolio
-
-One command sends a job's PDF to the portfolio site:
+# Publish a resume
 
 ```bash
-.venv/bin/python src/publish_resume.py jobs/<slug>/job.json
+.venv/bin/python src/publish_resume.py jobs/<slug>
 ```
 
-It prints the public link:
+`src/tailor.py` already runs it after every build, so you rarely call it alone.
 
-```
-https://www.masayagh.com/resume/<company>/<pdf_name>
-e.g. https://www.masayagh.com/resume/theodo/Mohamed-Amine-Sayagh-Software-Engineer-Fullstack-Theodo.pdf
-```
+## What it does depends on `config.json` → `publish.mode`
 
-The link ends in the PDF's real name, so a download keeps that name. Each publish **replaces** the previous PDF at the same link: there are no versions. A link already sent to a company always shows the latest resume.
+| Mode | Effect |
+|---|---|
+| `none` (default; no `config.json`) | Nothing is published. Say so; the PDFs stay in `jobs/<slug>/`. |
+| `folder` | Copies the resume and cover letter to `publish.folder`, at `publish.path`. |
+| `git` | Commits them in a clone only the pipeline uses (`publish.clone`, default `<repo>-publish`), at `publish.path`, then pulls and pushes `publish.branch`. |
 
-## When to run it
+`config.example.json` documents every field. The public link of each file is `publish.url` (with `{site}`, `{company}`, `{version}`, `{file}`); it is printed and stored on the offer in `data/resume.db` (`resume_url`, `cover_letter_url`, `published_at`).
 
-- `src/new_job.py` publishes once, automatically, when it creates a job folder.
-- **After every rebuild of a job's PDF** (`src/build_resume.py jobs/<slug>/content.json`), run the command above. The user expects the site to always have the latest version.
-- If the PDF did not change, it prints "Already published, unchanged" and pushes nothing.
-- Only the resume is published. The cover letter PDFs (`…-Cover-Letter.pdf`, `…-Resume-and-Cover-Letter.pdf`) stay in the job folder.
+## Always true, in every mode
+- Only the **English** resume and cover letter are published; the French version (`-FR`) stays local.
+- A **sent** (frozen) job, a **not-ready** resume (`_` prefix) or a not-ready cover letter is never published.
+- Version 2+ of a job goes under `v2/…`, so the link an employer received for an earlier version never changes.
 
-## What it does
+## Rules for `git` mode
+- **Never commit in `publish.repo` itself**; it may be the user's working copy with other work. Only the dedicated clone is used.
+- Never `git add -A` in the clone; only the published files are staged.
+- Choosing `mode: git` is the user's approval for pushing resume PDFs. Any other change to their site (pages, routes, config) is not part of this pipeline: ask the user.
 
-1. Reads `company` and `pdf_name` from `jobs/<slug>/job.json` (both set by `new_job.py`; `company` must match `[a-z0-9-]+`).
-2. Prepares its own clone of the portfolio repo at `/home/amine/projects/portfolio-publish` (cloned on first use) and resets it to `origin/main`.
-3. Copies the PDF to `public/resume/<company>/<pdf_name>`, stages **only that file**, commits `Publish resume <company>/<pdf_name>`, runs `git pull --rebase`, and pushes to `main`.
-4. Vercel deploys `main` to production in about a minute.
-
-## Rules
-
-- **Never commit in `/home/amine/projects/portfolio`.** It's the portfolio session's working copy, often on a feature branch with uncommitted work. Only the dedicated clone is used.
-- Never `git add -A` in the clone: only the PDF path.
-- Pushing to `main` is pre-approved by the user for resume PDFs. Anything else in the portfolio repo (`vercel.json`, pages, routes) belongs to the `portfolio` Claude session: message it with `SendMessage` (`to: "portfolio"`) instead of editing it.
-- The job title is public in the link and file name. The user chose this.
-
-## Checking it worked
-
-About a minute after the push:
+## Checking a published link
+About a minute after a push (if the site deploys from the branch):
 
 ```bash
-curl -sI https://www.masayagh.com/resume/<company>/<pdf_name> | grep -i -E "^HTTP|content-type|content-disposition|x-robots"
+curl -sI <printed link> | grep -i -E "^HTTP|content-type|content-disposition"
 ```
 
-Expect `200`, `application/pdf`, `x-robots-tag: noindex, nofollow`, and **no** `content-disposition` (that header would override the download name). A 404 right after the push usually means the deploy is still running.
+Expect `200` and `application/pdf`. A `content-disposition` header would override the download name. A 404 right after a push usually means the deploy is still running.
 
 ## Edge cases
-
-- **Renamed `pdf_name`:** the old file stays on the site. Remove it in the clone (`git -C /home/amine/projects/portfolio-publish rm -- public/resume/<company>/<old>.pdf`, commit, `pull --rebase`, push).
-- **Push rejected:** someone pushed in between. Rerun the command; it resets to the latest `origin/main` first.
-- **A job folder made before this feature:** add `"company": "<slug>"` to its `job.json`.
+- **Renamed `pdf_name`:** the old file stays published. Remove it in the clone or folder by hand if wanted.
+- **Push rejected:** someone pushed in between. Rerun; it resets the clone to the latest remote branch first.
+- **A job without `"company"` in the offer (`data/resume.db`):** add `"company": "<slug>"` ([a-z0-9-]+).

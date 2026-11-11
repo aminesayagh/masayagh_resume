@@ -2,7 +2,7 @@
 
 Run from the repo root:  .venv/bin/python -m uvicorn dashboard.app:app --host 127.0.0.1 --port 8000
 Reads jobs/ (dashboard/data.py). Changes go through the src/ scripts, so their rules hold: sent jobs are frozen,
-'_' marks a resume that is not ready, 3 pages max. The only direct write is "Mark as sent" (one field in job.json).
+'_' marks a resume that is not ready, 3 pages max. The only direct writes are "Mark as sent" and "Reopen" (the offer's sent date in data/resume.db).
 """
 
 import json
@@ -21,7 +21,9 @@ from dashboard import data
 ROOT = data.ROOT
 PYTHON = ROOT / ".venv" / "bin" / "python"
 sys.path.insert(0, str(ROOT / "src"))
-import job_page  # noqa: E402  (renders one job's details)
+import job_page  # noqa: E402
+import offers  # noqa: E402
+import paths  # noqa: E402  (renders one job's details)
 import skills_inventory  # noqa: E402
 
 app = FastAPI(title="Job dashboard", docs_url=None, redoc_url=None)
@@ -32,7 +34,7 @@ ACTIONS = {
     "sent": ("Mark as sent", "Freezes this job: no rebuild, edit or republish afterwards.",
              lambda j: not j["sent"], None),
     "reopen": ("Reopen (sent → in progress)",
-               "Removes the freeze so you can edit it again. A copy of every file as sent is kept in sent-<date>/ in "
+               "Removes the freeze so you can edit it again. A copy of everything as sent is kept in history/sent-<date>/ in "
                "this folder. Warning: once you Tailor it, the published link the employer received shows the new version; "
                "use “New version from this job” instead to leave that link untouched.",
                lambda j: bool(j["sent"]), None),
@@ -47,7 +49,7 @@ ACTIONS = {
 
 def job_or_404(slug: str) -> dict:
     folder = data.JOBS / slug
-    if "/" in slug or slug.startswith(".") or not (folder / "job.json").exists():
+    if "/" in slug or slug.startswith(".") or not offers.exists(folder):
         raise HTTPException(404, "No such job")
     return data.summary(folder)
 
@@ -66,11 +68,11 @@ def jobs(request: Request, q: str = "", status: str = "", skill: str = "", locat
 def job(request: Request, slug: str, rq: str = "", rstatus: str = "", rpriority: str = ""):
     j = job_or_404(slug)
     folder = data.JOBS / slug
-    review = data.load(folder / "review.json")
+    review = data.load(paths.review_json(folder))
     total = len(review.get("results", []))
     review["results"] = data.filter_requirements(review.get("results", []), rq, rstatus, rpriority)
-    card = job_page.job_card(folder, data.load(folder / "job.json"), review,
-                             data.load(folder / "interview.json"), files=f"/files/{slug}/")
+    card = job_page.job_card(folder, offers.load(folder), review,
+                             data.load(paths.interview(folder)), files=f"/files/{slug}/")
     pdfs = data.files_by_language(folder)
     actions = {k: v[:2] for k, v in ACTIONS.items() if v[2](j)}
     return templates.TemplateResponse(request, "job.html", {
@@ -92,8 +94,8 @@ def skills(request: Request):
 def files(slug: str, name: str):
     job_or_404(slug)
     path = data.JOBS / slug / name
-    archived = re.fullmatch(r"sent-[\d-]+/[^/]+", name)  # a copy kept by Reopen
-    if ("/" in name and not archived) or ".." in name or not path.is_file() or path.suffix not in (".pdf", ".md"):
+    inside = path.resolve().is_relative_to((data.JOBS / slug).resolve())  # no way out of the job folder
+    if not inside or not path.is_file() or path.suffix not in (".pdf", ".md"):
         raise HTTPException(404, "No such file")
     return FileResponse(path, media_type="application/pdf" if path.suffix == ".pdf" else "text/plain; charset=utf-8")
 
@@ -116,12 +118,9 @@ def run(request: Request, slug: str, action: str):
         data.reopen(data.JOBS / slug)
         return RedirectResponse(f"/job/{slug}", status_code=303)
     if action == "sent":
-        path = data.JOBS / slug / "job.json"
-        job_file = json.loads(path.read_text(encoding="utf-8"))
-        job_file["sent"] = date.today().isoformat()
-        path.write_text(json.dumps(job_file, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        import db_sync  # records the offer as sent, with a snapshot of its results
-        db_sync.sync_job(data.JOBS / slug)
+        job = offers.load(data.JOBS / slug)
+        job["sent"] = date.today().isoformat()
+        offers.save(data.JOBS / slug, job)  # also snapshots the review's results as sent
         return RedirectResponse(f"/job/{slug}", status_code=303)
     command = [str(PYTHON)] + [part.format(slug=slug) for part in ACTIONS[action][3]]
     result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=900)

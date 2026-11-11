@@ -19,6 +19,8 @@ from datetime import date
 from pathlib import Path
 
 import db
+import offers
+import paths
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -87,7 +89,7 @@ def resume_skills(content: dict) -> list[str]:
 
 def sync(inv: dict) -> list[str]:
     added = []
-    for path in [ROOT / "template" / "content" / "default.json", *sorted((ROOT / "jobs").glob("*/content.json"))]:
+    for path in [ROOT / "template" / "content" / "default.json", *sorted((ROOT / "jobs").glob("*/content/content.json"))]:
         for row in json.loads(path.read_text(encoding="utf-8")).get("skills", []):
             for item in row:
                 for name, aliases in atoms(item):
@@ -134,7 +136,7 @@ def main() -> None:
         save(inv)
         print(f"Added {len(added)} skill(s): {', '.join(added) or 'none'}")
     elif sys.argv[1] == "missing":
-        listed = {n.casefold() for path in [ROOT / "template" / "content" / "default.json", *(ROOT / "jobs").glob("*/content.json")]
+        listed = {n.casefold() for path in [ROOT / "template" / "content" / "default.json", *(ROOT / "jobs").glob("*/content/content.json")]
                   for n in resume_skills(json.loads(path.read_text(encoding="utf-8")))}
         todo = [s["name"] for s in inv["skills"] if not s.get("start")  # only skills you list on a resume
                 and ({s["name"].casefold(), *(m.casefold() for m in s["match"])} & listed)]
@@ -148,8 +150,8 @@ def main() -> None:
         print(f"{skill['name']}: {label(years(skill))}")
     else:
         folder = Path(sys.argv[2])
-        rows = job_skills(json.loads((folder / "job.json").read_text(encoding="utf-8")),
-                          json.loads((folder / "content.json").read_text(encoding="utf-8")), inv)
+        rows = job_skills(offers.load(paths.folder_arg(folder)),
+                          json.loads(paths.content(folder).read_text(encoding="utf-8")), inv)
         for s in rows:
             print(f"{'*' if s['in_job'] else ' '} {s['name']}: {label(s['years'])}")
 

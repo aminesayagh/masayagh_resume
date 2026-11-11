@@ -21,7 +21,7 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 ## Layout
 
 - `template/` — the master resume: `default.json` (content), `resume.html` (layout), `resume.pdf` (baseline build); and the cover letter: `default-cover.json` (default text), `cover-letter.html` (layout).
-- `jobs/<company>-<title>-v<N>/` — one folder per application: `posting.txt`, `job.json` (requirements), `content.json` (tailored content, starts as a copy of `template/content/default.json`), the PDF (named `<Your-Name>-<Job-Title>-<Company>.pdf`, set by `pdf_name` in `job.json`), `cover.json` (cover letter text) with its two PDFs (`…-Cover-Letter.pdf` and `…-Resume-and-Cover-Letter.pdf`), and the generated `review.json`/`review.md`.
+- `jobs/<company>-<title>-v<N>/` — one folder per application: the posting, the offer (`data/resume.db`) (requirements), `content.json` (tailored content, starts as a copy of `template/content/default.json`), the PDF (named `<Your-Name>-<Job-Title>-<Company>.pdf`, set by `pdf_name` in the offer (`data/resume.db`)), `cover.json` (cover letter text) with its two PDFs (`…-Cover-Letter.pdf` and `…-Resume-and-Cover-Letter.pdf`), and the generated `review.json`/`review.md`.
 - `src/` — all the tools.
 
 ## Start a new job application
@@ -36,8 +36,8 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 Version 1 workflow after the folder exists:
 
 1. **Draft requirements** with the `job-requirements` agent (`.claude/agents/job-requirements.md`, Haiku). It uses `src/draft_job.py` (`lines`, `apply`, `missed`): quotes are copied from line numbers, terms must be short, the location and degree lines must be covered, and every technology-looking word is covered or skipped with a reason.
-2. **Review** with `src/review_ats.py --job jobs/<slug>/job.json`: report, `interview.json` (prep topics) and `dashboard.html` (one page per job), labelled draft until requirements are reviewed. `--preview` prints the match and compares with the last saved report (verdict: no regression / REGRESSION).
-3. **Tailor** `content.json` within the rules in `.claude/skills/ats-review/SKILL.md` (3 pages, 6 skill rows of 4, experience edits proposed and confirmed first), rebuild, publish. It refuses to run if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting `job.json`'s requirements next.
+2. **Review** with `src/review_ats.py --job jobs/<slug>`: report, `interview.json` (prep topics) and `dashboard.html` (one page per job), labelled draft until requirements are reviewed. `--preview` prints the match and compares with the last saved report (verdict: no regression / REGRESSION).
+3. **Tailor** `content.json` within the rules in `.claude/skills/ats-review/SKILL.md` (3 pages, 6 skill rows of 4, experience edits proposed and confirmed first), rebuild, publish. It refuses to run if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting the offer's requirements next.
 
 To check whether the baseline is ready without starting a new application:
 
@@ -47,13 +47,21 @@ To check whether the baseline is ready without starting a new application:
 
 Rebuilds `template/build/resume.pdf` and lists every spelling/style/PDF-readability finding (same checks `new_job.py` gates on). Prints "ready" and exits 0 if there are none.
 
-## Publish a resume to the portfolio
+## Publish a resume (optional)
 
 ```bash
-.venv/bin/python src/publish_resume.py jobs/company-role-v1/job.json
+.venv/bin/python src/publish_resume.py jobs/<slug>    # tailor.py runs it after every build
 ```
 
-Pushes the job's PDF to the portfolio repo's `main` branch (from a dedicated clone at `/home/amine/projects/portfolio-publish`). It goes live at `https://www.masayagh.com/resume/<company>/<pdf_name>`, so a download keeps the PDF's real name. Each publish replaces the previous PDF at that link. `new_job.py` publishes automatically; rerun this after every rebuild of a job's PDF.
+Publishing is set in `config.json` (copy `config.example.json`; `config.json` is ignored by git):
+
+| `publish.mode` | Effect |
+|---|---|
+| `none` (default, no config needed) | Nothing is published; the PDFs stay in `jobs/<slug>/`. |
+| `folder` | The English resume and cover letter are copied to a folder (any static host or sync tool can serve it). |
+| `git` | They are committed to your portfolio repository through a dedicated clone and pushed to a branch. |
+
+`path` sets where files go and `url` their public link (`{site}`, `{company}`, `{version}`, `{file}`). Sent jobs, not-ready (`_`) files and the French version are never published; version 2+ of a job goes under `v2/` so earlier links never change. Details: `.claude/skills/publish-resume/SKILL.md`.
 
 ## Build a resume
 
@@ -69,7 +77,7 @@ Build one application's tailored version:
 .venv/bin/python src/build_resume.py jobs/company-role-v1/content.json
 ```
 
-The PDF is saved next to the JSON file: in a job folder it uses `job.json`'s `pdf_name`, otherwise `resume.pdf`. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
+The PDF is saved next to the JSON file: in a job folder it uses the offer's `pdf_name`, otherwise `resume.pdf`. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
 
 ## Cover letter
 
@@ -81,13 +89,13 @@ Every job build also produces the cover letter, so a job folder always holds thr
 | `<stem>-Cover-Letter.pdf` | The cover letter, one page |
 | `<stem>-Resume-and-Cover-Letter.pdf` | The resume pages, then the cover letter page |
 
-The letter text lives in `jobs/<slug>/cover.json`. The first build creates it from `template/content/default-cover.json`, filling in the company and job title from `job.json`; an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
+The letter text lives in `jobs/<slug>/content/cover.json`. The first build creates it from `template/content/default-cover.json`, filling in the company and job title from the offer (`data/resume.db`); an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
 
 ```bash
 .venv/bin/python src/build_cover.py jobs/company-role-v1
 ```
 
-If the text runs past the page, the build warns and saves both cover PDFs with a leading `_` (not ready to send), like an over-length resume. Only the resume is published to the portfolio.
+If the text runs past the page, the build warns and saves both cover PDFs with a leading `_` (not ready to send), like an over-length resume. When publishing is on (`config.json`), the English resume and its ready cover letter are published; the combined PDF and the French version stay local.
 
 ## Edit content
 
@@ -136,11 +144,11 @@ The JSON report is saved to `pdf-check.json` next to the PDF. The command exits 
 
 ## Describe a job posting
 
-A job file (`jobs/<slug>/job.json`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `src/check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. See the [job file guide](docs/job-file-guide.md) and the [fictional example](jobs/fictional-full-stack-v1/job.json).
+A job file (`jobs/<slug>`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `src/check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. See the [job file guide](docs/job-file-guide.md) and the [fictional example](jobs/fictional-full-stack-v1/the offer).
 
 ```bash
-.venv/bin/python src/check_job.py jobs/fictional-full-stack-v1/job.json
-.venv/bin/python src/check_job.py jobs/company-role-v1/job.json --draft   # while still reviewing
+.venv/bin/python src/check_job.py jobs/fictional-full-stack-v1/the offer
+.venv/bin/python src/check_job.py jobs/company-role-v1/the offer --draft   # while still reviewing
 ```
 
 ## Review a resume for a job (one command)
@@ -148,8 +156,8 @@ A job file (`jobs/<slug>/job.json`) lists what a posting asks for. Each requirem
 `src/review_ats.py` runs all the checks for one posting and writes a readable report:
 
 ```bash
-.venv/bin/python src/review_ats.py --job jobs/fictional-full-stack-v1/job.json
-.venv/bin/python src/review_ats.py --job jobs/company-role-v1/job.json
+.venv/bin/python src/review_ats.py --job jobs/fictional-full-stack-v1/the offer
+.venv/bin/python src/review_ats.py --job jobs/company-role-v1/the offer
 ```
 
 The report, `review.md` next to the job file (with `review.json` beside it), contains these sections in order:
@@ -172,8 +180,8 @@ Without `--cv`/`--content`, the command uses `resume.pdf` and `content.json` nex
 Every `met` or `partial` result quotes the exact PDF line and its page. "At least N years" requirements are computed from your job dates. Matching is deterministic: no model and no network. Alternative spellings that count as the same term (for example Postgres for PostgreSQL) are skill keywords in `data/resume.db`; add one with `src/skills_inventory.py keyword "PostgreSQL" "Postgres"`, true synonyms only.
 
 ```bash
-.venv/bin/python src/match_job.py jobs/fictional-full-stack-v1/job.json
-.venv/bin/python src/match_job.py jobs/company-role-v1/job.json
+.venv/bin/python src/match_job.py jobs/fictional-full-stack-v1/the offer
+.venv/bin/python src/match_job.py jobs/company-role-v1/the offer
 ```
 
 The report is saved to `match.json` next to the job file.
@@ -200,6 +208,6 @@ The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/S
 | `src/spelling-allow.txt` | Confirmed spellings |
 | `src/vendor/` | Bundled QR generator and its license |
 | `tests/` | Tests for the reviewer (`.venv/bin/python -m unittest discover -s tests -t .`) |
-| `docs/` | Reviewer plan and job file guide |
+| `docs/` | Reviewer plan, job file guide, and the [requirement extraction benchmark](docs/requirement-extraction-benchmark.md) (why extraction stays as it is) |
 | `.claude/skills/ats-review/`, `.claude/skills/draft-cover-letter/`, `.claude/skills/publish-resume/`, `AGENTS.md` | Instructions for AI assistants |
 

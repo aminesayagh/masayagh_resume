@@ -20,6 +20,8 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+import paths
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
 TEMPLATE = ROOT / "template" / "layout" / "resume.html"
@@ -271,8 +273,8 @@ def main() -> None:
     parser.add_argument("--no-network", action="store_true", help="skip opening the links in the PDF")
     args = parser.parse_args()
 
-    content_path = args.content or next((p for p in (args.pdf.parent / "content.json", args.pdf.parent / "default.json")
-                                          if p.exists()), args.pdf.parent / "content.json")
+    content_path = args.content or (paths.content(folder) if (folder := paths.job_folder(args.pdf))
+                                          else ROOT / "template" / "content" / "default.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
     report = check(args.pdf, content, template_headings(TEMPLATE), network=not args.no_network)
     rel = lambda path: str(path.resolve().relative_to(ROOT)) if path.resolve().is_relative_to(ROOT) else str(path)

@@ -5,11 +5,16 @@ Nothing here writes to jobs/ or template/; changes go through the scripts in src
 
 import json
 import shutil
+import sys
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-JOBS = ROOT / "jobs"
+sys.path.insert(0, str(ROOT / "src"))
+import offers  # noqa: E402  (the offers in data/resume.db)
+import paths  # noqa: E402  (the job folder layout)
+
+JOBS = paths.JOBS
 
 
 def load(path: Path) -> dict:
@@ -18,10 +23,9 @@ def load(path: Path) -> dict:
 
 def status(folder: Path, job: dict, review: dict) -> str:
     """sent > not ready (a '_' resume) > no requirements > draft (unreviewed) > ready."""
-    pdf = job.get("pdf_name", "resume.pdf")
     if job.get("sent"):
         return "sent"
-    if (folder / f"_{pdf}").exists():
+    if paths.not_ready(paths.resume_pdf(folder)).exists():
         return "not ready"
     if not job.get("requirements"):
         return "no requirements"
@@ -31,22 +35,21 @@ def status(folder: Path, job: dict, review: dict) -> str:
 
 
 def summary(folder: Path) -> dict:
-    job, review = load(folder / "job.json"), load(folder / "review.json")
+    job, review = offers.load(folder), load(paths.review_json(folder))
     company, _, title = job.get("title", folder.name).partition(" — ")
     cov = review.get("evidence_coverage") or {}
-    posting = folder / "posting.txt"
     return {
         "slug": folder.name, "company": company, "title": title or company, "status": status(folder, job, review),
         "sent": job.get("sent"), "location": job.get("location", ""), "location_match": job.get("location_match", ""),
         "must_have": cov.get("must_have"), "preferred": cov.get("preferred"), "french": bool(job.get("french_version")),
-        "created": posting.stat().st_mtime if posting.exists() else 0,
+
         "terms": sorted({t for r in job.get("requirements", []) for t in r.get("terms", [])}, key=str.casefold),
-        "posting": posting.read_text(encoding="utf-8") if posting.exists() else "",
+        "posting": job.get("posting_text", ""),
     }
 
 
 def all_jobs() -> list[dict]:
-    return sorted((summary(p.parent) for p in JOBS.glob("*/job.json")), key=lambda j: -j["created"])
+    return [summary(folder) for folder in offers.all_folders()]  # newest first
 
 
 def search(jobs: list[dict], q: str = "", status_: str = "", skill: str = "", location: str = "") -> list[dict]:
@@ -71,10 +74,10 @@ def skills_overview() -> list[dict]:
     """Every posting term across jobs: how many jobs ask for it and, per job, the best result on your resume."""
     rank = {"met": 2, "partial": 1}
     best: dict[tuple[str, str], tuple[str, str]] = {}  # (term, job) -> (status, spelling)
-    for path in JOBS.glob("*/review.json"):
+    for path in JOBS.glob("*/review/review.json"):
         for r in load(path).get("results", []):
             for t in r.get("terms", []):
-                key = (t["term"].casefold(), path.parent.name)
+                key = (t["term"].casefold(), path.parent.parent.name)
                 status_ = t["status"] if t["status"] in rank else "missing"
                 if rank.get(status_, 0) >= rank.get(best.get(key, ("missing",))[0], 0):
                     best[key] = (status_, t["term"])
@@ -87,12 +90,12 @@ def skills_overview() -> list[dict]:
 
 
 def files_by_language(folder: Path) -> dict[str, list[str]]:
-    """PDFs grouped by language: the French version's files carry -FR in their name."""
-    groups = {"English": [], "French": []}
-    for p in sorted(folder.glob("*.pdf")):
-        groups["French" if "-FR" in p.stem else "English"].append(p.name)
-    for archive in sorted(folder.glob("sent-*/")):  # copies kept by reopen()
-        groups[f"As sent on {archive.name[5:]}"] = [f"{archive.name}/{p.name}" for p in sorted(archive.glob("*.pdf"))]
+    """PDF paths relative to the job folder: English (pdf/), French (pdf/fr/), and each copy kept by reopen()."""
+    rel = lambda p: p.relative_to(folder).as_posix()
+    groups = {"English": [rel(p) for p in sorted(paths.pdf_dir(folder).glob("*.pdf"))],
+              "French": [rel(p) for p in sorted(paths.pdf_dir(folder, "fr").glob("*.pdf"))]}
+    for archive in sorted(paths.history(folder).glob("sent-*/")):
+        groups[f"As sent on {archive.name[5:]}"] = [rel(p) for p in sorted(archive.rglob("*.pdf"))]
     return {k: v for k, v in groups.items() if v}
 
 
@@ -113,14 +116,12 @@ def filter_requirements(results: list[dict], q: str = "", status_: str = "", pri
 
 
 def reopen(folder: Path) -> Path:
-    """The user's choice to edit a sent job again: archive every file as sent into sent-<date>/, then drop "sent"."""
-    job_file = folder / "job.json"
-    job = json.loads(job_file.read_text(encoding="utf-8"))
-    archive = folder / f"sent-{job['sent']}"
-    archive.mkdir(exist_ok=True)
-    for f in folder.iterdir():
-        if f.is_file():
-            shutil.copy2(f, archive / f.name)
+    """The user's choice to edit a sent job again: copy everything as sent into history/sent-<date>/ (JSON content,
+    PDFs, review, and the offer as offer.json), then drop "sent"."""
+    job = offers.load(folder)
+    archive = paths.history(folder) / f"sent-{job['sent']}"
+    shutil.copytree(folder, archive, ignore=shutil.ignore_patterns("history"), dirs_exist_ok=True)
+    (archive / "offer.json").write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     job.pop("sent")
-    job_file.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    offers.save(folder, job)
     return archive

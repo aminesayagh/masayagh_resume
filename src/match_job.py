@@ -26,6 +26,8 @@ from pypdf import PdfReader
 
 import check_job
 import check_pdf
+import paths
+import offers
 import db
 
 HERE = Path(__file__).resolve().parent
@@ -191,28 +193,28 @@ def main() -> None:
     parser.add_argument("--out", type=Path, help="JSON report path (default: match.json next to the job file)")
     args = parser.parse_args()
 
-    job = json.loads(args.job.read_text(encoding="utf-8"))
+    job = offers.read(args.job)
     problems = [f for f in check_job.validate(job) if f["severity"] == "error"]
     if problems:
         print("The job file is not valid; fix it first (python3 src/check_job.py " + str(args.job) + "):")
         for f in problems:
             print(f"  [error] {f['message']}")
         sys.exit(1)
-    cv = args.cv or args.job.parent / "resume.pdf"
+    cv = args.cv or paths.resume_pdf(paths.folder_arg(args.job))
     try:
         pages = [p.extract_text() or "" for p in PdfReader(cv).pages]
     except Exception as exc:
         print(f"[error] PDF could not be read: {exc}")
         sys.exit(1)
-    content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
-                                          if p.exists()), cv.parent / "content.json")
+    content_path = args.content or (paths.content(folder) if (folder := paths.job_folder(cv))
+                                          else ROOT / "template" / "content" / "default.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
     aliases = db.aliases()  # skills + keywords in data/resume.db (was src/aliases.json)
 
     report = assess(job, pages, content, check_pdf.template_headings(check_pdf.TEMPLATE), aliases)
     rel = lambda p: str(p.resolve().relative_to(ROOT)) if p.resolve().is_relative_to(ROOT) else str(p)
     report = {"job": rel(args.job), "cv": rel(cv), "content": rel(content_path) if content else None, **report}
-    out = args.out or args.job.parent / "match.json"
+    out = args.out or paths.folder_arg(args.job) / "review" / "match.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 

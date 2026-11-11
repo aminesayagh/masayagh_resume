@@ -2,7 +2,7 @@
 """Review a resume PDF against one job posting in one command (ATS reviewer, milestone 4).
 
 Usage: python3 src/review_ats.py --job jobs/<slug>/job.json [--cv jobs/<slug>/resume.pdf]
-                             [--content jobs/<slug>/content.json] [--out jobs/<slug>/review.md] [--no-network]
+                             [--content jobs/<slug>/content/content.json] [--out jobs/<slug>/review/review.md] [--no-network]
        python3 src/review_ats.py --job jobs/<slug>/job.json --preview
 
 --preview prints one line per requirement term (met/partial/missing and the PDF line it
@@ -28,6 +28,8 @@ from pathlib import Path
 from pypdf import PdfReader
 
 import check_job
+import paths
+import offers
 import check_pdf
 import db
 import check_spelling
@@ -144,7 +146,7 @@ def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
 
 
 def placement_gaps(rep: dict) -> list[dict]:
-    """Terms missing from a resume section the job file targets (job.json "targets")."""
+    """Terms missing from a resume section the offer targets (its requirements' "targets")."""
     return [{"id": r["id"], "priority": r["priority"], "term": t["term"], "targets": r["targets"],
              "found_in": t["found_in"], "missing_from": t["missing_from"]}
             for r in rep["results"] if r.get("targets") for t in r.get("terms", []) if t.get("missing_from")]
@@ -308,7 +310,7 @@ def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bo
     """Review the PDF, print what changed since the last saved report (and the verdict), then save the
     report and interview.json. Runs after every job PDF build, so the dashboard app never shows a stale review."""
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
-    md_path = md_path or job_path.parent / "review.md"
+    md_path = md_path or paths.review_md(job_path.parent)
     previous = md_path.with_suffix(".json")
     rep = review(job, cv, content, network=network)
     if previous.exists():
@@ -342,16 +344,17 @@ def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bo
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--job", type=Path, required=True)
-    parser.add_argument("--cv", type=Path, help="resume PDF (default: the job file's pdf_name, else resume.pdf, next to it)")
-    parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
-    parser.add_argument("--out", type=Path, help="Markdown report (default: review.md next to the job file); JSON is saved beside it")
+    parser.add_argument("--job", type=Path, required=True, help="jobs/<slug> (or jobs/<slug>/job.json)")
+    parser.add_argument("--cv", type=Path, help="resume PDF (default: the job's pdf/<pdf_name>)")
+    parser.add_argument("--content", type=Path, help="content JSON (default: the job's content/content.json)")
+    parser.add_argument("--out", type=Path, help="Markdown report (default: the job's review/review.md); JSON is saved beside it")
     parser.add_argument("--no-network", action="store_true", help="skip opening the links in the PDF")
     parser.add_argument("--preview", action="store_true",
                         help="print the match per requirement and write no report; unreviewed requirements allowed")
     args = parser.parse_args()
 
-    job = json.loads(args.job.read_text(encoding="utf-8"))
+    args.job = paths.job(paths.folder_arg(args.job))
+    job = offers.load(args.job.parent)
     # Unreviewed requirements are allowed; the report is then labelled draft everywhere.
     problems = [f for f in check_job.validate(job, draft=True) if f["severity"] == "error"]
     if problems:
@@ -359,17 +362,17 @@ def main() -> None:
         for f in problems:
             print(f"  [error] {f['message']}")
         sys.exit(1)
-    cv = args.cv or args.job.parent / job.get("pdf_name", "resume.pdf")
-    if not cv.exists() and cv.with_name("_" + cv.name).exists():  # not ready to send (see build_resume.mark_readiness)
-        cv = cv.with_name("_" + cv.name)
-    content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
-                                          if p.exists()), cv.parent / "content.json")
+    folder = args.job.parent
+    cv = args.cv or paths.resume_pdf(folder)
+    if not cv.exists() and paths.not_ready(cv).exists():  # not ready to send (see build_resume.mark_readiness)
+        cv = paths.not_ready(cv)
+    content_path = args.content or paths.content(folder)
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
 
     if args.preview:
         rep = review(job, cv, content, network=False)
         print_preview(rep)
-        saved = args.job.parent / "review.json"
+        saved = paths.review_json(args.job.parent)
         if not saved.exists():
             print("No saved review.json to compare with; run without --preview to save a baseline.")
             return

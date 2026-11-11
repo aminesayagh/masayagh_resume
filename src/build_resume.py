@@ -40,6 +40,7 @@ def skills_problem(skills: list) -> str | None:
     return None
 sys.path.insert(0, str(HERE / "vendor"))
 sys.dont_write_bytecode = True
+import paths  # noqa: E402
 import qrcode  # bundled so the resume builds without another installation step
 
 
@@ -100,18 +101,16 @@ def chrome_command(browser: str, profile: str, html_file: Path) -> list[str]:
 
 
 def default_pdf(data_path: Path) -> Path:
-    """<folder>/<job.json's pdf_name> for a job folder, else <folder>/resume.pdf."""
-    folder = data_path.resolve().parent
-    job_file = folder / "job.json"
-    name = json.loads(job_file.read_text(encoding="utf-8")).get("pdf_name") if job_file.exists() else None
-    return folder / (name or "resume.pdf")
+    """A job's resume PDF (paths.resume_pdf) for a job's content file, else resume.pdf next to the file."""
+    folder = paths.job_folder(data_path)
+    return paths.resume_pdf(folder) if folder else data_path.resolve().parent / "resume.pdf"
 
 
 def frozen(folder: Path) -> str | None:
-    """A job whose files were sent ("sent": "YYYY-MM-DD" in job.json) is frozen: nothing may rebuild, translate or
+    """A job whose files were sent (its offer has a sent date in data/resume.db) is frozen: nothing may rebuild, translate or
     republish it, so the folder keeps exactly what the employer received. Changes go into a new version folder."""
-    job_file = folder / "job.json"
-    sent = json.loads(job_file.read_text(encoding="utf-8")).get("sent") if job_file.exists() else None
+    import offers  # late: offers imports paths, which this module imports
+    sent = offers.load(folder).get("sent") if offers.exists(folder) else None
     return (f"{folder.name} was sent on {sent}; its files are frozen. To change it, start a new version with "
             f"src/new_job.py (it creates the next -vN folder).") if sent else None
 
@@ -119,9 +118,9 @@ def frozen(folder: Path) -> str | None:
 def mark_readiness(data_path: Path, pdf_file: Path, output_path: Path | None, ready: bool) -> Path:
     """A job PDF that is not ready to send (over 3 pages, broken skills layout) is renamed with a leading '_'
     and the ready-named file is removed, so a not-ready resume can't be attached or published by mistake."""
-    if output_path is not None or not (data_path.resolve().parent / "job.json").exists():
+    if output_path is not None or paths.job_folder(data_path) is None:
         return pdf_file
-    draft = pdf_file.with_name("_" + pdf_file.name)
+    draft = paths.not_ready(pdf_file)
     if ready:
         draft.unlink(missing_ok=True)
         return pdf_file
@@ -133,10 +132,12 @@ def mark_readiness(data_path: Path, pdf_file: Path, output_path: Path | None, re
 def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None) -> None:
     """A job's own PDF changed: re-run its review so report, interview prep and dashboard match it.
     Skipped for the template, for -o builds elsewhere, and before requirements are drafted."""
-    job_file = data_path.resolve().parent / "job.json"
-    if output_path is not None or not job_file.exists():
+    folder = paths.job_folder(data_path)
+    import offers
+    if output_path is not None or folder is None or not offers.exists(folder):
         return
-    job = json.loads(job_file.read_text(encoding="utf-8"))
+    job_file = paths.job(folder)
+    job = offers.load(folder)
     if not job.get("requirements"):
         return
     import check_job, review_ats  # late: review_ats is heavier and not needed for template builds
@@ -150,7 +151,7 @@ def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None
 
 def build(data_path: Path, output_path: Path | None = None) -> Path:
     """Render and print `data_path` to PDF. Returns the PDF path."""
-    if output_path is None and (reason := frozen(data_path.resolve().parent)):
+    if output_path is None and (folder := paths.job_folder(data_path)) and (reason := frozen(folder)):
         raise SystemExit(reason)
     data = load_data(data_path.resolve(strict=True))
     qr_url = data["contact"].get("qr_url") or data["contact"]["website_link"]
@@ -203,13 +204,14 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
         print(f"WARNING: over {MAX_PAGES} pages. Last page starts with: {spill}")
     pdf_file = mark_readiness(data_path, pdf_file, output_path, int(page_count) <= MAX_PAGES and not problem)
     refresh_job_report(data_path, pdf_file, output_path)
-    if output_path is None and (data_path.resolve().parent / "job.json").exists():
+    if output_path is None and (folder := paths.job_folder(data_path)):
         import build_cover  # late: imports this module
-        build_cover.build(data_path.resolve().parent)
-        job = json.loads((data_path.resolve().parent / "job.json").read_text(encoding="utf-8"))
+        build_cover.build(folder)
+        import offers
+        job = offers.load(folder) if offers.exists(folder) else {}
         if job.get("french_version"):
             import build_fr  # the local French version follows every English build
-            build_fr.build(data_path.resolve().parent)
+            build_fr.build(folder)
     return pdf_file
 
 
@@ -218,7 +220,7 @@ def main() -> None:
     parser.add_argument("data", nargs="?", type=Path, default=DEFAULT_DATA,
                         help="JSON file for this job application (default: template/content/default.json)")
     parser.add_argument("-o", "--output", type=Path,
-                        help="PDF path (default: job.json's pdf_name in the JSON file's folder, else resume.pdf)")
+                        help="PDF path (default: a job's pdf/<pdf_name>, else resume.pdf next to the JSON file)")
     args = parser.parse_args()
     build(args.data, args.output)
 

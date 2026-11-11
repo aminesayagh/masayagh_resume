@@ -3,12 +3,12 @@
 
 Usage: python3 src/build_fr.py jobs/<slug>
 
-Applies when job.json has "french_version": true (a French posting that doesn't ask for English).
-1. Translates jobs/<slug>/content.json line by line: unchanged template lines reuse template/content/default-fr.json,
+Applies when the offer has "french_version": true (a French posting that doesn't ask for English).
+1. Translates jobs/<slug>/content/content.json line by line: unchanged template lines reuse template/content/default-fr.json,
    tailored lines reuse template/content/translations-fr.json. Any line still untranslated is written to
-   jobs/<slug>/translate-fr.json ({"English line": ""}); fill it in, rerun, and the entries move to
+   jobs/<slug>/content/translate-fr.json ({"English line": ""}); fill it in, rerun, and the entries move to
    translations-fr.json for every future job.
-2. Writes content-fr.json and builds <stem>-FR.pdf, with the same rules as English: over 3 pages or a broken
+2. Writes content-fr.json and builds pdf/fr/<stem>-FR.pdf, with the same rules as English: over 3 pages or a broken
    skills layout means a '_' prefix (not ready). While translations are missing, no French PDF is built and
    an existing one is renamed with '_', so a stale French version can't be sent.
 3. Builds the French cover letter from cover-fr.json when it exists (build_cover.build(..., lang="fr")).
@@ -23,6 +23,7 @@ from pathlib import Path
 from pypdf import PdfReader
 
 import build_resume
+import paths
 import db
 
 ROOT = build_resume.ROOT
@@ -78,14 +79,14 @@ def translate(node, memory: dict, missing: list, key=None):
 
 def hide(path: Path) -> None:
     if path.exists():
-        shutil.move(str(path), path.with_name("_" + path.name.lstrip("_")))
+        shutil.move(str(path), paths.not_ready(path))
 
 
 def build(folder: Path) -> Path | None:
     folder = folder.resolve()
     if reason := build_resume.frozen(folder):
         raise SystemExit(reason)
-    pending = folder / "translate-fr.json"
+    pending = paths.translate_fr(folder)
     if pending.exists():  # merge what was filled in, keep the rest pending
         filled = {k: v for k, v in json.loads(pending.read_text(encoding="utf-8")).items() if v.strip()}
         memory = json.loads(MEMORY.read_text(encoding="utf-8")) if MEMORY.exists() else {}
@@ -101,11 +102,10 @@ def build(folder: Path) -> Path | None:
         MEMORY.write_text(json.dumps({**memory, **rest}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         pending.unlink()
 
-    english = json.loads((folder / "content.json").read_text(encoding="utf-8"))
+    english = json.loads(paths.content(folder).read_text(encoding="utf-8"))
     missing: list[str] = []
     french = translate(english, translation_memory(), missing)
-    pdf = build_resume.default_pdf(folder / "content.json")
-    fr_pdf = pdf.with_name(f"{pdf.stem}-FR.pdf")
+    fr_pdf = paths.resume_pdf(folder, "fr")
     if missing:
         pending.write_text(json.dumps(dict.fromkeys(dict.fromkeys(missing), ""), indent=2, ensure_ascii=False) + "\n",
                            encoding="utf-8")
@@ -114,15 +114,15 @@ def build(folder: Path) -> Path | None:
         return None
 
     french["lang"] = "fr"
-    fr_content = folder / "content-fr.json"
+    fr_content = paths.content(folder, "fr")
     fr_content.write_text(json.dumps(french, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     built = build_resume.build(fr_content, fr_pdf)
     ready = len(PdfReader(built).pages) <= build_resume.MAX_PAGES and not build_resume.skills_problem(french["skills"])
-    (fr_pdf.with_name("_" + fr_pdf.name)).unlink(missing_ok=True)
+    paths.not_ready(fr_pdf).unlink(missing_ok=True)
     if not ready:
         hide(built)
         print(f"NOT READY TO SEND: French resume saved as _{fr_pdf.name}")
-    if (folder / "cover-fr.json").exists():
+    if paths.cover(folder, "fr").exists():
         import build_cover  # late: imports build_resume
         build_cover.build(folder, lang="fr")
     else:

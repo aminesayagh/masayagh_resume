@@ -14,8 +14,57 @@ import draft_job  # noqa: E402,F401  (its asserts check line numbering, quotes a
 import fetch_posting  # noqa: E402,F401  (its asserts check the JobPosting parsing)
 import review_ats  # noqa: E402
 import tailor  # noqa: E402
+import compose  # noqa: E402,F401  (its asserts check the pick: most offer terms, ties to the newest)
 import build_fr  # noqa: E402,F401  (its asserts check French-only posting detection)
 import skills_inventory  # noqa: E402,F401  (its asserts check skill splitting and year math)
+
+
+class PublishModesTest(unittest.TestCase):
+    """Runs publish_resume for real in modes none and folder, against a temporary config and job."""
+
+    def setUp(self):
+        import json
+        import config
+        import publish_resume
+        self.json, self.config, self.publish = json, config, publish_resume
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        import db
+        import offers
+        self.db, self.offers = db, offers
+        self.saved_db = (db.DB, db.DUMP)
+        db.DB, db.DUMP = root / "test.db", root / "test.sql"  # never the real data/resume.db
+        self.job = root / "acme-dev-v2"
+        (self.job / "pdf").mkdir(parents=True)
+        self.offer = {"title": "Acme — Dev", "posting_text": "Build things.", "company": "acme", "pdf_name": "A.pdf"}
+        offers.save(self.job, self.offer)
+        (self.job / "pdf" / "A.pdf").write_bytes(b"resume")
+        (self.job / "pdf" / "A-Cover-Letter.pdf").write_bytes(b"letter")
+        self.saved = config.FILE
+        config.FILE = root / "config.json"
+
+    def tearDown(self):
+        self.config.FILE = self.saved
+        self.db.DB, self.db.DUMP = self.saved_db
+        self.tmp.cleanup()
+
+    def test_none_publishes_nothing(self):
+        self.assertIsNone(self.publish.publish(self.job / "job.json"))  # no config.json at all
+
+    def test_folder_copies_resume_and_letter_under_the_version(self):
+        out = Path(self.tmp.name) / "out"
+        self.config.FILE.write_text(self.json.dumps({"publish": {
+            "mode": "folder", "folder": str(out), "site": "https://x.dev"}}), encoding="utf-8")
+        url = self.publish.publish(self.job / "job.json")
+        self.assertEqual((out / "resume/acme/v2/A.pdf").read_bytes(), b"resume")
+        self.assertTrue((out / "resume/acme/v2/A-Cover-Letter.pdf").exists())
+        self.assertEqual(url, "https://x.dev/resume/acme/v2/A.pdf")
+
+    def test_sent_jobs_are_never_published(self):
+        self.offers.save(self.job, {**self.offer, "sent": "2026-11-11"})
+        self.config.FILE.write_text(self.json.dumps({"publish": {"mode": "folder", "folder": self.tmp.name}}), encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            self.publish.publish(self.job / "job.json")
 
 
 class AddAllowTest(unittest.TestCase):

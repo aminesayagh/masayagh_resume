@@ -1,21 +1,21 @@
 # Creating a job file
 
-A job file turns a posting into a list of requirements the reviewer can check your resume against. Each requirement quotes the posting word for word, so every later finding traces back to what the employer actually wrote. Example: [`jobs/fictional-full-stack-v1/job.json`](../jobs/fictional-full-stack-v1/job.json).
+A job file turns a posting into a list of requirements the reviewer can check your resume against. Each requirement quotes the posting word for word, so every later finding traces back to what the employer actually wrote. Example: [`jobs/fictional-full-stack-v1/the offer`](../jobs/fictional-full-stack-v1/the offer).
 
 ## Steps
 
-1. Run `.venv/bin/python src/new_job.py` to scaffold `jobs/<company>-<title>-v<N>/` — it saves the posting as `posting.txt`, copies the master content to `content.json`, builds the PDF as `<Your-Name>-<Job-Title>-<Company>.pdf` (plus `cover.json` and the two cover letter PDFs, see the README), and writes a `job.json` skeleton (with that name in `"pdf_name"`) with `"posting_file"` already pointing at `posting.txt`.
-2. Add one requirement per thing the posting asks for, in `job.json`. When one line lists several skills ("Experience with React, Python, SQL"), make one requirement per skill. They can all share the same quote.
-3. Validate while you work: `.venv/bin/python src/check_job.py jobs/<slug>/job.json --draft`
+1. Run `.venv/bin/python src/new_job.py` to scaffold `jobs/<company>-<title>-v<N>/` — it stores the posting with the offer in `data/resume.db`, copies the master content to `content.json`, builds the PDF as `<Your-Name>-<Job-Title>-<Company>.pdf` (plus `cover.json` and the two cover letter PDFs, see the README), and records the offer (with that name in `"pdf_name"`) with no requirements yet.
+2. Add one requirement per thing the posting asks for, in the offer (`data/resume.db`). When one line lists several skills ("Experience with React, Python, SQL"), make one requirement per skill. They can all share the same quote.
+3. Validate while you work: `.venv/bin/python src/check_job.py jobs/<slug> --draft`
 4. Re-read each requirement against the posting, set `"reviewed": true`, and validate again without `--draft`. The file can be used for scoring only when it shows 0 errors.
-5. Run `.venv/bin/python src/review_ats.py --job jobs/<slug>/job.json` to fill in the matching section and evidence coverage.
+5. Run `.venv/bin/python src/review_ats.py --job jobs/<slug>` to fill in the matching section and evidence coverage.
 
 ## Skeleton
 
 ```json
 {
   "title": "Company — Role",
-  "posting_file": "jobs/<slug>/posting.txt",
+  "posting_text": "the full posting text",
   "requirements": [
     {
       "id": "R01",

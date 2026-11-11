@@ -10,6 +10,8 @@ from html import escape
 from pathlib import Path
 
 import config
+import offers
+import paths
 import skills_inventory
 
 HERE = Path(__file__).resolve().parent
@@ -62,9 +64,10 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "")
     links = " · ".join(x for x in (
         f'<a href="{escape(url)}">job posting</a>' if url else "",
         f'<a href="{escape(published)}">published resume</a>' if published else "",
-        f'<a href="{files}{escape(pdf)}">local PDF (ready to send)</a>' if pdf and (folder / pdf).exists() else
-        f'<a href="{files}_{escape(pdf)}">local PDF: NOT READY, do not send</a>' if pdf and (folder / f"_{pdf}").exists() else "",
-        f'<a href="{files}review.md">review.md</a>' if (folder / "review.md").exists() else "") if x)
+        f'<a href="{files}pdf/{escape(pdf)}">local PDF (ready to send)</a>' if pdf and paths.resume_pdf(folder).exists() else
+        f'<a href="{files}pdf/_{escape(pdf)}">local PDF: NOT READY, do not send</a>'
+        if pdf and paths.not_ready(paths.resume_pdf(folder)).exists() else "",
+        f'<a href="{files}review/review.md">review.md</a>' if paths.review_md(folder).exists() else "") if x)
     unreviewed = review.get("unreviewed", 0)
     parts = [f'<div class="card" id="{escape(folder.name)}"><h2>{escape(job.get("title", folder.name))}</h2>',
              f"<p>{tag('draft', 'partial')} {unreviewed} requirement(s) not reviewed yet; quotes and priorities may change.</p>"
@@ -91,7 +94,7 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "")
         parts.append(f"<h3>Requirements</h3><table><tr><th>Id</th><th>Priority</th><th>Status</th>"
                      f"<th>Requirement · posting quote</th><th>Terms</th><th>Resume line found</th></tr>{rows}</table>")
     else:
-        parts.append('<p class="muted">No requirements drafted yet: ask for them to be drafted from posting.txt.</p>')
+        parts.append('<p class="muted">No requirements drafted yet: ask for them to be drafted from the posting.</p>')
 
     gaps = [(r["id"], t["term"], r["targets"], t["found_in"], t["missing_from"]) for r in results if r.get("targets")
             for t in r.get("terms", []) if t.get("missing_from")]
@@ -111,7 +114,7 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "")
         parts.append(f"<h3>Interview prep</h3><ul>{hints}</ul><p class='muted'>{escape(prep['how_to_prepare'].get('source', ''))}</p>"
                      f"<table><tr><th>Id</th><th>Focus</th><th>Requirement</th><th>Your resume says</th><th>Terms not met</th></tr>{rows}</table>")
 
-    content_file = folder / "content.json"
+    content_file = paths.content(folder)
     if content_file.exists():
         skills = skills_inventory.job_skills(job, json.loads(content_file.read_text(encoding="utf-8")))
         rows = "".join(f"<tr><td>{escape(k['name'])}</td><td>{escape(skills_inventory.label(k['years']))}</td>"
@@ -124,7 +127,6 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "")
                      + (f"<p>{tag('start date needed', 'missing')} {escape(', '.join(missing))}</p>" if missing else "")
                      + f"<table><tr><th>Skill</th><th>Experience</th><th>In posting</th></tr>{rows}</table>")
 
-    posting = folder / "posting.txt"
-    if posting.exists():
-        parts.append(f"<details><summary>Full job posting</summary><pre>{escape(posting.read_text(encoding='utf-8'))}</pre></details>")
+    if posting_text := job.get("posting_text", ""):  # the posting lives with the offer in data/resume.db
+        parts.append(f"<details><summary>Full job posting</summary><pre>{escape(posting_text)}</pre></details>")
     return "".join(parts) + "</div>"

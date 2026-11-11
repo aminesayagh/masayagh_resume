@@ -33,7 +33,8 @@ class StatusTest(unittest.TestCase):
             folder = Path(tmp)
             req = [{"id": "R01", "reviewed": False}]
             self.assertEqual(data.status(folder, {"requirements": req}, {}), "draft")
-            (folder / "_resume.pdf").write_bytes(b"")
+            (folder / "pdf").mkdir(exist_ok=True)
+            (folder / "pdf" / "_resume.pdf").write_bytes(b"")
             self.assertEqual(data.status(folder, {"requirements": req}, {}), "not ready")
             self.assertEqual(data.status(folder, {"requirements": req, "sent": "2026-11-11"}, {}), "sent")
             self.assertEqual(data.status(folder, {"requirements": []}, {}), "not ready")
@@ -49,10 +50,12 @@ class RequirementFilterTest(unittest.TestCase):
 
     def test_files_grouped_by_language(self):
         with tempfile.TemporaryDirectory() as tmp:
-            for name in ("A.pdf", "A-Cover-Letter.pdf", "A-FR.pdf", "A-FR-Cover-Letter.pdf"):
-                (Path(tmp) / name).write_bytes(b"")
-            groups = data.files_by_language(Path(tmp))
-            self.assertEqual(groups["French"], ["A-FR-Cover-Letter.pdf", "A-FR.pdf"])
+            folder = Path(tmp)
+            (folder / "pdf" / "fr").mkdir(parents=True)
+            for name in ("pdf/A.pdf", "pdf/A-Cover-Letter.pdf", "pdf/fr/A-FR.pdf", "pdf/fr/A-FR-Cover-Letter.pdf"):
+                (folder / name).write_bytes(b"")
+            groups = data.files_by_language(folder)
+            self.assertEqual(groups["French"], ["pdf/fr/A-FR-Cover-Letter.pdf", "pdf/fr/A-FR.pdf"])
             self.assertEqual(len(groups["English"]), 2)
 
 
@@ -60,12 +63,19 @@ class ReopenTest(unittest.TestCase):
     def test_keeps_a_copy_of_the_sent_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)
-            (folder / "job.json").write_text(json.dumps({"title": "A — B", "sent": "2026-11-11"}), encoding="utf-8")
-            (folder / "resume.pdf").write_bytes(b"as sent")
+            import db
+            import offers
+            saved = (db.DB, db.DUMP)
+            db.DB, db.DUMP = folder / "test.db", folder / "test.sql"  # never the real data/resume.db
+            self.addCleanup(lambda: setattr(db, "DB", saved[0]) or setattr(db, "DUMP", saved[1]))
+            offers.save(folder, {"title": "A — B", "posting_text": "x", "sent": "2026-11-11"})
+            (folder / "pdf").mkdir()
+            (folder / "pdf" / "resume.pdf").write_bytes(b"as sent")
             archive = data.reopen(folder)
-            self.assertNotIn("sent", json.loads((folder / "job.json").read_text(encoding="utf-8")))
-            self.assertEqual((archive / "resume.pdf").read_bytes(), b"as sent")
-            self.assertIn("2026-11-11", json.loads((archive / "job.json").read_text(encoding="utf-8"))["sent"])
+            self.assertEqual(archive, folder / "history" / "sent-2026-11-11")
+            self.assertNotIn("sent", offers.load(folder))
+            self.assertEqual(json.loads((archive / "offer.json").read_text(encoding="utf-8"))["sent"], "2026-11-11")
+            self.assertEqual((archive / "pdf" / "resume.pdf").read_bytes(), b"as sent")
 
 
 class SkillsOverviewTest(unittest.TestCase):
@@ -83,13 +93,13 @@ class AppTest(unittest.TestCase):
     def test_pages_load_and_files_are_confined(self):
         self.assertEqual(self.client.get("/").status_code, 200)
         self.assertEqual(self.client.get("/skills").status_code, 200)
-        self.assertEqual(self.client.get("/job/fictional-full-stack-v1").status_code, 200)
+        slug = data.all_jobs()[0]["slug"]
+        self.assertEqual(self.client.get(f"/job/{slug}").status_code, 200)
         self.assertEqual(self.client.get("/job/../template").status_code, 404)
-        self.assertEqual(self.client.get("/files/fictional-full-stack-v1/job.json").status_code, 404)
+        self.assertEqual(self.client.get(f"/files/{slug}/../../config.json").status_code, 404)
 
     def test_sent_jobs_offer_no_changing_action(self):
-        sent = next(p.parent.name for p in data.JOBS.glob("*/job.json")
-                    if json.loads(p.read_text(encoding="utf-8")).get("sent"))
+        sent = next(j["slug"] for j in data.all_jobs() if j["sent"])
         self.assertEqual(self.client.get(f"/job/{sent}/confirm/tailor").status_code, 400)
         self.assertEqual(self.client.post(f"/job/{sent}/run/sent").status_code, 400)
 

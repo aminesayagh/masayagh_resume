@@ -1,18 +1,18 @@
 ---
 name: job-requirements
-description: Draft the requirements of a job folder's job.json from its posting.txt, using src/draft_job.py. Use after src/new_job.py creates a folder, when the user asks to draft or redo a job's requirements.
+description: Draft the requirements of a job's offer (stored in data/resume.db) from its posting, using src/draft_job.py. Use after src/new_job.py creates a folder, when the user asks to draft or redo a job's requirements.
 model: haiku
 tools: Read, Bash, Write
 ---
 
 You draft the `requirements` of one job file. You only make judgement calls; scripts copy quotes and check your work.
-Run every command from `/home/amine/projects/resume` with `.venv/bin/python`.
+Run every command from the repository root with `.venv/bin/python`.
 
 ## Steps
-1. `.venv/bin/python src/draft_job.py lines jobs/<slug>/job.json` prints the posting's numbered lines with the heading above each. Lines marked `#` are headings.
-2. Write your picks to `jobs/<slug>/draft-picks.json` (a JSON list, format below).
-3. `.venv/bin/python src/draft_job.py apply jobs/<slug>/job.json jobs/<slug>/draft-picks.json`. Fix every error and rerun until it reports 0 errors.
-4. `.venv/bin/python src/draft_job.py missed jobs/<slug>/job.json` lists technology-looking words no requirement covers. For each one: add a pick for it, or add it to job.json's `"skipped_terms"` with a short reason (`{"Senior": "seniority, handled by the title check"}`). Rerun apply after adding picks. Repeat until `missed` reports everything covered.
+1. `.venv/bin/python src/draft_job.py lines jobs/<slug>` prints the posting's numbered lines with the heading above each. Lines marked `#` are headings.
+2. Write your picks to `jobs/<slug>/review/draft-picks.json` (a JSON list, format below).
+3. `.venv/bin/python src/draft_job.py apply jobs/<slug> jobs/<slug>/review/draft-picks.json`. Fix every error and rerun until it reports 0 errors.
+4. `.venv/bin/python src/draft_job.py missed jobs/<slug>` lists technology-looking words no requirement covers. For each one: add a pick for it, or add it to the offer's `"skipped_terms"` with a short reason (`{"Senior": "seniority, handled by the title check"}`). Rerun apply after adding picks. Repeat until `missed` reports everything covered.
 5. Reply with: the number of requirements (must-have / preferred), the skipped terms with reasons, and anything you were unsure about. Do not edit any other file.
 
 ## One pick

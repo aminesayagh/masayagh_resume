@@ -3,9 +3,9 @@
 
 Usage: python3 src/build_cover.py jobs/<slug>
 
-Reads jobs/<slug>/cover.json. If it doesn't exist yet, creates it from template/content/default-cover.json,
-filling {company} and {job_title} from job.json. An empty "date" prints today's date.
-Writes next to the resume (job.json's pdf_name = <stem>.pdf):
+Reads jobs/<slug>/content/cover.json. If it doesn't exist yet, creates it from template/content/default-cover.json,
+filling {company} and {job_title} from the offer. An empty "date" prints today's date.
+Writes into jobs/<slug>/pdf/ (the offer's pdf_name = <stem>.pdf; French in pdf/fr/):
   <stem>-Cover-Letter.pdf             the cover letter alone (one page)
   <stem>-Resume-and-Cover-Letter.pdf  the resume pages, then the cover letter page
 A cover letter whose text overflows the page is saved with a leading '_' (not ready to send), like the resume.
@@ -25,6 +25,8 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from pypdf import PdfWriter
 
 import build_resume
+import paths
+import offers
 import check_style
 
 TEMPLATE_DIR = build_resume.TEMPLATE_DIR
@@ -50,7 +52,7 @@ def company_and_title(job: dict) -> tuple[str, str]:
 
 
 def ensure_cover(folder: Path, job: dict) -> Path:
-    path = folder / "cover.json"
+    path = paths.cover(folder)
     if not path.exists():
         company, title = company_and_title(job)
         text = DEFAULT_COVER.read_text(encoding="utf-8")
@@ -105,7 +107,7 @@ def render_pdf(data: dict, letter: dict, pdf_file: Path) -> bool:
 
 def settle(path: Path, ready: bool) -> Path:
     """Same convention as build_resume.mark_readiness: a not-ready PDF moves to '_<name>'; the stale twin goes."""
-    draft = path.with_name("_" + path.name)
+    draft = paths.not_ready(path)
     if ready:
         draft.unlink(missing_ok=True)
         return path
@@ -118,18 +120,18 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
     folder = folder.resolve()
     if reason := build_resume.frozen(folder):
         raise SystemExit(reason)
-    job = json.loads((folder / "job.json").read_text(encoding="utf-8"))
-    resume = build_resume.default_pdf(folder / "content.json")  # pdf_name, else resume.pdf
+    job = offers.load(folder)
+    resume = paths.resume_pdf(folder, lang)
     if lang == "fr":
-        resume = resume.with_name(f"{resume.stem}-FR.pdf")
-        letter = load_letter(folder / "cover-fr.json", lang="fr")
-        data = json.loads((folder / "content-fr.json").read_text(encoding="utf-8"))
+        letter = load_letter(paths.cover(folder, "fr"), lang="fr")
+        data = json.loads(paths.content(folder, "fr").read_text(encoding="utf-8"))
     else:
         letter = load_letter(ensure_cover(folder, job))
-        data = json.loads((folder / "content.json").read_text(encoding="utf-8"))
+        data = json.loads(paths.content(folder).read_text(encoding="utf-8"))
     stem = resume.stem
 
-    cover_pdf = folder / f"{stem}-Cover-Letter.pdf"
+    cover_pdf = paths.cover_pdf(folder, lang)
+    cover_pdf.parent.mkdir(parents=True, exist_ok=True)
     cover_ready = render_pdf(data, letter, cover_pdf)
     if not cover_ready:
         print("WARNING: the cover letter text runs past the page and is cut off; shorten cover.json's paragraphs.")
@@ -137,8 +139,8 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
 
     resume_ready = resume.exists()
     if not resume_ready:
-        resume = resume.with_name("_" + resume.name)  # build_resume marked it not ready
-    combined = folder / f"{stem}-Resume-and-Cover-Letter.pdf"
+        resume = paths.not_ready(resume)  # build_resume marked it not ready
+    combined = paths.combined_pdf(folder, lang)
     writer = PdfWriter()
     for part in (resume, final_cover):
         writer.append(str(part))

@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
-"""Keep data/resume.db in step with a job folder. Called after every job build and when a job is marked sent.
+"""Grow the library from a job folder: new approved lines (in their activity) and rewritten cover paragraphs.
+Called after every job build. The offer itself is written by src/offers.py.
 
 Usage: python3 src/db_sync.py jobs/<slug>      (or import: sync_job(folder))
 
-Records the offer and its requirements, every resume line used for the job that the library doesn't know yet
-(as an approved line of that experience, first used by this offer), rewritten cover-letter paragraphs, and,
-once the job is sent, a snapshot of its results. Sent offers keep their requirements as they were.
+Records every resume line used for the job that the library doesn't know yet (as an approved line of that
+experience and activity, first used by this offer) and rewritten cover-letter paragraphs.
 """
 
 import json
 import re
 import sys
-from datetime import date
 from pathlib import Path
 
-import build_fr
-import config
 import db
+import offers
+import paths
 
 ROOT = db.ROOT
 SAME_EXPERIENCE = {"technical consulting": "Technical Consultant",  # older resumes named it differently
@@ -53,11 +52,13 @@ def link_skills(con, table: str, key: str, row_id: int, text: str) -> None:
             con.execute(f"INSERT OR IGNORE INTO {table} ({key}, skill_id) VALUES (?, ?)", (row_id, sid))
 
 
-def add_line(con, experience_id: int, kind: str, text: str, offer_id: int | None, text_fr: str | None = None) -> None:
+def add_line(con, experience_id: int, kind: str, text: str, offer_id: int | None, text_fr: str | None = None,
+             activity_id: int | None = None) -> None:
+    """A new line joins the library; activity_id says which activity it rewords (from the job's composition.json)."""
     if not text.strip():
         return
-    cur = con.execute("INSERT OR IGNORE INTO descriptions (experience_id, kind, text_en, text_fr, first_offer_id) "
-                      "VALUES (?, ?, ?, ?, ?)", (experience_id, kind, text, text_fr, offer_id))
+    cur = con.execute("INSERT OR IGNORE INTO descriptions (experience_id, activity_id, kind, text_en, text_fr, "
+                      "first_offer_id) VALUES (?, ?, ?, ?, ?, ?)", (experience_id, activity_id, kind, text, text_fr, offer_id))
     if cur.rowcount:
         link_skills(con, "description_skills", "description_id", cur.lastrowid, text)
 
@@ -82,89 +83,39 @@ def sync_template(con=None) -> None:
         db.dump(con)
 
 
-TEST_FIXTURES = {"fictional-full-stack-v1"}  # the test job is not a real offer
 
 
 def sync_job(folder: Path, con=None) -> int | None:
-    if folder.resolve().name in TEST_FIXTURES:
-        return None
     own = con is None
     con = con or db.connect()
     folder = folder.resolve()
-    job, review, content = load(folder / "job.json"), load(folder / "review.json"), load(folder / "content.json")
+    if not offers.exists(folder, con):
+        return None
+    job, content = offers.load(folder, con), load(paths.content(folder))
     name, _, title = job["title"].partition(" — ")
-    posting = (folder / "posting.txt").read_text(encoding="utf-8")
-    pdf = job.get("pdf_name", "resume.pdf")
-    version = int(m[1]) if (m := re.search(r"-v(\d+)$", folder.name)) else 1
-    url = config.public_url(job.get("company", ""), version, pdf)  # None when publishing is off (config.json)
-    unreviewed = any(not r.get("reviewed") for r in job.get("requirements", []))
-    status = "sent" if job.get("sent") else ("draft" if unreviewed or not job.get("requirements") else "ready")
-    french = len(build_fr.FRENCH_WORDS.findall(posting)) > 2 * len(build_fr.ENGLISH_WORDS.findall(posting))
-    previous = con.execute("SELECT id FROM offers WHERE folder = ?", (f"jobs/{job.get('previous_version')}",)).fetchone()
-    values = (company(con, name.strip(), "prospect"), title or name, job.get("url"), pdf, url,
-              "fr" if french else "en", int(bool(job.get("french_version"))), job.get("location"),
-              job.get("location_match"), posting, status, job.get("sent"), previous and previous[0])
-    row = con.execute("SELECT id, status FROM offers WHERE folder = ?", (f"jobs/{folder.name}",)).fetchone()
-    if row:
-        oid, was_sent = row[0], row[1] == "sent"
-        con.execute("UPDATE offers SET company_id=?, title=?, link=?, pdf_name=?, resume_url=?, language=?, "
-                    "french_version=?, location=?, location_match=?, posting=?, status=?, sent_at=?, "
-                    "previous_offer_id=? WHERE id=?", (*values, oid))
-    else:
-        was_sent = False
-        oid = con.execute(
-            "INSERT INTO offers (company_id, title, link, pdf_name, resume_url, language, french_version, location, "
-            "location_match, posting, status, sent_at, previous_offer_id, folder, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (*values, f"jobs/{folder.name}", date.fromtimestamp((folder / "posting.txt").stat().st_mtime).isoformat())).lastrowid
-
-    if not was_sent:  # requirements of a sent offer stay as they were sent
-        old = [r for (r,) in con.execute("SELECT id FROM requirements WHERE offer_id = ?", (oid,))]
-        con.executemany("DELETE FROM requirement_terms WHERE requirement_id = ?", [(r,) for r in old])
-        con.execute("DELETE FROM offer_results WHERE offer_id = ?", (oid,))
-        con.execute("DELETE FROM requirements WHERE offer_id = ?", (oid,))
-        overrides = {o["id"]: o for o in job.get("overrides", [])}
-        codes = {}
-        for r in job.get("requirements", []):
-            o = overrides.get(r["id"], {})
-            codes[r["id"]] = rid = con.execute(
-                "INSERT INTO requirements (offer_id, section, priority, quote, description, kind, min_years, targets, "
-                "reviewed, note, override_status, override_reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (oid, r["section"], r["priority"], r["quote"], r.get("description", ""), r.get("kind", "evidence"),
-                 r.get("min_years"), ",".join(r.get("targets", [])) or None, int(bool(r.get("reviewed"))), r.get("note"),
-                 o.get("status"), o.get("reason"))).lastrowid
-            for t in r.get("terms", []):
-                skill = con.execute("SELECT s.id FROM skills s LEFT JOIN skill_keywords k ON k.skill_id = s.id "
-                                    "WHERE lower(s.name_en) = lower(?) OR lower(k.keyword) = lower(?) LIMIT 1", (t, t)).fetchone()
-                con.execute("INSERT OR IGNORE INTO requirement_terms (requirement_id, term, skill_id) VALUES (?, ?, ?)",
-                            (rid, t, skill and skill[0]))
-        if job.get("sent"):  # just sent: keep what the employer received, measured
-            for res in review.get("results", []):
-                for t in res.get("terms", []):
-                    if res["id"] in codes:
-                        con.execute("INSERT INTO offer_results (offer_id, requirement_id, term, status, found_in, "
-                                    "snapshot_at) VALUES (?, ?, ?, ?, ?, ?)",
-                                    (oid, codes[res["id"]], t["term"],
-                                     t["status"] if t["status"] in ("met", "partial") else "missing",
-                                     t.get("section"), job["sent"]))
-
+    oid = con.execute("SELECT id FROM offers WHERE folder = ?", (f"jobs/{folder.name}",)).fetchone()[0]
     experiences: dict[str, int] = {}  # company name (and product, e.g. "Hypeo") -> experience id
     for x, name_, detail in con.execute("SELECT e.id, c.name, e.detail FROM experiences e "
                                         "JOIN companies c ON c.id = e.company_id"):
         experiences[name_] = x
         if detail and detail.startswith("-"):
             experiences[detail.strip("- ").split(",")[0]] = x
-    for e in content.get("experience", []):  # lines approved for this job join the library
+    slots = {c["company"]: c for c in load(paths.composition(folder)) or []}
+    for e in content.get("experience", []):  # lines approved for this job join the library, in their activity
         if (x := experiences.get(company_name(e))) is None:
             print(f"db_sync: no experience '{company_name(e)}' in the library; its lines were not recorded.")
             continue
-        add_line(con, x, "description", e.get("description", ""), oid)
-        for b in e.get("bullets", []):
-            add_line(con, x, "bullet", b, oid)
+        slot = slots.get(company_name(e), {})
+        add_line(con, x, "description", e.get("description", ""), oid, activity_id=slot.get("description"))
+        for i, b in enumerate(e.get("bullets", [])):
+            bullets = slot.get("bullets", [])
+            add_line(con, x, "bullet", b, oid, activity_id=bullets[i] if i < len(bullets) else None)
+    for (orphan,) in con.execute("SELECT substr(text_en, 1, 60) FROM descriptions WHERE activity_id IS NULL"):
+        print(f"db_sync: line without an activity (attach it when reviewing the library): {orphan}…")
 
     default = load(ROOT / "template/content/default-cover.json").get("paragraphs", [])
     filled = [t.replace("{company}", name.strip()).replace("{job_title}", title or name) for t in default]
-    letter, letter_fr = load(folder / "cover.json"), load(folder / "cover-fr.json")
+    letter, letter_fr = load(paths.cover(folder)), load(paths.cover(folder, "fr"))
     paragraphs = letter.get("paragraphs", [])
     for i, text in enumerate(paragraphs):
         if text in filled:

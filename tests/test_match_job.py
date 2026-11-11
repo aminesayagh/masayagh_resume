@@ -80,7 +80,7 @@ class MatchJobTest(unittest.TestCase):
         self.assertEqual(y(3, None)["status"], "uncertain")
 
     def test_real_pdf_quotes_are_verbatim_and_deterministic(self):
-        job = json.loads((ROOT / "jobs" / "fictional-full-stack-v1" / "job.json").read_text(encoding="utf-8"))
+        job = json.loads((ROOT / "tests" / "fixtures" / "fictional-job.json").read_text(encoding="utf-8"))
         content = json.loads((ROOT / "template" / "content" / "default.json").read_text(encoding="utf-8"))
         pages = [p.extract_text() for p in PdfReader(ROOT / "template" / "build" / "resume.pdf").pages]
         aliases = db.aliases()
