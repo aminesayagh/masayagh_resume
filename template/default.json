@@ -11,7 +11,7 @@
     "github": "https://github.com/aminesayagh",
     "linkedin": "https://linkedin.com/in/mohamedamine-sayagh"
   },
-  "summary": "Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale.",
+  "summary": "Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted development to turn inefficient workflows into practical tools that help teams get more done. Looking to join a team that ships products at scale.",
   "skills": [
     [
       "JavaScript",
@@ -69,7 +69,7 @@
       "role": "Software Developer",
       "description": "Developed product features for Hypeo, a MENA creator-marketing SaaS platform connecting influencers and media creators with businesses launching online content campaigns.",
       "bullets": [
-        "Delivered a contextual AI chat that transforms open-ended client conversations into configured marketing campaigns, integrated with the internal influencer database.",
+        "Integrated an AI agent experience that transforms open-ended client conversations into configured marketing campaigns, connected to the internal influencer database.",
         "Built and refined the front-end experience in close collaboration with a senior technical lead, continuously adapting workflows to backend integration and evolving business requirements.",
         "Automated the manipulation and extraction of influencer data from web-scraping outputs and database pipelines used across the platform.",
         "Took ownership of maintenance, deployment support, access/IP handover, and bug-fix coordination during a technical leadership transition.",
@@ -91,23 +91,15 @@
       ]
     },
     {
-      "dates": "Nov 2024 - Jan 2025",
+      "dates": "Aug 2024 - Jan 2025",
       "company": "Rich Media,",
       "detail": "Morocco",
       "role": "Software Developer",
-      "description": "Designed and integrated product features for Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data for campaign planning.",
+      "description": "Designed and integrated product features for Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data for campaign planning. Delivered high-conversion lead-capture landing pages for Miratti (Morocco), French Dandy (Dubai), and Horde Studio (USA), supporting growth campaigns showcased at regional events (e.g., Forbes Middle East).",
       "bullets": [
         "Designed UI flows and prototypes for Inflauditor to validate product direction and accelerate development decisions.",
         "Integrated data insights such as creator scoring, language detection, and sentiment indicators to support campaign planning."
       ]
-    },
-    {
-      "dates": "Aug 2024 - Oct 2024",
-      "company": "Digital Consulting",
-      "detail": "",
-      "role": "Software Developer",
-      "description": "Delivered high-conversion lead-capture landing pages for Miratti (Morocco), French Dandy (Dubai), and Horde Studio (USA), supporting growth campaigns showcased at regional events (e.g., Forbes Middle East).",
-      "bullets": []
     },
     {
       "dates": "Aug 2023 - Jul 2024",

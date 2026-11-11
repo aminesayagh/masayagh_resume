@@ -51,6 +51,12 @@
       "end": null
     },
     {
+      "name": "Code review",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
       "name": "Codex",
       "match": [],
       "start": null,
@@ -191,6 +197,12 @@
       "end": null
     },
     {
+      "name": "Microservices",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
       "name": "NestJS",
       "match": [],
       "start": null,
@@ -284,6 +296,12 @@
     },
     {
       "name": "SDKs",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Sonar",
       "match": [],
       "start": null,
       "end": null

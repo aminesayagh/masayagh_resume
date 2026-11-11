@@ -1,31 +1,46 @@
 {
-  "cv": "jobs/fictional-full-stack-v1/resume.pdf",
+  "cv": "jobs/fictional-full-stack-v1/_resume.pdf",
   "job": "jobs/fictional-full-stack-v1/job.json",
   "content": "jobs/fictional-full-stack-v1/content.json",
   "title": "FICTIONAL — Full Stack Software Developer, Workflow Products",
-  "generated": "2026-11-05",
+  "generated": "2026-11-11",
   "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
+  "unreviewed": 0,
+  "job_title": {
+    "posting": "Full Stack Software Developer, Workflow Products",
+    "resume": "Software Developer",
+    "match": false,
+    "severity": "warning",
+    "message": "Resume title 'Software Developer' differs from the posting's title 'Full Stack Software Developer, Workflow Products'. Recruiters and ATS searches match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you."
+  },
   "pdf_check": {
-    "pdf": "jobs/fictional-full-stack-v1/resume.pdf",
+    "pdf": "jobs/fictional-full-stack-v1/_resume.pdf",
     "pages": [
       {
         "page": 1,
-        "chars": 1719
+        "chars": 1916
       },
       {
         "page": 2,
-        "chars": 1860
+        "chars": 2189
       },
       {
         "page": 3,
-        "chars": 1680
+        "chars": 1213
       }
     ],
-    "experience_years": {
-      "merged": 5.4,
-      "summed": 9.1
-    },
+    "experience_years": null,
     "findings": [
+      {
+        "severity": "warning",
+        "code": "field_missing",
+        "message": "Heading 'Projects' not found in the PDF text."
+      },
+      {
+        "severity": "warning",
+        "code": "field_missing",
+        "message": "Heading 'Certifications' not found in the PDF text."
+      },
       {
         "severity": "warning",
         "code": "role_missing",
@@ -52,43 +67,6 @@
         "message": "'MySchool' has no job title; parsers expect title, company and dates per entry."
       },
       {
-        "severity": "warning",
-        "code": "link_icon_only",
-        "message": "linkedin 'linkedin.com/in/mohamedamine-sayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured."
-      },
-      {
-        "severity": "warning",
-        "code": "link_icon_only",
-        "message": "github 'github.com/aminesayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured."
-      },
-      {
-        "severity": "warning",
-        "code": "date_single",
-        "message": "'Lavish Trading' has a single date 'Aug 2021'; parsers expect a range ('Aug 2021 - Aug 2021' or 'Aug 2021 - Sep 2021') to compute its length."
-      },
-      {
-        "severity": "info",
-        "code": "date_overlap",
-        "message": "10 overlapping job pair(s): LingoWP / Phoenix AI USA Inc.; Cogy Tech / Rich Media; Digital Consulting / Cyber Cohesion; Digital Consulting / Sodiadd; Cyber Cohesion / Jonas Agency; Cyber Cohesion / Sodiadd; Cyber Cohesion / Happy Water NFT; Jonas Agency / Sodiadd; Jonas Agency / Happy Water NFT; Sodiadd / Happy Water NFT. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.",
-        "pairs": [
-          "LingoWP / Phoenix AI USA Inc.",
-          "Cogy Tech / Rich Media",
-          "Digital Consulting / Cyber Cohesion",
-          "Digital Consulting / Sodiadd",
-          "Cyber Cohesion / Jonas Agency",
-          "Cyber Cohesion / Sodiadd",
-          "Cyber Cohesion / Happy Water NFT",
-          "Jonas Agency / Sodiadd",
-          "Jonas Agency / Happy Water NFT",
-          "Sodiadd / Happy Water NFT"
-        ]
-      },
-      {
-        "severity": "info",
-        "code": "experience_years",
-        "message": "Experience from your dates: 5.4 years counting overlaps once, 9.1 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these."
-      },
-      {
         "severity": "info",
         "code": "meta_author",
         "message": "The PDF has no author field; set it to your name."
@@ -96,7 +74,7 @@
       {
         "severity": "warning",
         "code": "file_name",
-        "message": "File name 'resume.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'."
+        "message": "File name '_resume.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'."
       },
       {
         "severity": "info",
@@ -150,12 +128,6 @@
         "severity": "info",
         "code": "repeated_opener",
         "field": "experience",
-        "message": "experience: 3 lines start with 'Delivered'; vary the verbs."
-      },
-      {
-        "severity": "info",
-        "code": "repeated_opener",
-        "field": "experience",
         "message": "experience: 3 lines start with 'Built'; vary the verbs."
       },
       {
@@ -166,7 +138,7 @@
       }
     ]
   },
-  "match_version": 1,
+  "match_version": 2,
   "results": [
     {
       "id": "R01",
@@ -174,6 +146,7 @@
       "priority": "preferred",
       "description": "Build React/Next.js front ends and Python/FastAPI services",
       "posting_quote": "Build accessible React or Next.js interfaces and Python or FastAPI services.",
+      "targets": null,
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -189,7 +162,11 @@
           "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
           "page": 1,
           "section": "skills",
-          "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "Next.js",
@@ -199,7 +176,11 @@
           "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
           "page": 1,
           "section": "skills",
-          "rationale": "'Next.js' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Next.js' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "Python",
@@ -209,7 +190,11 @@
           "quote": "Skills JavaScript PHP Python SQL",
           "page": 1,
           "section": "skills",
-          "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "FastAPI",
@@ -219,7 +204,11 @@
           "quote": "FastAPI WordPress Odoo PostgreSQL",
           "page": 1,
           "section": "skills",
-          "rationale": "'FastAPI' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'FastAPI' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -231,22 +220,27 @@
       "priority": "preferred",
       "description": "Design and integrate APIs on PostgreSQL",
       "posting_quote": "Design and integrate APIs backed by PostgreSQL.",
+      "targets": null,
       "keyword": "alias",
       "status": "partial",
       "method": "exact",
       "quote": "FastAPI WordPress Odoo PostgreSQL",
       "page": 1,
-      "rationale": "Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated'); use the posting's term.",
+      "rationale": "Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.",
       "terms": [
         {
           "term": "APIs",
           "keyword": "alias",
           "status": "met",
           "method": "alias",
-          "quote": "Implemented a Go API service to orchestrate isolated",
-          "page": 3,
+          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "page": 2,
           "section": "experience",
-          "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term."
+          "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "PostgreSQL",
@@ -256,11 +250,15 @@
           "quote": "FastAPI WordPress Odoo PostgreSQL",
           "page": 1,
           "section": "skills",
-          "rationale": "'PostgreSQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'PostgreSQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p2). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
       "id": "R03",
@@ -268,10 +266,11 @@
       "priority": "preferred",
       "description": "Prototype from product requirements, then ship tested features",
       "posting_quote": "Turn product requirements into prototypes, then ship tested features.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Designed UI flows and prototypes for Inflauditor to validate",
+      "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
       "page": 2,
       "rationale": "'prototypes' found in experience text.",
       "terms": [
@@ -280,10 +279,14 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Designed UI flows and prototypes for Inflauditor to validate",
+          "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
           "page": 2,
           "section": "experience",
-          "rationale": "'prototypes' found in experience text."
+          "rationale": "'prototypes' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -295,6 +298,7 @@
       "priority": "preferred",
       "description": "Maintain Docker and CI/CD workflows",
       "posting_quote": "Maintain Docker-based development and CI/CD delivery workflows.",
+      "targets": null,
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -310,7 +314,11 @@
           "quote": "Web scraping CI/CD Docker Testing Practices",
           "page": 1,
           "section": "skills",
-          "rationale": "'Docker' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Docker' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "CI/CD",
@@ -320,7 +328,11 @@
           "quote": "Web scraping CI/CD Docker Testing Practices",
           "page": 1,
           "section": "skills",
-          "rationale": "'CI/CD' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'CI/CD' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -332,10 +344,11 @@
       "priority": "preferred",
       "description": "Work with product and design on customer-facing SaaS",
       "posting_quote": "Collaborate with product and design colleagues on customer-facing SaaS tools.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
+      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
       "page": 1,
       "rationale": "'SaaS' found in experience text.",
       "terms": [
@@ -344,10 +357,14 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
+          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
           "page": 1,
           "section": "experience",
-          "rationale": "'SaaS' found in experience text."
+          "rationale": "'SaaS' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -379,6 +396,7 @@
       "priority": "must_have",
       "description": "Professional experience with React",
       "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "targets": null,
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -394,7 +412,11 @@
           "quote": "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
           "page": 1,
           "section": "skills",
-          "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'React' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -406,6 +428,7 @@
       "priority": "must_have",
       "description": "Professional experience with Python",
       "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "targets": null,
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -421,7 +444,11 @@
           "quote": "Skills JavaScript PHP Python SQL",
           "page": 1,
           "section": "skills",
-          "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Python' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -433,6 +460,7 @@
       "priority": "must_have",
       "description": "Professional experience with SQL",
       "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "targets": null,
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -448,7 +476,11 @@
           "quote": "Skills JavaScript PHP Python SQL",
           "page": 1,
           "section": "skills",
-          "rationale": "'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'SQL' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -460,6 +492,7 @@
       "priority": "must_have",
       "description": "Professional experience with API integration",
       "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -475,7 +508,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'API integration' not found in this PDF."
+          "rationale": "'API integration' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -487,6 +522,7 @@
       "priority": "must_have",
       "description": "Professional experience with automated testing",
       "posting_quote": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -502,7 +538,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'automated testing' not found in this PDF."
+          "rationale": "'automated testing' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -514,6 +552,7 @@
       "priority": "must_have",
       "description": "Computer science degree, or equivalent practical experience",
       "posting_quote": "A computer science degree or equivalent practical experience.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -529,7 +568,11 @@
           "quote": "2020 - 2023 Bachelor's in Computer Science",
           "page": 3,
           "section": "education",
-          "rationale": "'computer science' found in education text."
+          "rationale": "'computer science' found in education text.",
+          "found_in": [
+            "education"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -541,12 +584,13 @@
       "priority": "must_have",
       "description": "Written English",
       "posting_quote": "Clear written communication in English.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
       "quote": "Languages Arabic - Native French - Professional English - Professional",
       "page": 3,
-      "rationale": "'English' found in education text.",
+      "rationale": "'English' found in languages text.",
       "terms": [
         {
           "term": "English",
@@ -555,8 +599,12 @@
           "method": "exact",
           "quote": "Languages Arabic - Native French - Professional English - Professional",
           "page": 3,
-          "section": "education",
-          "rationale": "'English' found in education text."
+          "section": "languages",
+          "rationale": "'English' found in languages text.",
+          "found_in": [
+            "languages"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -568,6 +616,7 @@
       "priority": "preferred",
       "description": "Experience with AWS",
       "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -583,7 +632,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'AWS' not found in this PDF."
+          "rationale": "'AWS' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -595,6 +646,7 @@
       "priority": "preferred",
       "description": "Experience with Kubernetes",
       "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -610,7 +662,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'Kubernetes' not found in this PDF."
+          "rationale": "'Kubernetes' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -622,6 +676,7 @@
       "priority": "preferred",
       "description": "Experience with TypeScript",
       "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -637,7 +692,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'TypeScript' not found in this PDF."
+          "rationale": "'TypeScript' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -649,10 +706,11 @@
       "priority": "preferred",
       "description": "Experience with creator-marketing",
       "posting_quote": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
+      "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
       "page": 1,
       "rationale": "'creator-marketing' found in experience text.",
       "terms": [
@@ -661,10 +719,14 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS",
+          "quote": "Contributed to Hypeo, a MENA creator-marketing SaaS platform",
           "page": 1,
           "section": "experience",
-          "rationale": "'creator-marketing' found in experience text."
+          "rationale": "'creator-marketing' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -676,6 +738,7 @@
       "priority": "must_have",
       "description": "Based in Morocco, remote-first",
       "posting_quote": "The role is remote-first and based in Morocco.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -691,7 +754,12 @@
           "quote": "Casablanca, Morocco",
           "page": 1,
           "section": "header",
-          "rationale": "'Morocco' found in header text."
+          "rationale": "'Morocco' found in header text.",
+          "found_in": [
+            "experience",
+            "header"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,

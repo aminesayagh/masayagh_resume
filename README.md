@@ -20,8 +20,8 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 
 ## Layout
 
-- `template/` — the master resume: `default.json` (content), `resume.html` (layout), `resume.pdf` (baseline build).
-- `jobs/<company>-<title>-v<N>/` — one folder per application: `posting.txt`, `job.json` (requirements), `content.json` (tailored content, starts as a copy of `template/default.json`), the PDF (named `<Your-Name>-<Job-Title>-<Company>.pdf`, set by `pdf_name` in `job.json`), and the generated `review.json`/`review.md`.
+- `template/` — the master resume: `default.json` (content), `resume.html` (layout), `resume.pdf` (baseline build); and the cover letter: `default-cover.json` (default text), `cover-letter.html` (layout).
+- `jobs/<company>-<title>-v<N>/` — one folder per application: `posting.txt`, `job.json` (requirements), `content.json` (tailored content, starts as a copy of `template/default.json`), the PDF (named `<Your-Name>-<Job-Title>-<Company>.pdf`, set by `pdf_name` in `job.json`), `cover.json` (cover letter text) with its two PDFs (`…-Cover-Letter.pdf` and `…-Resume-and-Cover-Letter.pdf`), and the generated `review.json`/`review.md`.
 - `src/` — all the tools.
 
 ## Start a new job application
@@ -70,6 +70,24 @@ Build one application's tailored version:
 ```
 
 The PDF is saved next to the JSON file: in a job folder it uses `job.json`'s `pdf_name`, otherwise `resume.pdf`. Use `-o path/to/resume.pdf` to choose another location. HTML is created temporarily during rendering and removed afterward.
+
+## Cover letter
+
+Every job build also produces the cover letter, so a job folder always holds three PDFs:
+
+| File | Content |
+| --- | --- |
+| `<pdf_name>` | The resume |
+| `<stem>-Cover-Letter.pdf` | The cover letter, one page |
+| `<stem>-Resume-and-Cover-Letter.pdf` | The resume pages, then the cover letter page |
+
+The letter text lives in `jobs/<slug>/cover.json`. The first build creates it from `template/default-cover.json`, filling in the company and job title from `job.json`; an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
+
+```bash
+.venv/bin/python src/build_cover.py jobs/company-role-v1
+```
+
+If the text runs past the page, the build warns and saves both cover PDFs with a leading `_` (not ready to send), like an over-length resume. Only the resume is published to the portfolio.
 
 ## Edit content
 
@@ -192,8 +210,10 @@ For another posting, pass `--cv`, `--job`, `--out`, and a comma-separated `--ski
 | `template/default.json` | Master resume content |
 | `template/resume.html`, `template/fonts/`, `template/assets/` | Page layout, print styles, bundled Poppins fonts (OFL license) and SVG logos |
 | `template/resume.pdf` | Baseline build |
+| `template/default-cover.json`, `template/cover-letter.html` | Default cover letter text and its layout |
 | `jobs/<slug>/` | One folder per application: posting, job requirements, tailored content, built PDF, and report |
-| `src/build_resume.py` | Validates content, creates the QR, checks page fit, and exports the PDF |
+| `src/build_resume.py` | Validates content, creates the QR, checks page fit, and exports the PDF; for a job folder, then runs `build_cover.py` |
+| `src/build_cover.py` | Builds a job's cover letter PDF and the combined resume + cover letter PDF from `cover.json` |
 | `src/new_job.py` | Scaffolds a new `jobs/<slug>/` folder from a pasted posting |
 | `src/check_template.py` | Checks whether `template/` is ready (no spelling/style/PDF findings) to start a new application |
 | `src/check_spelling.py`, `check_style.py`, `check_pdf.py`, `check_job.py`, `match_job.py`, `review_ats.py` | ATS reviewer tools |
@@ -202,5 +222,5 @@ For another posting, pass `--cv`, `--job`, `--out`, and a comma-separated `--ski
 | `tests/` | Tests for the reviewer (`.venv/bin/python -m unittest discover -s tests -t .`) |
 | `docs/` | Reviewer plan and job file guide |
 | `examples/` | Local cv-matcher runner (unrelated experiment, see `docs/ats-reviewer-plan.md`) |
-| `.claude/skills/ats-review/`, `AGENTS.md` | Instructions for AI assistants |
+| `.claude/skills/ats-review/`, `.claude/skills/draft-cover-letter/`, `.claude/skills/publish-resume/`, `AGENTS.md` | Instructions for AI assistants |
 

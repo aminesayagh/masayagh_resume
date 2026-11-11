@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-"""Build jobs/<slug>/dashboard.html: one page with everything known about one job offer.
+"""Render one job's page (requirements, gaps, interview prep, skills with years, posting) as HTML.
 
-Usage: python3 src/dashboard.py [jobs/<slug> ...]   (no argument: every job folder)
-
-Reads the folder's job.json, review.json, interview.json and posting.txt and writes a
-static page: location check, links, evidence coverage, requirements with the resume
-lines that back them, interview prep topics and the full posting. Nothing is computed here that the other tools don't already
-write; rerun it after src/review_ats.py or src/new_job.py (both call it).
+Used by the local dashboard app (dashboard/app.py); it writes no files.
 """
 
 import json
-from datetime import datetime
 from html import escape
 from pathlib import Path
 
@@ -57,7 +51,7 @@ def coverage(review: dict) -> str:
     return f"must-have <b>{cov['must_have']}</b> · preferred <b>{cov['preferred']}</b>"
 
 
-def job_card(folder: Path, job: dict, review: dict, prep: dict) -> str:
+def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "") -> str:
     url, pdf = job.get("url"), job.get("pdf_name")
     published = f"{SITE}/resume/{job['company']}/{pdf}" if job.get("company") and pdf else None
     pdf_check = review.get("pdf_check", {})
@@ -66,9 +60,9 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict) -> str:
     links = " · ".join(x for x in (
         f'<a href="{escape(url)}">job posting</a>' if url else "",
         f'<a href="{escape(published)}">published resume</a>' if published else "",
-        f'<a href="{escape(pdf)}">local PDF (ready to send)</a>' if pdf and (folder / pdf).exists() else
-        f'<a href="_{escape(pdf)}">local PDF: NOT READY, do not send</a>' if pdf and (folder / f"_{pdf}").exists() else "",
-        f'<a href="review.md">review.md</a>' if (folder / "review.md").exists() else "") if x)
+        f'<a href="{files}{escape(pdf)}">local PDF (ready to send)</a>' if pdf and (folder / pdf).exists() else
+        f'<a href="{files}_{escape(pdf)}">local PDF: NOT READY, do not send</a>' if pdf and (folder / f"_{pdf}").exists() else "",
+        f'<a href="{files}review.md">review.md</a>' if (folder / "review.md").exists() else "") if x)
     unreviewed = review.get("unreviewed", 0)
     parts = [f'<div class="card" id="{escape(folder.name)}"><h2>{escape(job.get("title", folder.name))}</h2>',
              f"<p>{tag('draft', 'partial')} {unreviewed} requirement(s) not reviewed yet; quotes and priorities may change.</p>"
@@ -132,22 +126,3 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict) -> str:
     if posting.exists():
         parts.append(f"<details><summary>Full job posting</summary><pre>{escape(posting.read_text(encoding='utf-8'))}</pre></details>")
     return "".join(parts) + "</div>"
-
-
-def build(folder: Path) -> Path:
-    job = load(folder / "job.json")
-    card = job_card(folder, job, load(folder / "review.json"), load(folder / "interview.json"))
-    title = escape(job.get("title", folder.name))
-    out = folder / "dashboard.html"
-    out.write_text(f"<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>{title}</title><style>{CSS}</style>"
-                   f"</head><body><p class='muted'>Built {datetime.now():%Y-%m-%d %H:%M} from {escape(folder.name)}/. "
-                   f"Coverage shows how much of the posting the resume text backs up; it is not an ATS score or a "
-                   f"hiring prediction.</p>{card}</body></html>", encoding="utf-8")
-    return out
-
-
-if __name__ == "__main__":
-    import sys
-    folders = [Path(a) for a in sys.argv[1:]] or sorted(p.parent for p in JOBS.glob("*/job.json"))
-    for folder in folders:
-        print(f"Dashboard: {build(folder)}")

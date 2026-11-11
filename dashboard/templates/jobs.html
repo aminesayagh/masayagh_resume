@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Jobs <span class="muted">({{ jobs|length }} of {{ total }})</span></h1>
+<form class="filters" method="get">
+  <input name="q" value="{{ q }}" placeholder="Search company, title, posting…" size="34">
+  <select name="status"><option value="">Any status</option>{% for s in statuses %}<option {{ 'selected' if s == status }}>{{ s }}</option>{% endfor %}</select>
+  <input name="skill" value="{{ skill }}" placeholder="Skill asked (e.g. Java)">
+  <input name="location" value="{{ location }}" placeholder="Location (e.g. same city)">
+  <button>Filter</button> <a href="/">Clear</a>
+</form>
+<table><tr><th>Offer</th><th>Status</th><th>Must-have</th><th>Preferred</th><th>Location</th><th>FR</th></tr>
+{% for j in jobs %}
+<tr><td><a href="/job/{{ j.slug }}">{{ j.company }} — {{ j.title }}</a><div class="muted">{{ j.slug }}</div></td>
+<td><span class="tag {{ j.status|replace(' ', '-') }}">{{ j.status }}</span>{% if j.sent %}<div class="muted">{{ j.sent }}</div>{% endif %}</td>
+<td>{{ j.must_have if j.must_have is not none else '–' }}</td><td>{{ j.preferred if j.preferred is not none else '–' }}</td>
+<td>{{ j.location }}<div class="muted">{{ j.location_match }}</div></td><td>{{ 'yes' if j.french else '' }}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">No job matches.</td></tr>{% endfor %}
+</table>
+<p class="muted">Coverage = (met + 0.5 × partial) ÷ requirements, per priority. It is not an ATS score.</p>
+{% endblock %}

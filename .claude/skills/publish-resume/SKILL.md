@@ -25,6 +25,7 @@ The link ends in the PDF's real name, so a download keeps that name. Each publis
 - `src/new_job.py` publishes once, automatically, when it creates a job folder.
 - **After every rebuild of a job's PDF** (`src/build_resume.py jobs/<slug>/content.json`), run the command above. The user expects the site to always have the latest version.
 - If the PDF did not change, it prints "Already published, unchanged" and pushes nothing.
+- Only the resume is published. The cover letter PDFs (`…-Cover-Letter.pdf`, `…-Resume-and-Cover-Letter.pdf`) stay in the job folder.
 
 ## What it does
 

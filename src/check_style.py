@@ -19,8 +19,26 @@ FIRST_PERSON = re.compile(r"\b(I|I'm|I've|me|my|mine|we|our|us)\b")  # case-sens
 WEAK_OPENERS = ("helped", "contributed", "assisted", "worked on", "participated", "involved in",
                 "responsible for", "tasked with", "in charge of", "supported")
 RESULT = re.compile(r"\d|%|\b(one|two|three|four|five|six|seven|eight|nine|ten|dozens?|hundreds?|thousands?)\b", re.I)
+# Short or structural words that repeat naturally; everything 4+ letters outside this list is checked.
+COMMON = set("""that this with from into their they them than then when where which while what will would have
+been were also more most such each other over under across within about after before during using used
+your there these those only very well both make made""".split())
+WORD = re.compile(r"[a-z][a-z'-]{3,}")
+OVERUSED_LINES = 4
 MAX_BULLET_WORDS = 30
 MAX_SUMMARY_WORDS = 60
+
+
+def repeats(text: str) -> list[str]:
+    """Words of 4+ letters used twice or more in one sentence or line."""
+    counts = Counter(w for w in WORD.findall(text.casefold()) if w not in COMMON)
+    return sorted(w for w, n in counts.items() if n > 1)
+
+
+def overused(texts: list[str], min_lines: int = OVERUSED_LINES) -> dict[str, int]:
+    """Words that appear in min_lines or more different lines."""
+    counts = Counter(w for t in texts for w in set(WORD.findall(t.casefold())) if w not in COMMON)
+    return {w: n for w, n in counts.most_common() if n >= min_lines}
 
 
 def check(content: dict) -> dict:
@@ -55,6 +73,14 @@ def check(content: dict) -> dict:
         if field.split(" ")[0].endswith("]") and len(words) > MAX_BULLET_WORDS:
             add("warning", "too_long", field, f"{len(words)} words; bullets over {MAX_BULLET_WORDS} get skimmed. Split or trim.")
 
+    for field, text in [("summary", summary)] + lines:
+        if twice := repeats(text):
+            add("warning", "repeated_word", field, f"uses {', '.join(repr(w) for w in twice)} more than once; "
+                "vary the wording.")
+    if lines and (words := overused([t for _, t in lines])):
+        add("info", "overused_word", "experience", "same words in many lines: "
+            + ", ".join(f"'{w}' ({n})" for w, n in words.items()) + ". Vary some of them.")
+
     measured = [f for f, t in lines if RESULT.search(t)]
     if lines:
         add("info", "measurable", "experience", f"{len(measured)} of {len(lines)} lines include a number or measurable "
@@ -64,6 +90,11 @@ def check(content: dict) -> dict:
         if n >= 3:
             add("info", "repeated_opener", "experience", f"{n} lines start with '{verb.capitalize()}'; vary the verbs.")
     return {"findings": findings}
+
+
+assert repeats("Software developer joining a software team building products, building tools.") == ["building", "software"]
+assert repeats("Built the API and shipped it.") == []
+assert overused(["business a", "business b", "business c", "business d", "x"]) == {"business": 4}
 
 
 def main() -> None:

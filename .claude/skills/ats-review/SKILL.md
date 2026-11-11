@@ -41,7 +41,7 @@ Each tool defaults to its input's own folder: run against `template/default.json
 .venv/bin/python src/new_job.py --company X --title Y --posting FILE   #    or from pasted text when the site blocks reading
 .venv/bin/python src/check_spelling.py jobs/<slug>/content.json   # 1. spelling: warnings only
 .venv/bin/python src/check_style.py jobs/<slug>/content.json      # 2. writing style: warnings only
-.venv/bin/python src/build_resume.py jobs/<slug>/content.json     # 3. build jobs/<slug>/<pdf_name>
+.venv/bin/python src/build_resume.py jobs/<slug>/content.json     # 3. build jobs/<slug>/<pdf_name> + the two cover letter PDFs
 .venv/bin/python src/check_pdf.py jobs/<slug>/<pdf_name>           # 4. PDF text: exit 1 on errors
 .venv/bin/python src/check_job.py jobs/<slug>/job.json             # 5. validate the job file
 .venv/bin/python src/review_ats.py --job jobs/<slug>/job.json --preview  # match per term, writes nothing, drafts OK
@@ -55,13 +55,17 @@ Each tool defaults to its input's own folder: run against `template/default.json
 
 **Years of experience per skill:** `template/skills.json` holds every resume skill, its posting synonyms (`match`) and the user's start date; years are computed to today. Each dashboard has a "Skills for application forms" box ready to paste. After adding skills to any `content.json`, run `src/skills_inventory.py sync`, then `missing`, and **ask the user for each start date** (never guess); record with `src/skills_inventory.py set "<skill>" YYYY-MM`.
 
+**French version (local only):** when the posting is French and doesn't ask for English, `job.json` gets `"french_version": true` (set by `new_job.py`). Every English build then runs `src/build_fr.py`: unchanged lines take their French from `template/default-fr.json`, tailored lines from `template/translations-fr.json`; anything new goes to `jobs/<slug>/translate-fr.json` for you to translate (concise, faithful, nothing added), then rerun. Output `<pdf_name stem>-FR.pdf` (+ French cover letter from `cover-fr.json`), same 3-page and `_` rules. Tailor and match in English only; the French version is never published. When `template/default.json` changes, update `default-fr.json` in step (same shape).
+
+**Sent = frozen:** when the user sends an application, add `"sent": "YYYY-MM-DD"` to its `job.json`. From then on `build_resume.py`, `build_cover.py`, `build_fr.py`, `tailor.py` and `publish_resume.py` refuse that folder, and `check_template.py` no longer lists it for refresh. Never edit a sent folder or propagate template changes into it; changes go into a new version folder. See AGENTS.md.
+
 **Not ready = `_` prefix:** a job PDF over 3 pages or with a broken skills layout is saved as `_<pdf_name>` and the ready-named file is removed. `publish_resume.py` refuses it and the dashboard labels it "NOT READY, do not send". Never rename it by hand; fix the content and rebuild.
 
 **Every job PDF build refreshes the review:** `src/build_resume.py jobs/<slug>/content.json` re-runs the review (no network), prints what changed since the previous report with a verdict, and saves `review.md`/`review.json`, `interview.json` and `dashboard.html`. The dashboard is therefore never older than the PDF. (Skipped for the template, for `-o` builds and before requirements exist.)
 
 **While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `src/spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (`job.json`'s `template_sha`); those are safe to refresh with `cp template/default.json`, rebuild and publish.
 
-**Dashboard:** `jobs/<slug>/dashboard.html` gives the full picture of one offer (location check, links, coverage, requirements with posting quotes and resume lines, interview prep, full posting). `review_ats.py` and `new_job.py` rebuild it; `src/dashboard.py [jobs/<slug>]` rebuilds one or all. Open it from WSL with `explorer.exe "$(wslpath -w jobs/<slug>/dashboard.html)"`.
+**Dashboard:** run the local app (`dashboard/README.md`): `.venv/bin/python -m uvicorn dashboard.app:app --host 127.0.0.1`, then http://127.0.0.1:8000. Job pages are no longer written into `jobs/`; `dashboard/` is separate and only reads them. To change a sent job: `src/new_job.py --from jobs/<slug>` creates the next `-vN` folder with its tailoring (published under `/resume/<company>/vN/`).
 
 **Publishing (step 7):** run it after every rebuild of a job's PDF. Details and rules: [`../publish-resume/SKILL.md`](../publish-resume/SKILL.md).
 

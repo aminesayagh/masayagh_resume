@@ -65,7 +65,7 @@
       "role": "Software Developer",
       "description": "Developed product features for Hypeo, a MENA creator-marketing SaaS platform connecting influencers and media creators with businesses launching online content campaigns.",
       "bullets": [
-        "Delivered a contextual AI chat that transforms open-ended client conversations into configured marketing campaigns, integrated with the internal influencer database.",
+        "Integrated an AI agent experience that transforms open-ended client conversations into configured marketing campaigns, connected to the internal influencer database.",
         "Built and refined the front-end experience in close collaboration with a senior technical lead, continuously adapting workflows to backend integration and evolving business requirements.",
         "Automated the manipulation and extraction of influencer data from web-scraping outputs and database pipelines used across the platform.",
         "Took ownership of maintenance, deployment support, access/IP handover, and bug-fix coordination during a technical leadership transition.",

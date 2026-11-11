@@ -1,0 +1,225 @@
+{
+  "name": "Mohamed Amine Sayagh",
+  "role": "Ingénieur logiciel",
+  "contact": {
+    "phone": "(+212) 616-13 71 24",
+    "phone_link": "tel:+212616137124",
+    "email": "mohamedamine@masayagh.com",
+    "location": "Casablanca, Maroc",
+    "website": "masayagh.com/hire",
+    "website_link": "https://www.masayagh.com/hire",
+    "github": "https://github.com/aminesayagh",
+    "linkedin": "https://linkedin.com/in/mohamedamine-sayagh"
+  },
+  "summary": "Développeur logiciel qui conçoit des expériences produit simplifiant des processus complexes. J'allie ingénierie, design visuel, sens métier et ingénierie assistée par l'IA pour transformer des workflows inefficaces en outils concrets qui rendent les équipes plus efficaces. Je souhaite rejoindre une équipe qui développe des produits à grande échelle.",
+  "skills": [
+    [
+      "Java",
+      "JavaScript",
+      "Python",
+      "PHP"
+    ],
+    [
+      "Spring Boot",
+      "API REST",
+      "Node.js / NestJS",
+      "Git"
+    ],
+    [
+      "FastAPI",
+      "Microservices",
+      "Sonar",
+      "PostgreSQL"
+    ],
+    [
+      "Revue de code",
+      "CI/CD",
+      "Docker",
+      "Pratiques de test"
+    ],
+    [
+      "Figma",
+      "Framer",
+      "Design interactif",
+      "Prototypage"
+    ],
+    [
+      "Claude Code & Codex",
+      "Intégrations MCP",
+      "Intégration d'API LLM",
+      "Workflows d'agents IA"
+    ]
+  ],
+  "experience": [
+    {
+      "dates": "Sept. 2026 - Présent",
+      "company": "Consultant technique,",
+      "detail": "France",
+      "role": "Développeur logiciel",
+      "description": "",
+      "bullets": [
+        "Tarifpublic.fr : conseil technique pour une marketplace de la commande publique soutenue par l'État français, pour une tarification standardisée des produits.",
+        "Workflows d'agents IA pour automatiser les décisions métier des missions d'agences internationales."
+      ]
+    },
+    {
+      "dates": "Juil. 2025 - Sept. 2026",
+      "company": "Phoenix AI USA Inc.",
+      "detail": "- Hypeo, MENA",
+      "role": "Développeur logiciel",
+      "description": "Fonctionnalités produit pour Hypeo, plateforme SaaS de marketing d'influence (MENA) reliant influenceurs et créateurs aux entreprises qui lancent des campagnes de contenu en ligne.",
+      "bullets": [
+        "Intégration d'une expérience d'agent IA qui transforme des conversations clients ouvertes en campagnes marketing configurées, reliée à la base interne d'influenceurs.",
+        "Conception et amélioration du front-end avec un lead technique senior, en adaptant les workflows à l'intégration back-end et à l'évolution des besoins métier.",
+        "Automatisation de l'extraction et du traitement des données d'influenceurs issues du web scraping et des pipelines de données de la plateforme.",
+        "Prise en charge de la maintenance, du support aux déploiements, de la passation des accès et de la PI, et de la coordination des correctifs lors d'une transition de direction technique.",
+        "Documentation des modules métier clés, des zones non implémentées et des solutions d'architecture pour la planification des développements futurs.",
+        "Solution externe de métriques sur l'audience des créateurs et leurs collaborations, ensuite adoptée et intégrée aux workflows de l'entreprise."
+      ]
+    },
+    {
+      "dates": "Févr. 2025 - Juin 2025",
+      "company": "Cogy Tech,",
+      "detail": "Maroc",
+      "role": "Développeur logiciel",
+      "description": "Co-conception et déploiement d'un processus standardisé de livraison logicielle, alignant les workflows de l'équipe et réduisant les coûts de livraison.",
+      "bullets": [
+        "Démarche de prototypage réutilisable pour valider les besoins métier sur plusieurs cas d'usage avant le développement.",
+        "Suivi des KPI de sprint dans Odoo et identification des blocages pour fiabiliser la planification et augmenter le débit.",
+        "Mise en production de 02Book, assistant de rédaction IA pour rédacteurs B2B, utilisé par des clients comme Orange et Le Matin.",
+        "Montée en compétences en conception logicielle sous mentorat continu, sur des besoins clients et des contraintes de livraison."
+      ]
+    },
+    {
+      "dates": "Août 2024 - Janv. 2025",
+      "company": "Rich Media,",
+      "detail": "Maroc",
+      "role": "Développeur logiciel",
+      "description": "Conception et intégration de fonctionnalités pour Inflauditor, tableau de bord d'aide à la décision qui permet aux marques d'analyser des données de créateurs à grande échelle. Landing pages de génération de leads à fort taux de conversion pour Miratti (Maroc), French Dandy (Dubaï) et Horde Studio (États-Unis), pour des campagnes présentées lors d'événements régionaux (ex. Forbes Middle East).",
+      "bullets": [
+        "Parcours UI et prototypes pour Inflauditor afin de valider l'orientation produit et d'accélérer les décisions de développement.",
+        "Intégration d'indicateurs (scoring des créateurs, détection de langue, analyse de sentiment) pour la planification des campagnes."
+      ]
+    },
+    {
+      "dates": "Août 2023 - Juil. 2024",
+      "company": "Cyber Cohesion,",
+      "detail": "Singapour",
+      "role": "Développeur logiciel",
+      "description": "Direction du développement web d'une plateforme CTF de compétitions de sécurité, utilisée lors d'événements comme OWASP AppSec Days, BSides Singapore et ISACA.",
+      "bullets": [
+        "Service API en Go orchestrant des déploiements d'applications isolées, pour un environnement d'entraînement sécurisé.",
+        "Expérience web de Warzone, tableau de bord de suivi de la progression des équipes, des scores et de la gamification."
+      ]
+    },
+    {
+      "dates": "Mai 2023 - Juil. 2023",
+      "company": "Sodiadd,",
+      "detail": "France",
+      "role": "Développeur logiciel",
+      "description": "Développement d'un site d'abonnement responsive pour des plans d'investissement immobilier individuels.",
+      "bullets": []
+    },
+    {
+      "dates": "Oct. 2022 - Avr. 2023",
+      "company": "Jonas Agency,",
+      "detail": "Londres",
+      "role": "Développeur Full Stack",
+      "description": "",
+      "bullets": [
+        "Automatisation de la livraison de nouveaux sites par la réutilisation de modèles éprouvés, réduisant les cycles de mise en production.",
+        "Sites de génération de leads à forte conversion pour les campagnes clients."
+      ]
+    },
+    {
+      "dates": "Juil. 2022 - Sept. 2022",
+      "company": "Happy Water NFT,",
+      "detail": "France",
+      "role": "Développeur logiciel",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "dates": "Août 2021 - Juin 2022",
+      "company": "Lavish Trading,",
+      "detail": "Londres",
+      "role": "Développeur logiciel",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "dates": "Janv. 2021 - Juin 2021",
+      "company": "MySchool,",
+      "detail": "Maroc",
+      "role": "Développeur logiciel",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "dates": "2016 - 2020",
+      "company": "Freelance,",
+      "detail": "Maroc",
+      "role": "Web designer",
+      "description": "",
+      "bullets": []
+    }
+  ],
+  "projects": [
+    {
+      "dates": "21 jours ouvrés",
+      "name": "OrbitRows CLI",
+      "tech": "Python · CLI · Agent IA · SQLite · SQL · JEV · GLiNER2",
+      "link": "https://www.masayagh.com/work/orbitrows/"
+    },
+    {
+      "dates": "43 jours ouvrés",
+      "name": "LingoWP",
+      "tech": "WordPress · React · Python · FastAPI · PostgreSQL · FreeBSD",
+      "link": "https://www.masayagh.com/work/lingowp/"
+    }
+  ],
+  "education": [
+    {
+      "dates": "2023 - 2025",
+      "degree": "Master en Big Data & Cloud Computing",
+      "institution": "Université Hassan II, Casablanca"
+    },
+    {
+      "dates": "2020 - 2023",
+      "degree": "Licence en informatique",
+      "institution": "Université Hassan II, Casablanca"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Building with the Claude API",
+      "issuer": "Anthropic",
+      "link": "https://www.masayagh.com/badge/claude-api"
+    },
+    {
+      "name": "Model Context Protocol: Advanced Topics",
+      "issuer": "Anthropic",
+      "link": "https://www.masayagh.com/badge/mcp-advanced-topics"
+    },
+    {
+      "name": "Fundamentals of Agents",
+      "issuer": "Hugging Face",
+      "link": "https://www.masayagh.com/badge/fundamentals-of-agents"
+    }
+  ],
+  "languages": [
+    {
+      "language": "Arabe",
+      "level": "Langue maternelle"
+    },
+    {
+      "language": "Français",
+      "level": "Professionnel"
+    },
+    {
+      "language": "Anglais",
+      "level": "Professionnel"
+    }
+  ],
+  "lang": "fr"
+}

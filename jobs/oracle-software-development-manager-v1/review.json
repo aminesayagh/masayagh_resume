@@ -3,7 +3,7 @@
   "job": "jobs/oracle-software-development-manager-v1/job.json",
   "content": "jobs/oracle-software-development-manager-v1/content.json",
   "title": "Oracle — Software Development Manager",
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
   "unreviewed": 36,
   "job_title": {
@@ -18,7 +18,7 @@
     "pages": [
       {
         "page": 1,
-        "chars": 1945
+        "chars": 1944
       },
       {
         "page": 2,
@@ -1236,7 +1236,7 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Delivered a contextual generative AI chat that transforms open-",
+          "quote": "Integrated a generative AI agent experience that transforms open-",
           "page": 1,
           "section": "experience",
           "rationale": "'generative AI' found in experience text.",

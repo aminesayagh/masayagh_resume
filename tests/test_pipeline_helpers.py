@@ -14,6 +14,7 @@ import draft_job  # noqa: E402,F401  (its asserts check line numbering, quotes a
 import fetch_posting  # noqa: E402,F401  (its asserts check the JobPosting parsing)
 import review_ats  # noqa: E402
 import tailor  # noqa: E402
+import build_fr  # noqa: E402,F401  (its asserts check French-only posting detection)
 import skills_inventory  # noqa: E402,F401  (its asserts check skill splitting and year math)
 
 

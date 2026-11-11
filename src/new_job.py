@@ -2,6 +2,7 @@
 """Scaffold a new job application folder from a posting.
 
 Usage: python3 src/new_job.py --url JOB_URL
+       python3 src/new_job.py --from jobs/<slug>     # next version of a job, keeping its tailoring
        python3 src/new_job.py [--company NAME] [--title TITLE] [--posting FILE]
 
 --url reads the title, company, description and location from the posting page
@@ -25,8 +26,8 @@ import unicodedata
 from pathlib import Path
 
 import build_resume
+import build_fr
 import check_template
-import dashboard
 import fetch_posting
 import publish_resume
 import review_ats
@@ -54,7 +55,33 @@ def next_version(slug: str) -> int:
     return max(versions, default=0) + 1
 
 
+COPIED = ("job.json", "posting.txt", "content.json", "cover.json", "cover-fr.json")
+
+
+def new_version(source: Path) -> Path:
+    """Copy a job (typically a sent, frozen one) into its next -vN folder, keeping its tailoring, ready to edit."""
+    source = source.resolve()
+    base = re.sub(r"-v\d+$", "", source.name)
+    folder = JOBS_DIR / f"{base}-v{next_version(base)}"
+    folder.mkdir()
+    for name in COPIED:
+        if (source / name).exists():
+            shutil.copyfile(source / name, folder / name)
+    job = json.loads((folder / "job.json").read_text(encoding="utf-8"))
+    job.pop("sent", None)
+    job.pop("template_sha", None)  # tailored content, not a template copy
+    job["posting_file"] = f"jobs/{folder.name}/posting.txt"
+    job["previous_version"] = source.name
+    (folder / "job.json").write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"Created {folder.relative_to(ROOT)} from {source.name} (not sent; edit, then run src/tailor.py).")
+    build_resume.build(folder / "content.json")
+    return folder
+
+
 def main() -> None:
+    if len(sys.argv) == 3 and sys.argv[1] == "--from":
+        new_version(Path(sys.argv[2]))
+        return
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--company")
     parser.add_argument("--title")
@@ -97,6 +124,7 @@ def main() -> None:
            "pdf_name": pdf_name(name, title, company),
            "company": slugify(company),
            **({"url": found["url"], "location": found["location"], "location_match": found["location_match"]} if found else {}),
+           "french_version": build_fr.is_french_only(posting),
            "template_sha": hashlib.sha256(content_path.read_bytes()).hexdigest(),
            "requirements": []}
     job_path = folder / "job.json"
@@ -113,7 +141,6 @@ def main() -> None:
     print(f"\nCreated {folder}")
     if rep.get("job_title") and not rep["job_title"]["match"]:
         print(f"[warning] {rep['job_title']['message']}")
-    print(f"Dashboard: {dashboard.build(folder)}")
     publish_resume.publish(job_path)
     print(f"Report so far: PDF readability + spelling + style (no job requirements yet, so no matching).")
     print(f"Next: draft {job_path.relative_to(ROOT)}'s requirements from posting.txt (see "

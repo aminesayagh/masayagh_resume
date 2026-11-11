@@ -1,6 +1,6 @@
 {
   "job": "Oracle — Software Development Manager",
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "draft_requirements_unreviewed": 36,
   "summary": {
     "prove_claim": 3,
@@ -245,7 +245,7 @@
       "requirement": "Machine learning or generative AI",
       "posting_says": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
       "your_resume_says": [
-        "Delivered a contextual generative AI chat that transforms open-"
+        "Integrated a generative AI agent experience that transforms open-"
       ],
       "terms_not_met": [
         "machine learning"

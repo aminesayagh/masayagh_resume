@@ -1,12 +1,20 @@
 {
-  "cv": "jobs/oracle-senior-manager-platform-software-engineering-v1/Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf",
+  "cv": "jobs/oracle-senior-manager-platform-software-engineering-v1/_Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf",
   "job": "jobs/oracle-senior-manager-platform-software-engineering-v1/job.json",
   "content": "jobs/oracle-senior-manager-platform-software-engineering-v1/content.json",
   "title": "Oracle — Senior Manager, Platform Software Engineering",
-  "generated": "2026-11-09",
+  "generated": "2026-11-11",
   "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
+  "unreviewed": 0,
+  "job_title": {
+    "posting": "Senior Manager, Platform Software Engineering",
+    "resume": "Software Engineer",
+    "match": false,
+    "severity": "warning",
+    "message": "Resume title 'Software Engineer' differs from the posting's title 'Senior Manager, Platform Software Engineering'. Recruiters and ATS searches match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you."
+  },
   "pdf_check": {
-    "pdf": "jobs/oracle-senior-manager-platform-software-engineering-v1/Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf",
+    "pdf": "jobs/oracle-senior-manager-platform-software-engineering-v1/_Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf",
     "pages": [
       {
         "page": 1,
@@ -21,24 +29,8 @@
         "chars": 1448
       }
     ],
-    "experience_years": {
-      "merged": 10.8,
-      "summed": 10.9
-    },
+    "experience_years": null,
     "findings": [
-      {
-        "severity": "info",
-        "code": "date_overlap",
-        "message": "1 overlapping job pair(s): Technical Consultant / Phoenix AI USA Inc.. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.",
-        "pairs": [
-          "Technical Consultant / Phoenix AI USA Inc."
-        ]
-      },
-      {
-        "severity": "info",
-        "code": "experience_years",
-        "message": "Experience from your dates: 10.8 years counting overlaps once, 10.9 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these."
-      },
       {
         "severity": "info",
         "code": "meta_author",
@@ -64,7 +56,7 @@
       }
     ]
   },
-  "match_version": 1,
+  "match_version": 2,
   "results": [
     {
       "id": "R01",
@@ -72,6 +64,7 @@
       "priority": "must_have",
       "description": "Full-stack development expertise",
       "posting_quote": "Strong full-stack software development expertise, including modern front-end technologies, service development, APIs, data integration and cloud-based application architectures.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -87,7 +80,11 @@
           "quote": "Tarifpublic.fr, provide full-stack technical consulting for a French",
           "page": 1,
           "section": "experience",
-          "rationale": "'full-stack' found in experience text."
+          "rationale": "'full-stack' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -99,6 +96,7 @@
       "priority": "must_have",
       "description": "Modern front-end technologies",
       "posting_quote": "Strong full-stack software development expertise, including modern front-end technologies, service development, APIs, data integration and cloud-based application architectures.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -114,7 +112,11 @@
           "quote": "Built and refined the front-end experience in close collaboration",
           "page": 1,
           "section": "experience",
-          "rationale": "'front-end' found in experience text."
+          "rationale": "'front-end' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -126,6 +128,7 @@
       "priority": "must_have",
       "description": "APIs and service development",
       "posting_quote": "Strong full-stack software development expertise, including modern front-end technologies, service development, APIs, data integration and cloud-based application architectures.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -141,7 +144,12 @@
           "quote": "Built a data integration with external APIs for creator audience and",
           "page": 2,
           "section": "experience",
-          "rationale": "'APIs' found in experience text."
+          "rationale": "'APIs' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -153,6 +161,7 @@
       "priority": "must_have",
       "description": "Data integration",
       "posting_quote": "Strong full-stack software development expertise, including modern front-end technologies, service development, APIs, data integration and cloud-based application architectures.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -168,7 +177,12 @@
           "quote": "Built a data integration with external APIs for creator audience and",
           "page": 2,
           "section": "experience",
-          "rationale": "'data integration' found in experience text."
+          "rationale": "'data integration' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -180,6 +194,7 @@
       "priority": "must_have",
       "description": "Cloud-based application architectures",
       "posting_quote": "Strong full-stack software development expertise, including modern front-end technologies, service development, APIs, data integration and cloud-based application architectures.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -195,7 +210,11 @@
           "quote": "Education 2023 - 2025 Master's in Big Data & Cloud Computing",
           "page": 3,
           "section": "education",
-          "rationale": "'cloud' found in education text."
+          "rationale": "'cloud' found in education text.",
+          "found_in": [
+            "education"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -207,6 +226,7 @@
       "priority": "must_have",
       "description": "Hiring, coaching and retaining engineers",
       "posting_quote": "Experience hiring, developing, coaching and retaining high-performing software engineers.",
+      "targets": null,
       "keyword": "some",
       "status": "partial",
       "method": "exact",
@@ -222,7 +242,11 @@
           "quote": "hiring of new engineers.",
           "page": 2,
           "section": "experience",
-          "rationale": "'hiring' found in experience text."
+          "rationale": "'hiring' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "coaching",
@@ -232,7 +256,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'coaching' not found in this PDF."
+          "rationale": "'coaching' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -244,6 +270,7 @@
       "priority": "must_have",
       "description": "Managing teams in a matrixed organisation",
       "posting_quote": "Demonstrated success managing teams in a matrixed organisation, with shared accountability across functional and delivery leaders.",
+      "targets": null,
       "keyword": "some",
       "status": "partial",
       "method": "exact",
@@ -259,7 +286,11 @@
           "quote": "Singapore, and ISACA. Shared in managing teams and supported the",
           "page": 2,
           "section": "experience",
-          "rationale": "'managing teams' found in experience text."
+          "rationale": "'managing teams' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "matrixed",
@@ -269,7 +300,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'matrixed' not found in this PDF."
+          "rationale": "'matrixed' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -281,6 +314,7 @@
       "priority": "must_have",
       "description": "Delivering enterprise software, cloud services or developer platforms",
       "posting_quote": "Experience delivering enterprise software, cloud services, developer platforms, frameworks or shared engineering capabilities.",
+      "targets": null,
       "keyword": "some",
       "status": "partial",
       "method": "exact",
@@ -296,7 +330,11 @@
           "quote": "Develop enterprise software with AI agent workflows that automate",
           "page": 1,
           "section": "experience",
-          "rationale": "'enterprise software' found in experience text."
+          "rationale": "'enterprise software' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "developer platforms",
@@ -306,7 +344,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'developer platforms' not found in this PDF."
+          "rationale": "'developer platforms' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         },
         {
           "term": "frameworks",
@@ -316,7 +356,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'frameworks' not found in this PDF."
+          "rationale": "'frameworks' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -328,6 +370,7 @@
       "priority": "must_have",
       "description": "Establishing engineering standards and practices",
       "posting_quote": "Experience establishing and improving engineering standards and practices.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -343,7 +386,11 @@
           "quote": "Co-developed engineering standards for code quality and shipping,",
           "page": 2,
           "section": "experience",
-          "rationale": "'engineering standards' found in experience text."
+          "rationale": "'engineering standards' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -355,6 +402,7 @@
       "priority": "must_have",
       "description": "Strong written and verbal communication",
       "posting_quote": "Strong written and verbal communication skills, with the ability to explain complex technical and organisational topics clearly.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -370,7 +418,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'communication' not found in this PDF."
+          "rationale": "'communication' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -382,6 +432,7 @@
       "priority": "must_have",
       "description": "Bachelor's in CS/engineering or equivalent practical experience",
       "posting_quote": "Bachelor’s degree in computer science, engineering or a related technical field, or equivalent practical experience.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -397,7 +448,11 @@
           "quote": "2020 - 2023 Bachelor's in Computer Science",
           "page": 3,
           "section": "education",
-          "rationale": "'computer science' found in education text."
+          "rationale": "'computer science' found in education text.",
+          "found_in": [
+            "education"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -409,6 +464,7 @@
       "priority": "preferred",
       "description": "AI-enabled products, agentic systems, AI-assisted developer tools",
       "posting_quote": "Building AI-enabled products, agentic systems, generative AI platforms or AI-assisted developer tools.",
+      "targets": null,
       "keyword": "some",
       "status": "partial",
       "method": null,
@@ -424,17 +480,23 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'AI-enabled products' not found in this PDF."
+          "rationale": "'AI-enabled products' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         },
         {
           "term": "agentic systems",
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Delivered a contextual AI chat built on agentic systems, turning",
+          "quote": "Integrated an AI agent experience built on agentic systems, turning",
           "page": 1,
           "section": "experience",
-          "rationale": "'agentic systems' found in experience text."
+          "rationale": "'agentic systems' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "AI-assisted developer tools",
@@ -444,7 +506,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'AI-assisted developer tools' not found in this PDF."
+          "rationale": "'AI-assisted developer tools' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -456,6 +520,7 @@
       "priority": "preferred",
       "description": "LLMs and agent orchestration",
       "posting_quote": "Large language models, agent orchestration, prompt and context management, model evaluation, AI guardrails, feedback systems or AI observability.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -471,7 +536,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'Large language models' not found in this PDF."
+          "rationale": "'Large language models' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         },
         {
           "term": "agent orchestration",
@@ -481,7 +548,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'agent orchestration' not found in this PDF."
+          "rationale": "'agent orchestration' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -493,6 +562,7 @@
       "priority": "preferred",
       "description": "Reusable SDKs, frameworks, developer tools",
       "posting_quote": "Building reusable SDKs, frameworks, APIs, developer tools or internal engineering platforms.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -508,7 +578,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'SDKs' not found in this PDF."
+          "rationale": "'SDKs' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         },
         {
           "term": "developer tools",
@@ -518,7 +590,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'developer tools' not found in this PDF."
+          "rationale": "'developer tools' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -530,6 +604,7 @@
       "priority": "preferred",
       "description": "Managing distributed or multicultural teams",
       "posting_quote": "Managing geographically distributed or multicultural engineering teams.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -545,7 +620,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'distributed' not found in this PDF."
+          "rationale": "'distributed' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         },
         {
           "term": "multicultural",
@@ -555,7 +632,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'multicultural' not found in this PDF."
+          "rationale": "'multicultural' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -567,6 +646,7 @@
       "priority": "preferred",
       "description": "SRE, incident management, operational readiness",
       "posting_quote": "Service management, site reliability engineering, incident management or operational readiness.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -582,7 +662,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'site reliability engineering' not found in this PDF."
+          "rationale": "'site reliability engineering' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         },
         {
           "term": "incident management",
@@ -592,7 +674,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'incident management' not found in this PDF."
+          "rationale": "'incident management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -604,6 +688,7 @@
       "priority": "preferred",
       "description": "Master's degree in CS, engineering or business",
       "posting_quote": "Master’s degree in computer science, engineering, business administration or a related discipline.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -619,7 +704,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'Master’s degree' not found in this PDF."
+          "rationale": "'Master’s degree' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -631,6 +718,7 @@
       "priority": "preferred",
       "description": "Engineering standards incl. testing and observability",
       "posting_quote": "Establish strong engineering standards across architecture, APIs, testing, observability, reliability and software development.",
+      "targets": null,
       "keyword": "some",
       "status": "partial",
       "method": "exact",
@@ -646,7 +734,11 @@
           "quote": "Data scraping CI/CD Docker Testing Practices",
           "page": 1,
           "section": "skills",
-          "rationale": "'testing' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'testing' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "observability",
@@ -656,7 +748,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'observability' not found in this PDF."
+          "rationale": "'observability' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -668,6 +762,7 @@
       "priority": "preferred",
       "description": "Solve issues across distributed systems",
       "posting_quote": "Help teams solve complex technical issues across distributed systems and services.",
+      "targets": null,
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -683,7 +778,9 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'distributed systems' not found in this PDF."
+          "rationale": "'distributed systems' not found in this PDF.",
+          "found_in": [],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -695,6 +792,7 @@
       "priority": "must_have",
       "description": "Role based in Morocco",
       "posting_quote": "We are looking for a Senior Manager of Software Development to build, lead and develop a multidisciplinary engineering team in Morocco.",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -710,7 +808,12 @@
           "quote": "Casablanca, Morocco",
           "page": 1,
           "section": "header",
-          "rationale": "'Morocco' found in header text."
+          "rationale": "'Morocco' found in header text.",
+          "found_in": [
+            "experience",
+            "header"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,

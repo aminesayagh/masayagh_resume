@@ -53,8 +53,8 @@
     .contact-line { flex-wrap: wrap; column-gap: 8px; }
     .contact-line .sep { color: var(--color-gray); opacity: 0.5; }
 
-    .letter-body { gap: 12px; }
-    .letter-body .paragraph { line-height: 20px; }
+    .letter-body { gap: 12px; width: 86%; }
+    .letter-body .paragraph, #signature .paragraph { font-size: 13px; line-height: 22px; text-wrap: balance; }
 
     footer {
       position: absolute;
@@ -99,15 +99,23 @@
       {% endfor %}
     </article>
 
-    <div class="flex-col gap-2">
-      <p class="paragraph">{{ letter.get('closing', 'Best regards,') }}</p>
+    <div class="flex-col gap-2" id="signature">
+      {% if letter.get('closing', 'Best regards,') %}<p class="paragraph">{{ letter.get('closing', 'Best regards,') }}</p>{% endif %}
       <p class="paragraph color-black" style="font-weight: 500;">{{ data.name }}</p>
     </div>
 
     <footer class="flex-row">
-      <p class="paragraph">{{ data.name }} <span class="color-black">Cover Letter</span></p>
+      <p class="paragraph">{{ data.name }} <span class="color-black">{{ 'Lettre de motivation' if letter.get('lang') == 'fr' else 'Cover Letter' }}</span></p>
       <a href="{{ data.contact.website_link }}" class="paragraph color-black">{{ data.contact.website }}</a>
     </footer>
   </main>
+  <script>
+    // .page clips overflow, so the PDF stays one page even when text is cut: flag it for build_cover.py.
+    window.addEventListener('load', () => document.fonts.ready.then(() => {
+      const bottom = document.querySelector('#signature').getBoundingClientRect().bottom;
+      const footerTop = document.querySelector('footer').getBoundingClientRect().top;
+      document.body.dataset.overflow = bottom > footerTop - 16 ? 'yes' : 'no';
+    }));
+  </script>
 </body>
 </html>

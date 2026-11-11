@@ -524,5 +524,6 @@
     "Oracle": "employer name, not a skill",
     "Senior": "seniority, handled by the title check",
     "Master": "degree level, covered by the degree requirement on line 17"
-  }
+  },
+  "sent": "2026-11-11"
 }

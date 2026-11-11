@@ -168,6 +168,24 @@ def greenhouse(url: str) -> dict | None:
             "jobLocation": {"address": {"addressLocality": city or country, "addressCountry": country if city else ""}}}
 
 
+def linkedin(url: str) -> dict | None:
+    """LinkedIn job pages dropped their JobPosting block; the public guest API returns the same job as HTML."""
+    job_id = re.search(r"linkedin\.com/jobs/view/(?:[\w-]*-)?(\d+)", url) or re.search(r"currentJobId=(\d+)", url)
+    if not job_id:
+        return None
+    page = download(f"https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{job_id[1]}")
+    grab = lambda pattern: (m := re.search(pattern, page, re.S)) and to_text(m[1]).strip()
+    title = grab(r'class="[^"]*topcard__title[^"]*"[^>]*>(.*?)</h2>')
+    if not title:
+        return None
+    company = grab(r'topcard__org-name-link[^>]*>(.*?)</a>') or ""
+    place = grab(r'topcard__flavor topcard__flavor--bullet"[^>]*>(.*?)</span>') or ""
+    city, _, country = place.partition(",")
+    return {"@type": "JobPosting", "title": title, "hiringOrganization": {"name": company},
+            "description": (re.search(r'show-more-less-html__markup[^>]*>(.*?)</div>', page, re.S) or [None, ""])[1],
+            "jobLocation": {"address": {"addressLocality": city.strip(), "addressCountry": country.split(",")[-1].strip()}}}
+
+
 def oracle_hcm(url: str, page: str) -> dict | None:
     """Oracle Recruiting Cloud sites (careers.oracle.com and many other employers) load the job
     with JavaScript from <host>/hcmRestApi; the page names the host and the site number."""
@@ -191,10 +209,12 @@ def oracle_hcm(url: str, page: str) -> dict | None:
 
 
 def fetch(url: str) -> dict:
+    if "linkedin.com/" in url and (job_id := re.search(r"[?&]currentJobId=(\d+)", url)):
+        url = f"https://www.linkedin.com/jobs/view/{job_id[1]}"  # search/collection pages hold the job id, not the job
     if "linkedin.com/" in url and "_l=" not in url:  # local subdomains (ma.linkedin.com) answer in the local language
         url += ("&" if "?" in url else "?") + "_l=en_US"
     page = "" if "greenhouse.io/" in url else download(url)
-    posting = greenhouse(url) or find_posting(page) or microdata_posting(page) or oracle_hcm(url, page) or find_posting(render(url))
+    posting = greenhouse(url) or linkedin(url) or find_posting(page) or microdata_posting(page) or oracle_hcm(url, page) or find_posting(render(url))
     if posting is None:
         sys.exit(f"No job data found at {url} (the site may block automated access). Paste the posting into src/new_job.py instead.")
     org = posting.get("hiringOrganization") or {}

@@ -1,8 +1,10 @@
 # ATS review: FICTIONAL — Full Stack Software Developer, Workflow Products
 
-Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/fictional-full-stack-v1/job.json` and `jobs/fictional-full-stack-v1/content.json`.
+Generated 2026-11-11 from `jobs/fictional-full-stack-v1/_resume.pdf`, `jobs/fictional-full-stack-v1/job.json` and `jobs/fictional-full-stack-v1/content.json`.
 
 > This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.
+
+**Warning, job title:** Resume title 'Software Developer' differs from the posting's title 'Full Stack Software Developer, Workflow Products'. Recruiters and ATS searches match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you.
 
 ## Decisions for you
 
@@ -14,19 +16,16 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 
 ## 1. PDF readability
 
-3 page(s): 0 error(s), 9 warning(s), 4 note(s).
+3 page(s): 0 error(s), 8 warning(s), 2 note(s).
 
+- **warning**: Heading 'Projects' not found in the PDF text.
+- **warning**: Heading 'Certifications' not found in the PDF text.
 - **warning**: 'LingoWP' has no job title; parsers expect title, company and dates per entry.
 - **warning**: 'Sodiadd' has no job title; parsers expect title, company and dates per entry.
 - **warning**: 'Happy Water NFT' has no job title; parsers expect title, company and dates per entry.
 - **warning**: 'Lavish Trading' has no job title; parsers expect title, company and dates per entry.
 - **warning**: 'MySchool' has no job title; parsers expect title, company and dates per entry.
-- **warning**: linkedin 'linkedin.com/in/mohamedamine-sayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured.
-- **warning**: github 'github.com/aminesayagh' is not written as text in the PDF (only as a clickable icon, if at all). Parsers read text, not icons; write the address out so it is captured.
-- **warning**: 'Lavish Trading' has a single date 'Aug 2021'; parsers expect a range ('Aug 2021 - Aug 2021' or 'Aug 2021 - Sep 2021') to compute its length.
-- **warning**: File name 'resume.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'.
-- **info**: 10 overlapping job pair(s): LingoWP / Phoenix AI USA Inc.; Cogy Tech / Rich Media; Digital Consulting / Cyber Cohesion; Digital Consulting / Sodiadd; Cyber Cohesion / Jonas Agency; Cyber Cohesion / Sodiadd; Cyber Cohesion / Happy Water NFT; Jonas Agency / Sodiadd; Jonas Agency / Happy Water NFT; Sodiadd / Happy Water NFT. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.
-- **info**: Experience from your dates: 5.4 years counting overlaps once, 9.1 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these.
+- **warning**: File name '_resume.pdf' does not contain your name; recruiters see it on upload. Rename it, e.g. 'Mohamed-Amine-Sayagh-Resume.pdf'.
 - **info**: The PDF has no author field; set it to your name.
 - **info**: 'mohamed amine sayagh resume | p# masayagh.com' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section.
 
@@ -43,7 +42,6 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 - experience[2].description (Cogy Tech): starts with 'Helped'. Lead with what you did (Built, Shipped, Led, Reduced…) so your own part is clear.
 - experience[3].description (Rich Media): starts with 'Contributed'. Lead with what you did (Built, Shipped, Led, Reduced…) so your own part is clear.
 - experience: 3 of 27 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them.
-- experience: 3 lines start with 'Delivered'; vary the verbs.
 - experience: 3 lines start with 'Built'; vary the verbs.
 - experience: 4 lines start with 'Developed'; vary the verbs.
 
@@ -106,7 +104,7 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 - **Posting:** "Clear written communication in English."
 - **Your PDF** (page 3): "Languages Arabic - Native French - Professional English - Professional"
 - **Keyword:** exact
-- **Why:** 'English' found in education text.
+- **Why:** 'English' found in languages text.
 
 #### R18 · met · Based in Morocco, remote-first
 
@@ -151,8 +149,8 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 - **Posting:** "Design and integrate APIs backed by PostgreSQL."
 - **Your PDF** (page 1): "FastAPI WordPress Odoo PostgreSQL"
 - **Keyword:** alias
-- **Why:** Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated'); use the posting's term.
-- **Suggestion:** The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated' (p3). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet.
+- **Why:** Backed by experience: APIs. Skills list or summary only: PostgreSQL. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.
+- **Suggestion:** The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p2). Use 'APIs' if it describes the same thing. 'PostgreSQL' is only in your skills list. If you used it in a job, name it in that job's bullet.
 
 #### R04 · partial · Maintain Docker and CI/CD workflows
 
@@ -165,21 +163,21 @@ Generated 2026-11-05 from `jobs/fictional-full-stack-v1/resume.pdf`, `jobs/ficti
 #### R03 · met · Prototype from product requirements, then ship tested features
 
 - **Posting:** "Turn product requirements into prototypes, then ship tested features."
-- **Your PDF** (page 2): "Designed UI flows and prototypes for Inflauditor to validate"
+- **Your PDF** (page 2): "Designed UI flows and prototypes for Inflauditor to validate product"
 - **Keyword:** exact
 - **Why:** 'prototypes' found in experience text.
 
 #### R05 · met · Work with product and design on customer-facing SaaS
 
 - **Posting:** "Collaborate with product and design colleagues on customer-facing SaaS tools."
-- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS"
+- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS platform"
 - **Keyword:** exact
 - **Why:** 'SaaS' found in experience text.
 
 #### R17 · met · Experience with creator-marketing
 
 - **Posting:** "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products."
-- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS"
+- **Your PDF** (page 1): "Contributed to Hypeo, a MENA creator-marketing SaaS platform"
 - **Keyword:** exact
 - **Why:** 'creator-marketing' found in experience text.
 

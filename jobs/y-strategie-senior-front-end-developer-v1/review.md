@@ -1,6 +1,6 @@
 # ATS review: Y Strategie — Senior Front-End Developer
 
-Generated 2026-11-10 from `jobs/y-strategie-senior-front-end-developer-v1/Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf`, `jobs/y-strategie-senior-front-end-developer-v1/job.json` and `jobs/y-strategie-senior-front-end-developer-v1/content.json`.
+Generated 2026-11-11 from `jobs/y-strategie-senior-front-end-developer-v1/Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf`, `jobs/y-strategie-senior-front-end-developer-v1/job.json` and `jobs/y-strategie-senior-front-end-developer-v1/content.json`.
 
 > This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.
 
@@ -46,10 +46,8 @@ Terms the job file targets for a resume section where they are not yet found.
 
 ## 1. PDF readability
 
-3 page(s): 0 error(s), 0 warning(s), 4 note(s).
+3 page(s): 0 error(s), 0 warning(s), 2 note(s).
 
-- **info**: 1 overlapping job pair(s): Technical Consultant / Phoenix AI USA Inc.. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.
-- **info**: Experience from your dates: 10.8 years counting overlaps once, 10.9 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these.
 - **info**: The PDF has no author field; set it to your name.
 - **info**: 'mohamed amine sayagh resume | p# masayagh.com/hire' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section.
 
@@ -62,7 +60,6 @@ Terms the job file targets for a resume section where they are not yet found.
 
 - experience: 2 of 24 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them.
 - experience: 3 lines start with 'Developed'; vary the verbs.
-- experience: 3 lines start with 'Delivered'; vary the verbs.
 
 ## 3. Must-have requirements
 

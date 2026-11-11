@@ -1,8 +1,10 @@
 # ATS review: Oracle — Senior Manager, Platform Software Engineering
 
-Generated 2026-11-09 from `jobs/oracle-senior-manager-platform-software-engineering-v1/Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf`, `jobs/oracle-senior-manager-platform-software-engineering-v1/job.json` and `jobs/oracle-senior-manager-platform-software-engineering-v1/content.json`.
+Generated 2026-11-11 from `jobs/oracle-senior-manager-platform-software-engineering-v1/_Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf`, `jobs/oracle-senior-manager-platform-software-engineering-v1/job.json` and `jobs/oracle-senior-manager-platform-software-engineering-v1/content.json`.
 
 > This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.
+
+**Warning, job title:** Resume title 'Software Engineer' differs from the posting's title 'Senior Manager, Platform Software Engineering'. Recruiters and ATS searches match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you.
 
 ## Decisions for you
 
@@ -13,10 +15,8 @@ Generated 2026-11-09 from `jobs/oracle-senior-manager-platform-software-engineer
 
 ## 1. PDF readability
 
-3 page(s): 0 error(s), 0 warning(s), 4 note(s).
+3 page(s): 0 error(s), 0 warning(s), 2 note(s).
 
-- **info**: 1 overlapping job pair(s): Technical Consultant / Phoenix AI USA Inc.. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.
-- **info**: Experience from your dates: 10.8 years counting overlaps once, 10.9 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these.
 - **info**: The PDF has no author field; set it to your name.
 - **info**: 'mohamed amine sayagh resume | p# masayagh.com/hire' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section.
 

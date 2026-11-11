@@ -1,6 +1,6 @@
 # ATS review: Oracle — Software Development Manager
 
-Generated 2026-11-10 from `jobs/oracle-software-development-manager-v1/_Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf`, `jobs/oracle-software-development-manager-v1/job.json` and `jobs/oracle-software-development-manager-v1/content.json`.
+Generated 2026-11-11 from `jobs/oracle-software-development-manager-v1/_Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf`, `jobs/oracle-software-development-manager-v1/job.json` and `jobs/oracle-software-development-manager-v1/content.json`.
 
 > This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.
 

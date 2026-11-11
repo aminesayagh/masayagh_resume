@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ 'en'|tr }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -421,7 +421,7 @@
   {% endmacro %}
   {% macro footer(number) %}
   <footer class="flex-row w-full justify-between">
-    <p class="paragraph" aria-label="Footer">{{ data.name }} <span class="color-black">Resume | P{{ number }}</span></p>
+    <p class="paragraph" aria-label="Footer">{{ data.name }} <span class="color-black">{{ 'Resume'|tr }} | P{{ number }}</span></p>
     <a href="{{ data.contact.website_link }}" class="paragraph color-black" aria-label="Website">{{ data.contact.website }}</a>
   </footer>
   {% endmacro %}
@@ -451,13 +451,13 @@
     <div class="body-content">
       {% if data.summary %}
       <section class="resume-section">
-        <div class="flex-col gap-6 section-title"><h3 class="title_h3">Summary</h3><hr class="heading-divider"></div>
+        <div class="flex-col gap-6 section-title"><h3 class="title_h3">{{ 'Summary'|tr }}</h3><hr class="heading-divider"></div>
         <div class="section-content"><p class="paragraph">{{ data.summary }}</p></div>
       </section>
       {% endif %}
       {% if data.skills %}
       <section class="resume-section">
-        <div class="flex-col gap-6 section-title"><h3 class="title_h3">Skills</h3><hr class="heading-divider"></div>
+        <div class="flex-col gap-6 section-title"><h3 class="title_h3">{{ 'Skills'|tr }}</h3><hr class="heading-divider"></div>
         <div class="flex-col gap-4 section-content">
           {% for group in data.skills %}
           <ul class="grid_4cols list-none">{% for skill in group %}<li class="paragraph">{{ skill }}</li>{% endfor %}</ul>
@@ -543,7 +543,7 @@
         pageNumber += 1;
         page = pageTemplate.content.firstElementChild.cloneNode(true);
         page.id = `page-${pageNumber}`;
-        page.querySelector('footer .color-black').textContent = `Resume | P${pageNumber}`;
+        page.querySelector('footer .color-black').textContent = `{{ 'Resume'|tr }} | P${pageNumber}`;
         document.body.appendChild(page);
         return page;
       }
@@ -571,7 +571,7 @@
           if (!fits()) {
             // Keep the heading and description together. A long job may continue
             // on the next page, but only between complete bullet points.
-            const list = title === 'Experience' ? item.querySelector('.experience-content ul') : null;
+            const list = templateId === '#experience-template' ? item.querySelector('.experience-content ul') : null;  // by id: the title is translated
             const moved = [];
             if (list && list.children.length > 1) {
               while (!fits() && list.children.length) moved.unshift(list.removeChild(list.lastElementChild));
@@ -603,13 +603,13 @@
           }
         }
       }
-      appendItems('#experience-template', 'Experience');
-      appendItems('#projects-template', 'Projects');
-      appendItems('#education-template', 'Education');
-      appendItems('#certifications-template', 'Certifications');
+      appendItems('#experience-template', '{{ "Experience"|tr }}');
+      appendItems('#projects-template', '{{ "Projects"|tr }}');
+      appendItems('#education-template', '{{ "Education"|tr }}');
+      appendItems('#certifications-template', '{{ "Certifications"|tr }}');
       const languages = document.querySelector('#languages-template').content;
       if (languages.children.length) {
-        let target = section('Languages');
+        let target = section('{{ "Languages"|tr }}');
         let list = document.createElement('ul');
         list.className = 'grid_3cols list-none section-content';
         target.querySelector('.section-items').appendChild(list);
@@ -619,7 +619,7 @@
             item.remove();
             if (!list.children.length) target.remove();
             newPage();
-            target = section('Languages');
+            target = section('{{ "Languages"|tr }}');
             list = list.cloneNode(false);
             target.querySelector('.section-items').appendChild(list);
             list.appendChild(item);

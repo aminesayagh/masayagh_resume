@@ -1,6 +1,7 @@
 {
   "job": "Oracle — Senior Manager, Platform Software Engineering",
-  "generated": "2026-11-09",
+  "generated": "2026-11-11",
+  "draft_requirements_unreviewed": 0,
   "summary": {
     "prove_claim": 5,
     "prepare_story": 8,
@@ -159,7 +160,7 @@
       "requirement": "AI-enabled products, agentic systems, AI-assisted developer tools",
       "posting_says": "Building AI-enabled products, agentic systems, generative AI platforms or AI-assisted developer tools.",
       "your_resume_says": [
-        "Delivered a contextual AI chat built on agentic systems, turning"
+        "Integrated an AI agent experience built on agentic systems, turning"
       ],
       "terms_not_met": [
         "AI-enabled products",

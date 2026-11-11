@@ -1,6 +1,6 @@
 # ATS review: Oracle — Senior AI Software Engineer
 
-Generated 2026-11-10 from `jobs/oracle-senior-ai-software-engineer-v1/Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf`, `jobs/oracle-senior-ai-software-engineer-v1/job.json` and `jobs/oracle-senior-ai-software-engineer-v1/content.json`.
+Generated 2026-11-11 from `jobs/oracle-senior-ai-software-engineer-v1/Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf`, `jobs/oracle-senior-ai-software-engineer-v1/job.json` and `jobs/oracle-senior-ai-software-engineer-v1/content.json`.
 
 > This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.
 
@@ -301,7 +301,7 @@ Terms the job file targets for a resume section where they are not yet found.
 #### R06 · met · Integrate LLM capabilities into enterprise software
 
 - **Posting:** "Integrate modern AI and Large Language Model capabilities into reliable enterprise software systems."
-- **Your PDF** (page 1): "Delivered a contextual AI chat built on Large Language Models that"
+- **Your PDF** (page 1): "Integrated an AI agent experience built on Large Language Models"
 - **Keyword:** exact
 - **Why:** 'Large Language Model' found in experience text.
 

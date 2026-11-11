@@ -53,7 +53,8 @@ def stale_jobs() -> list[Path]:
     current = hashlib.sha256((TEMPLATE_DIR / "default.json").read_bytes()).hexdigest()
     stale = []
     for job_file in sorted((ROOT / "jobs").glob("*/job.json")):
-        sha = json.loads(job_file.read_text(encoding="utf-8")).get("template_sha")
+        job = json.loads(job_file.read_text(encoding="utf-8"))
+        sha = None if job.get("sent") else job.get("template_sha")  # sent jobs are frozen
         content = job_file.parent / "content.json"
         if sha and sha != current and content.exists() and hashlib.sha256(content.read_bytes()).hexdigest() == sha:
             stale.append(job_file.parent)

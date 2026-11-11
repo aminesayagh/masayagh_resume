@@ -20,6 +20,10 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
 TEMPLATE_DIR = ROOT / "template"
+# French is the only second language: content-fr.json sets "lang": "fr" and the template's labels switch.
+FR_LABELS = {"Summary": "Profil", "Skills": "Compétences", "Experience": "Expérience", "Projects": "Projets",
+             "Education": "Formation", "Certifications": "Certifications", "Languages": "Langues",
+             "Resume": "CV", "en": "fr"}
 DEFAULT_DATA = TEMPLATE_DIR / "default.json"
 MAX_PAGES = 3  # the user's limit; going over warns, it doesn't fail
 SKILL_ROWS = 6  # languages, 3 rows of development technologies, design tools, AI
@@ -103,6 +107,15 @@ def default_pdf(data_path: Path) -> Path:
     return folder / (name or "resume.pdf")
 
 
+def frozen(folder: Path) -> str | None:
+    """A job whose files were sent ("sent": "YYYY-MM-DD" in job.json) is frozen: nothing may rebuild, translate or
+    republish it, so the folder keeps exactly what the employer received. Changes go into a new version folder."""
+    job_file = folder / "job.json"
+    sent = json.loads(job_file.read_text(encoding="utf-8")).get("sent") if job_file.exists() else None
+    return (f"{folder.name} was sent on {sent}; its files are frozen. To change it, start a new version with "
+            f"src/new_job.py (it creates the next -vN folder).") if sent else None
+
+
 def mark_readiness(data_path: Path, pdf_file: Path, output_path: Path | None, ready: bool) -> Path:
     """A job PDF that is not ready to send (over 3 pages, broken skills layout) is renamed with a leading '_'
     and the ready-named file is removed, so a not-ready resume can't be attached or published by mistake."""
@@ -135,6 +148,8 @@ def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None
 
 def build(data_path: Path, output_path: Path | None = None) -> Path:
     """Render and print `data_path` to PDF. Returns the PDF path."""
+    if output_path is None and (reason := frozen(data_path.resolve().parent)):
+        raise SystemExit(reason)
     data = load_data(data_path.resolve(strict=True))
     qr_url = data["contact"].get("qr_url") or data["contact"]["website_link"]
     data["contact"]["qr_url"] = qr_url
@@ -148,6 +163,7 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
         autoescape=select_autoescape(["html"]),
         undefined=StrictUndefined,
     )
+    env.filters["tr"] = (lambda text: FR_LABELS.get(text, text)) if data.get("lang") == "fr" else (lambda text: text)
     with tempfile.TemporaryDirectory(prefix="resume-build-") as temporary:
         temporary_dir = Path(temporary)
         html_file = temporary_dir / "resume.html"
@@ -188,6 +204,10 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
     if output_path is None and (data_path.resolve().parent / "job.json").exists():
         import build_cover  # late: imports this module
         build_cover.build(data_path.resolve().parent)
+        job = json.loads((data_path.resolve().parent / "job.json").read_text(encoding="utf-8"))
+        if job.get("french_version"):
+            import build_fr  # the local French version follows every English build
+            build_fr.build(data_path.resolve().parent)
     return pdf_file
 
 

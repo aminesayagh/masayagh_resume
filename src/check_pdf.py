@@ -47,8 +47,10 @@ def template_headings(template: Path) -> list[str]:
     html = template.read_text(encoding="utf-8")
     static = re.findall(r'class="title_h3">([^<$]*(?:<br\s*/?>[^<$]*)*)</h3>', html)
     dynamic = re.findall(r"appendItems\('[^']+',\s*'([^']+)'\)", html)
-    scripted = re.findall(r"\bsection\('([^']+)'\)", html)  # e.g. section('Languages'), built by the pagination script
-    return list(dict.fromkeys(re.sub(r"<br\s*/?>", " ", h).strip() for h in static + dynamic + scripted))
+    scripted = re.findall(r"\bsection\('([^']+)'\)", html)
+    dynamic = [d for d in dynamic]  # e.g. section('Languages'), built by the pagination script
+    unwrap = lambda h: re.sub(r"\{\{\s*['\"]([^'\"]+)['\"]\s*\|\s*tr\s*\}\}", r"\1", h)  # {{ 'Skills'|tr }} -> Skills
+    return list(dict.fromkeys(unwrap(re.sub(r"<br\s*/?>", " ", h)).strip() for h in static + dynamic + scripted))
 
 
 def find(needle: str, lines: list[str], joined: str) -> str:

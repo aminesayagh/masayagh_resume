@@ -1,0 +1,233 @@
+{
+  "job": "FICTIONAL — Full Stack Software Developer, Workflow Products",
+  "generated": "2026-11-11",
+  "draft_requirements_unreviewed": 0,
+  "summary": {
+    "prove_claim": 6,
+    "prepare_story": 7,
+    "gap": 5
+  },
+  "how_to_prepare": {
+    "source": "General interview-prep guidance (STAR: situation, task, action, result), the same for every job. Only 'topics' comes from this posting and this resume.",
+    "prepare_story": "Interviewers ask about what's written. Prepare the story behind the line: the situation, what you built, your choices, the result, and what you'd do differently.",
+    "prove_claim": "Your resume only claims this (skills, summary, or some of the terms). Prepare one concrete example that turns the claim into proof: scope, your role, a decision, the result.",
+    "gap": "Not on your resume. Prepare an honest answer: related experience, or how you would learn it."
+  },
+  "topics": [
+    {
+      "id": "R07",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Professional experience with React",
+      "posting_says": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "your_resume_says": [
+        "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony"
+      ],
+      "terms_not_met": [
+        "React"
+      ]
+    },
+    {
+      "id": "R08",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Professional experience with Python",
+      "posting_says": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "your_resume_says": [
+        "Skills JavaScript PHP Python SQL"
+      ],
+      "terms_not_met": [
+        "Python"
+      ]
+    },
+    {
+      "id": "R09",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Professional experience with SQL",
+      "posting_says": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "your_resume_says": [
+        "Skills JavaScript PHP Python SQL"
+      ],
+      "terms_not_met": [
+        "SQL"
+      ]
+    },
+    {
+      "id": "R06",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "3+ years of professional software development",
+      "posting_says": "At least three years of professional software development experience.",
+      "your_resume_says": [],
+      "terms_not_met": []
+    },
+    {
+      "id": "R12",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Computer science degree, or equivalent practical experience",
+      "posting_says": "A computer science degree or equivalent practical experience.",
+      "your_resume_says": [
+        "2020 - 2023 Bachelor's in Computer Science"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R13",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Written English",
+      "posting_says": "Clear written communication in English.",
+      "your_resume_says": [
+        "Languages Arabic - Native French - Professional English - Professional"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R18",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Based in Morocco, remote-first",
+      "posting_says": "The role is remote-first and based in Morocco.",
+      "your_resume_says": [
+        "Casablanca, Morocco"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R10",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Professional experience with API integration",
+      "posting_says": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "API integration"
+      ]
+    },
+    {
+      "id": "R11",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Professional experience with automated testing",
+      "posting_says": "Experience with React, Python, SQL, API integration, and automated testing.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "automated testing"
+      ]
+    },
+    {
+      "id": "R01",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Build React/Next.js front ends and Python/FastAPI services",
+      "posting_says": "Build accessible React or Next.js interfaces and Python or FastAPI services.",
+      "your_resume_says": [
+        "React / Next.js Vue.js / Nuxt.js Node.js / Express Symfony",
+        "Skills JavaScript PHP Python SQL",
+        "FastAPI WordPress Odoo PostgreSQL"
+      ],
+      "terms_not_met": [
+        "React",
+        "Next.js",
+        "Python",
+        "FastAPI"
+      ]
+    },
+    {
+      "id": "R02",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Design and integrate APIs on PostgreSQL",
+      "posting_says": "Design and integrate APIs backed by PostgreSQL.",
+      "your_resume_says": [
+        "Implemented a Go API service to orchestrate isolated application",
+        "FastAPI WordPress Odoo PostgreSQL"
+      ],
+      "terms_not_met": [
+        "PostgreSQL"
+      ]
+    },
+    {
+      "id": "R04",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Maintain Docker and CI/CD workflows",
+      "posting_says": "Maintain Docker-based development and CI/CD delivery workflows.",
+      "your_resume_says": [
+        "Web scraping CI/CD Docker Testing Practices"
+      ],
+      "terms_not_met": [
+        "Docker",
+        "CI/CD"
+      ]
+    },
+    {
+      "id": "R03",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Prototype from product requirements, then ship tested features",
+      "posting_says": "Turn product requirements into prototypes, then ship tested features.",
+      "your_resume_says": [
+        "Designed UI flows and prototypes for Inflauditor to validate product"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R05",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Work with product and design on customer-facing SaaS",
+      "posting_says": "Collaborate with product and design colleagues on customer-facing SaaS tools.",
+      "your_resume_says": [
+        "Contributed to Hypeo, a MENA creator-marketing SaaS platform"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R17",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Experience with creator-marketing",
+      "posting_says": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "your_resume_says": [
+        "Contributed to Hypeo, a MENA creator-marketing SaaS platform"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R14",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Experience with AWS",
+      "posting_says": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "AWS"
+      ]
+    },
+    {
+      "id": "R15",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Experience with Kubernetes",
+      "posting_says": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "Kubernetes"
+      ]
+    },
+    {
+      "id": "R16",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Experience with TypeScript",
+      "posting_says": "Experience with AWS, Kubernetes, TypeScript, and creator-marketing products.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "TypeScript"
+      ]
+    }
+  ]
+}

@@ -8,12 +8,13 @@ filling {company} and {job_title} from job.json. An empty "date" prints today's 
 Writes next to the resume (job.json's pdf_name = <stem>.pdf):
   <stem>-Cover-Letter.pdf             the cover letter alone (one page)
   <stem>-Resume-and-Cover-Letter.pdf  the resume pages, then the cover letter page
-A cover letter over one page is saved with a leading '_' (not ready to send), like the resume.
+A cover letter whose text overflows the page is saved with a leading '_' (not ready to send), like the resume.
 build_resume.py runs this after every job resume build; run it alone after editing cover.json.
 """
 
 import datetime
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -21,17 +22,21 @@ import tempfile
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
-from pypdf import PdfReader, PdfWriter
+from pypdf import PdfWriter
 
 import build_resume
+import check_style
 
 TEMPLATE_DIR = build_resume.TEMPLATE_DIR
 DEFAULT_COVER = TEMPLATE_DIR / "default-cover.json"
+
+
 FR_MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
              "septembre", "octobre", "novembre", "décembre"]
 
 
-def today(lang: str, day: datetime.date | None = None) -> str:
+def today(day: datetime.date | None = None, lang: str = "en") -> str:
+    """English for every application; French only for the local French version (build_fr.py)."""
     day = day or datetime.date.today()
     if lang == "fr":
         return f"{day.day} {FR_MONTHS[day.month - 1]} {day.year}"
@@ -56,7 +61,7 @@ def ensure_cover(folder: Path, job: dict) -> Path:
     return path
 
 
-def load_letter(path: Path) -> dict:
+def load_letter(path: Path, lang: str = "en") -> dict:
     letter = json.loads(path.read_text(encoding="utf-8"))
     for field in ("company", "job_title", "greeting", "paragraphs"):
         if not letter.get(field):
@@ -64,12 +69,14 @@ def load_letter(path: Path) -> dict:
     leftover = [k for k, v in letter.items() if "{" in json.dumps(v)]
     if leftover:
         raise ValueError(f"{path}: unfilled placeholder in {', '.join(leftover)}")
-    letter["date"] = letter.get("date") or today(letter.get("lang", "en"))
+    letter["lang"] = lang
+    letter["date"] = letter.get("date") or today(lang=lang)
     return letter
 
 
-def render_pdf(data: dict, letter: dict, pdf_file: Path) -> int:
-    """Print the letter to pdf_file; returns its page count."""
+def render_pdf(data: dict, letter: dict, pdf_file: Path) -> bool:
+    """Print the letter to pdf_file; returns True when all text fits above the footer.
+    The page clips overflow, so the page count can't tell; the template's script sets data-overflow."""
     browser = shutil.which("google-chrome")
     if browser is None:
         raise RuntimeError("Google Chrome is unavailable in WSL")
@@ -85,11 +92,15 @@ def render_pdf(data: dict, letter: dict, pdf_file: Path) -> int:
         ), encoding="utf-8")
         rendered = temporary_dir / "cover.pdf"
         command = build_resume.chrome_command(browser, str(temporary_dir / "chrome-profile"), html_file)
+        dom = subprocess.run(command[:-1] + ["--dump-dom", command[-1]], check=True, capture_output=True, text=True).stdout
+        match = re.search(r'<body[^>]*data-overflow="(yes|no)"', dom)
+        if match is None:
+            raise RuntimeError("The browser did not finish laying out the cover letter")
         subprocess.run(command[:-1] + [f"--print-to-pdf={rendered}", command[-1]], check=True, capture_output=True)
         if not rendered.is_file() or rendered.stat().st_size == 0:
             raise RuntimeError("Chrome did not create the cover letter PDF")
         shutil.move(str(rendered), pdf_file)
-    return len(PdfReader(pdf_file).pages)
+    return match.group(1) == "no"
 
 
 def settle(path: Path, ready: bool) -> Path:
@@ -102,21 +113,28 @@ def settle(path: Path, ready: bool) -> Path:
     return draft
 
 
-def build(folder: Path) -> tuple[Path, Path]:
+def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
+    """lang="fr": the local French version, from cover-fr.json and content-fr.json, files suffixed -FR."""
     folder = folder.resolve()
+    if reason := build_resume.frozen(folder):
+        raise SystemExit(reason)
     job = json.loads((folder / "job.json").read_text(encoding="utf-8"))
-    letter = load_letter(ensure_cover(folder, job))
-    data = json.loads((folder / "content.json").read_text(encoding="utf-8"))
-    stem = Path(job["pdf_name"]).stem
+    resume = build_resume.default_pdf(folder / "content.json")  # pdf_name, else resume.pdf
+    if lang == "fr":
+        resume = resume.with_name(f"{resume.stem}-FR.pdf")
+        letter = load_letter(folder / "cover-fr.json", lang="fr")
+        data = json.loads((folder / "content-fr.json").read_text(encoding="utf-8"))
+    else:
+        letter = load_letter(ensure_cover(folder, job))
+        data = json.loads((folder / "content.json").read_text(encoding="utf-8"))
+    stem = resume.stem
 
     cover_pdf = folder / f"{stem}-Cover-Letter.pdf"
-    pages = render_pdf(data, letter, cover_pdf)
-    cover_ready = pages == 1
+    cover_ready = render_pdf(data, letter, cover_pdf)
     if not cover_ready:
-        print(f"WARNING: the cover letter is {pages} pages; shorten cover.json's paragraphs to fit one page.")
+        print("WARNING: the cover letter text runs past the page and is cut off; shorten cover.json's paragraphs.")
     final_cover = settle(cover_pdf, cover_ready)
 
-    resume = folder / job["pdf_name"]
     resume_ready = resume.exists()
     if not resume_ready:
         resume = resume.with_name("_" + resume.name)  # build_resume marked it not ready
@@ -128,13 +146,18 @@ def build(folder: Path) -> tuple[Path, Path]:
         writer.write(out)
     combined = settle(combined, resume_ready and cover_ready)
     print(f"Created {final_cover.name} and {combined.name}")
+    for i, paragraph in enumerate(letter["paragraphs"], 1):  # same repetition rules as the resume
+        if twice := check_style.repeats(paragraph):
+            print(f"WARNING: cover letter paragraph {i} repeats {', '.join(repr(w) for w in twice)}; vary the wording.")
+    if words := check_style.overused(letter["paragraphs"], min_lines=3):
+        print("Cover letter: same words in 3+ paragraphs: " + ", ".join(f"'{w}' ({n})" for w, n in words.items()))
     if not resume_ready:
         print("NOT READY TO SEND: the combined PDF uses a resume that is not ready (see build_resume warnings).")
     return final_cover, combined
 
 
-assert today("fr", datetime.date(2026, 8, 3)) == "3 août 2026"
-assert today("en", datetime.date(2026, 11, 11)) == "November 11, 2026"
+assert today(datetime.date(2026, 11, 11)) == "November 11, 2026"
+assert today(datetime.date(2026, 8, 3), "fr") == "3 août 2026"
 assert company_and_title({"title": "Y Strategie — Senior Front-End Developer"}) == ("Y Strategie", "Senior Front-End Developer")
 
 if __name__ == "__main__":

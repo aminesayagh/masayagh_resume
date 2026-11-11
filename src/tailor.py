@@ -3,7 +3,7 @@
 
 Usage: python3 src/tailor.py jobs/<slug>
 
-1. Builds the PDF (which re-runs the review and refreshes review.md/json, interview.json, dashboard.html).
+1. Builds the PDF (which re-runs the review and refreshes review.md/json and interview.json).
 2. Publishes it to the portfolio, unless it is over 3 pages or has PDF errors.
 3. Prints every requirement that is not met: priority, status, each term, and the resume sections it is
    still missing from. This table is the pipeline's output; show it as-is.
@@ -57,7 +57,7 @@ def main() -> None:
     print("\nEverything not met:" if len(rows) > 2 else "\nEvery requirement is met.")
     if len(rows) > 2:
         print("\n".join(rows))
-    print(f"\nDashboard: {folder / 'dashboard.html'} (built from this same review)")
+    print(f"\nDashboard: http://127.0.0.1:8000/job/{folder.name} (run the dashboard app)")
 
 
 if __name__ == "__main__":

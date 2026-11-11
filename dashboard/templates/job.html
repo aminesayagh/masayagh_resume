@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ job.company }}{% endblock %}
+{% block content %}
+<p><a href="/">← All jobs</a> · <span class="tag {{ job.status|replace(' ', '-') }}">{{ job.status }}</span>{% if job.sent %} sent {{ job.sent }} (frozen){% endif %}</p>
+<div class="card"><h3>Files</h3>
+{% for language, names in pdfs.items() %}<p><b>{{ language }}</b>{% if language == 'French' %} <span class="muted">(local only, never published)</span>{% endif %}</p>
+{% for p in names %}<div><a href="/files/{{ job.slug }}/{{ p }}">{{ p }}</a>{% if p.startswith('_') %} <span class="tag not-ready">NOT READY, do not send</span>{% endif %}</div>{% endfor %}
+{% else %}<p class="muted">No PDF yet.</p>{% endfor %}
+<h3>Actions</h3>
+{% for key, (label, what) in actions.items() %}<p><a href="/job/{{ job.slug }}/confirm/{{ key }}">{{ label }}</a> <span class="muted">{{ what }}</span></p>
+{% else %}<p class="muted">No actions: this job was sent and is frozen. Use “New version” to change it.</p>{% endfor %}
+</div>
+<form class="filters" method="get">
+  <b>Requirements:</b>
+  <input name="rq" value="{{ rq }}" placeholder="Search requirement, quote or term…" size="30">
+  <select name="rstatus"><option value="">Any status</option>{% for s in ['met', 'partial', 'missing'] %}<option {{ 'selected' if s == rstatus }}>{{ s }}</option>{% endfor %}</select>
+  <select name="rpriority"><option value="">Any priority</option>{% for v, l in [('must_have', 'must-have'), ('preferred', 'preferred')] %}<option value="{{ v }}" {{ 'selected' if v == rpriority }}>{{ l }}</option>{% endfor %}</select>
+  <button>Filter</button> <a href="/job/{{ job.slug }}">Clear</a> <span class="muted">{{ shown }} of {{ total }} requirements shown</span>
+</form>
+{{ card|safe }}
+{% endblock %}

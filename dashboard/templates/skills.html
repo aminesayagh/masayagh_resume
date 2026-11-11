@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Skills{% endblock %}
+{% block content %}
+<h1>Skills asked across jobs</h1>
+<p class="muted">Every posting term, how many jobs ask for it, and per job the best result on that job's resume (met / partial / missing). Experience years come from template/skills.json; “–” means the term isn't one of your listed skills.</p>
+<table><tr><th>Term</th><th>Jobs</th><th>Met</th><th>Partial</th><th>Missing</th><th>Your experience</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ r.term }}</td><td>{{ r.jobs }}</td><td>{{ r.met }}</td><td>{{ r.partial }}</td><td>{{ r.missing }}</td>
+<td class="muted">{{ r.years }}</td><td><a href="/?skill={{ r.term|urlencode }}">jobs</a></td></tr>{% endfor %}
+</table>
+{% endblock %}

@@ -1,6 +1,6 @@
 {
   "job": "Oracle — Senior AI Software Engineer",
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "draft_requirements_unreviewed": 34,
   "summary": {
     "prove_claim": 12,
@@ -79,7 +79,7 @@
       "requirement": "Working knowledge of AI systems and LLMs",
       "posting_says": "Working knowledge of modern AI systems, Large Language Models, AI application development, or AI platform integration.",
       "your_resume_says": [
-        "Delivered a contextual AI chat built on Large Language Models that"
+        "Integrated an AI agent experience built on Large Language Models"
       ],
       "terms_not_met": [
         "AI systems",
@@ -335,7 +335,7 @@
       "requirement": "Integrate LLM capabilities into enterprise software",
       "posting_says": "Integrate modern AI and Large Language Model capabilities into reliable enterprise software systems.",
       "your_resume_says": [
-        "Delivered a contextual AI chat built on Large Language Models that"
+        "Integrated an AI agent experience built on Large Language Models"
       ],
       "terms_not_met": []
     },

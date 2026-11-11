@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<p><a href="/job/{{ job.slug }}">← Back to {{ job.company }}</a></p>
+<div class="card"><h2>{{ label }}: <span class="tag {{ 'ready' if ok else 'missing' }}">{{ 'done' if ok else 'stopped' }}</span></h2><pre>{{ output }}</pre></div>
+{% endblock %}

@@ -30,7 +30,6 @@ from pypdf import PdfReader
 import check_job
 import check_pdf
 import check_spelling
-import dashboard
 import check_style
 import match_job
 
@@ -276,6 +275,7 @@ def summary(rep: dict) -> dict:
             "must_have": rep["evidence_coverage"]["must_have"], "preferred": rep["evidence_coverage"]["preferred"],
             "pages": len(rep["pdf_check"]["pages"]), "spelling": len(rep["spelling"]["findings"]),
             "pdf": sum(f["severity"] != "info" for f in rep["pdf_check"]["findings"]),
+            "style": sum(f["severity"] == "warning" for f in (rep.get("style") or {}).get("findings", [])),
             "title_mismatch": int(bool(rep.get("job_title") and not rep["job_title"]["match"]))}
 
 
@@ -294,7 +294,7 @@ def compare(old: dict, new: dict) -> tuple[list[str], list[str]]:
             changes.append(f"{k} coverage {old[k]} → {new[k]}")
             if (new[k] or 0) < (old[k] or 0):
                 regressions.append(f"{k} coverage {old[k]} → {new[k]}")
-    for k in ("pages", "spelling", "pdf", "title_mismatch"):
+    for k in ("pages", "spelling", "style", "pdf", "title_mismatch"):
         if old.get(k, 0) != new.get(k, 0):
             changes.append(f"{k} {old.get(k, 0)} → {new.get(k, 0)}")
             if new.get(k, 0) > old.get(k, 0):
@@ -305,7 +305,7 @@ def compare(old: dict, new: dict) -> tuple[list[str], list[str]]:
 def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bool = False,
             md_path: Path | None = None) -> dict:
     """Review the PDF, print what changed since the last saved report (and the verdict), then save the
-    report, interview.json and the dashboard. Runs after every job PDF build, so the dashboard is never stale."""
+    report and interview.json. Runs after every job PDF build, so the dashboard app never shows a stale review."""
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
     md_path = md_path or job_path.parent / "review.md"
     previous = md_path.with_suffix(".json")
@@ -335,7 +335,7 @@ def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bo
           f"({rep['overridden']} overridden)")
     print(f"  Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} (not an ATS score)")
     print(f"  Report: {rel(md_path)} (+ .json); interview prep: {rel(interview_path)}")
-    print(f"  Dashboard: {rel(dashboard.build(job_path.parent))}")
+    print(f"  Dashboard: http://127.0.0.1:8000/job/{job_path.parent.name} (run the dashboard app)")
     return rep
 
 

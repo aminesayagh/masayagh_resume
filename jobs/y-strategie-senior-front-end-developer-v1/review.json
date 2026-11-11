@@ -3,7 +3,7 @@
   "job": "jobs/y-strategie-senior-front-end-developer-v1/job.json",
   "content": "jobs/y-strategie-senior-front-end-developer-v1/content.json",
   "title": "Y Strategie — Senior Front-End Developer",
-  "generated": "2026-11-10",
+  "generated": "2026-11-11",
   "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
   "unreviewed": 35,
   "job_title": {
@@ -29,24 +29,8 @@
         "chars": 1568
       }
     ],
-    "experience_years": {
-      "merged": 10.8,
-      "summed": 10.9
-    },
+    "experience_years": null,
     "findings": [
-      {
-        "severity": "info",
-        "code": "date_overlap",
-        "message": "1 overlapping job pair(s): Technical Consultant / Phoenix AI USA Inc.. Fine for parallel work, but some parsers add overlapping jobs twice when computing years of experience.",
-        "pairs": [
-          "Technical Consultant / Phoenix AI USA Inc."
-        ]
-      },
-      {
-        "severity": "info",
-        "code": "experience_years",
-        "message": "Experience from your dates: 10.8 years counting overlaps once, 10.9 years if a parser adds every job. Requirements like '3+ years' are filtered on numbers like these."
-      },
       {
         "severity": "info",
         "code": "meta_author",
@@ -75,16 +59,10 @@
         "code": "repeated_opener",
         "field": "experience",
         "message": "experience: 3 lines start with 'Developed'; vary the verbs."
-      },
-      {
-        "severity": "info",
-        "code": "repeated_opener",
-        "field": "experience",
-        "message": "experience: 3 lines start with 'Delivered'; vary the verbs."
       }
     ]
   },
-  "match_version": 1,
+  "match_version": 2,
   "results": [
     {
       "id": "R01",
@@ -411,8 +389,8 @@
           "section": "experience",
           "rationale": "'API' found in experience text.",
           "found_in": [
+            "certifications",
             "experience",
-            "other",
             "skills"
           ],
           "missing_from": []

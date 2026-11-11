@@ -1,15 +1,109 @@
 {
   "_about": "Other ways a resume may write a posting's term. Keep only true synonyms: an alias match counts as evidence, reported as 'wording differs'. Keys are compared case-insensitively.",
-  "PostgreSQL": ["Postgres"],
-  "Next.js": ["NextJS", "Next js"],
-  "Node.js": ["NodeJS"],
-  "AWS": ["Amazon Web Services"],
-  "Kubernetes": ["K8s"],
-  "CI/CD": ["continuous integration", "continuous delivery", "continuous deployment"],
-  "SaaS": ["software as a service"],
-  "API integration": ["API integrations", "integrated APIs", "integrating APIs", "integrate APIs"],
-  "APIs": ["API"],
-  "automated testing": ["automated tests", "test automation", "unit tests", "integration tests", "end-to-end tests"],
-  "creator-marketing": ["creator marketing", "influencer marketing"],
-  "prototypes": ["prototype", "prototyping"]
+  "PostgreSQL": [
+    "Postgres"
+  ],
+  "Next.js": [
+    "NextJS",
+    "Next js"
+  ],
+  "Node.js": [
+    "NodeJS"
+  ],
+  "AWS": [
+    "Amazon Web Services"
+  ],
+  "Kubernetes": [
+    "K8s"
+  ],
+  "CI/CD": [
+    "continuous integration",
+    "continuous delivery",
+    "continuous deployment"
+  ],
+  "SaaS": [
+    "software as a service"
+  ],
+  "API integration": [
+    "API integrations",
+    "integrated APIs",
+    "integrating APIs",
+    "integrate APIs"
+  ],
+  "APIs": [
+    "API"
+  ],
+  "automated testing": [
+    "automated tests",
+    "test automation",
+    "unit tests",
+    "integration tests",
+    "end-to-end tests"
+  ],
+  "creator-marketing": [
+    "creator marketing",
+    "influencer marketing"
+  ],
+  "prototypes": [
+    "prototype",
+    "prototyping"
+  ],
+  "informatique": [
+    "Computer Science"
+  ],
+  "IA agentique": [
+    "agentic AI",
+    "agentic systems",
+    "agentic workflows"
+  ],
+  "intelligence artificielle": [
+    "artificial intelligence",
+    "AI"
+  ],
+  "bases de données": [
+    "databases",
+    "database"
+  ],
+  "tests": [
+    "testing",
+    "tested"
+  ],
+  "architectures distribuées": [
+    "distributed architectures",
+    "distributed systems"
+  ],
+  "sources de données": [
+    "data sources"
+  ],
+  "choix d'architecture": [
+    "architecture decisions",
+    "architectural decisions"
+  ],
+  "sécurité": [
+    "security"
+  ],
+  "revues de code": [
+    "code review",
+    "code reviews"
+  ],
+  "tests techniques": [
+    "technical testing"
+  ],
+  "équipes techniques": [
+    "technical teams",
+    "engineering teams"
+  ],
+  "conception technique": [
+    "technical design"
+  ],
+  "problématiques complexes": [
+    "complex problems"
+  ],
+  "collaboration transverse": [
+    "cross-functional collaboration"
+  ],
+  "orientation résultats": [
+    "results-oriented"
+  ],
+  "_about_fr": "French posting terms -> English resume wording (all applications are in English)."
 }

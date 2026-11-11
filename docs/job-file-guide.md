@@ -4,7 +4,7 @@ A job file turns a posting into a list of requirements the reviewer can check yo
 
 ## Steps
 
-1. Run `.venv/bin/python src/new_job.py` to scaffold `jobs/<company>-<title>-v<N>/` — it saves the posting as `posting.txt`, copies the master content to `content.json`, builds the PDF as `<Your-Name>-<Job-Title>-<Company>.pdf`, and writes a `job.json` skeleton (with that name in `"pdf_name"`) with `"posting_file"` already pointing at `posting.txt`.
+1. Run `.venv/bin/python src/new_job.py` to scaffold `jobs/<company>-<title>-v<N>/` — it saves the posting as `posting.txt`, copies the master content to `content.json`, builds the PDF as `<Your-Name>-<Job-Title>-<Company>.pdf` (plus `cover.json` and the two cover letter PDFs, see the README), and writes a `job.json` skeleton (with that name in `"pdf_name"`) with `"posting_file"` already pointing at `posting.txt`.
 2. Add one requirement per thing the posting asks for, in `job.json`. When one line lists several skills ("Experience with React, Python, SQL"), make one requirement per skill. They can all share the same quote.
 3. Validate while you work: `.venv/bin/python src/check_job.py jobs/<slug>/job.json --draft`
 4. Re-read each requirement against the posting, set `"reviewed": true`, and validate again without `--draft`. The file can be used for scoring only when it shows 0 errors.
