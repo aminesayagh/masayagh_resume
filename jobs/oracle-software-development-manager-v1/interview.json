@@ -1,0 +1,423 @@
+{
+  "job": "Oracle — Software Development Manager",
+  "generated": "2026-11-10",
+  "draft_requirements_unreviewed": 36,
+  "summary": {
+    "prove_claim": 3,
+    "prepare_story": 15,
+    "gap": 18
+  },
+  "how_to_prepare": {
+    "source": "General interview-prep guidance (STAR: situation, task, action, result), the same for every job. Only 'topics' comes from this posting and this resume.",
+    "prepare_story": "Interviewers ask about what's written. Prepare the story behind the line: the situation, what you built, your choices, the result, and what you'd do differently.",
+    "prove_claim": "Your resume only claims this (skills, summary, or some of the terms). Prepare one concrete example that turns the claim into proof: scope, your role, a decision, the result.",
+    "gap": "Not on your resume. Prepare an honest answer: related experience, or how you would learn it."
+  },
+  "topics": [
+    {
+      "id": "R01",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Role based in Casablanca",
+      "posting_says": "Location: Casablanca, Morocco",
+      "your_resume_says": [
+        "Casablanca, Morocco"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R02",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Bachelor's in CS/engineering or equivalent practical experience",
+      "posting_says": "Bachelor’s degree in Computer Science, Engineering, or a related field, or equivalent practical experience.",
+      "your_resume_says": [
+        "2020 - 2023 Bachelor's in Computer Science"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R03",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "10+ years of software engineering",
+      "posting_says": "10+ years of software engineering, systems engineering, data engineering, or related technical experience.",
+      "your_resume_says": [],
+      "terms_not_met": []
+    },
+    {
+      "id": "R07",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Delivery across multiple teams and stakeholders",
+      "posting_says": "Demonstrated success delivering complex software, platform, support, data, or AI-related initiatives across multiple teams and stakeholders.",
+      "your_resume_says": [
+        "stakeholders."
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R08",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Cloud services",
+      "posting_says": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "your_resume_says": [
+        "support on cloud services, access/IP handover, incident response"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R09",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Agile delivery",
+      "posting_says": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "your_resume_says": [
+        "Tracked agile sprint KPIs in Odoo and surfaced bottlenecks to"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R10",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Security",
+      "posting_says": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "your_resume_says": [
+        "Led web development of a CTF platform for security competitions,"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R12",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Leading teams supporting production systems",
+      "posting_says": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "your_resume_says": [
+        "Experience Took ownership of production systems maintenance, deployment"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R13",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Supporting enterprise customers",
+      "posting_says": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "your_resume_says": [
+        "delivering standardized software to enterprise customers at lower"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R14",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Incident response",
+      "posting_says": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "your_resume_says": [
+        "support on cloud services, access/IP handover, incident response"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R15",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Turning business needs into technical priorities",
+      "posting_says": "Ability to translate business and customer needs into clear technical priorities and executable plans.",
+      "your_resume_says": [
+        "requirements and set technical priorities before development."
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R04",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "5+ years of people management",
+      "posting_says": "5+ years of people-management experience, including experience managing managers and/or leading sizable engineering teams.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "people-management"
+      ]
+    },
+    {
+      "id": "R05",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Managing managers or sizable teams",
+      "posting_says": "5+ years of people-management experience, including experience managing managers and/or leading sizable engineering teams.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "managing managers"
+      ]
+    },
+    {
+      "id": "R06",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Delivering complex initiatives across teams",
+      "posting_says": "Demonstrated success delivering complex software, platform, support, data, or AI-related initiatives across multiple teams and stakeholders.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "complex software"
+      ]
+    },
+    {
+      "id": "R11",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Operational reliability",
+      "posting_says": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "operational reliability"
+      ]
+    },
+    {
+      "id": "R16",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Communication",
+      "posting_says": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "communication"
+      ]
+    },
+    {
+      "id": "R17",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Stakeholder management",
+      "posting_says": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "stakeholder-management"
+      ]
+    },
+    {
+      "id": "R18",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Organizational leadership",
+      "posting_says": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "organizational leadership"
+      ]
+    },
+    {
+      "id": "R24",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Code quality and testing",
+      "posting_says": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "your_resume_says": [
+        "Co-developed engineering standards for code quality and shipping,",
+        "Data scraping CI/CD Docker Testing Practices"
+      ],
+      "terms_not_met": [
+        "testing"
+      ]
+    },
+    {
+      "id": "R28",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Data, cloud, automation and AI capability",
+      "posting_says": "Develop technical and leadership capability in modern data, cloud, automation, and AI technologies, ensuring practical and responsible adoption.",
+      "your_resume_says": [
+        "support on cloud services, access/IP handover, incident response",
+        "Develop enterprise software with AI agent workflows that automate"
+      ],
+      "terms_not_met": [
+        "automation"
+      ]
+    },
+    {
+      "id": "R32",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Machine learning or generative AI",
+      "posting_says": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "your_resume_says": [
+        "Delivered a contextual generative AI chat that transforms open-"
+      ],
+      "terms_not_met": [
+        "machine learning"
+      ]
+    },
+    {
+      "id": "R19",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Professional English",
+      "posting_says": "Professional fluency in English; French and/or Arabic are strongly preferred.",
+      "your_resume_says": [
+        "Languages Arabic - Native French - Professional English - Professional"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R20",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "French and/or Arabic",
+      "posting_says": "Professional fluency in English; French and/or Arabic are strongly preferred.",
+      "your_resume_says": [
+        "Tarifpublic.fr, provide technical consulting for a French state-",
+        "Languages Arabic - Native French - Professional English - Professional"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R26",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Hiring",
+      "posting_says": "Build and execute talent plans: hiring, onboarding, performance management, career development, succession planning, and retention.",
+      "your_resume_says": [
+        "hiring of new engineers."
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R30",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Enterprise software",
+      "posting_says": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "your_resume_says": [
+        "Develop enterprise software with AI agent workflows that automate"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R21",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Lead and coach an engineering organization",
+      "posting_says": "Lead, coach, and develop an engineering organization of 30 or more employees, including engineering managers, technical leads, and individual contributors.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "coach"
+      ]
+    },
+    {
+      "id": "R22",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Define roadmaps with global teams",
+      "posting_says": "Partner closely with global engineering, product, support, data, security, and operations teams to define roadmaps, resolve dependencies, and deliver measurable outcomes.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "roadmaps"
+      ]
+    },
+    {
+      "id": "R23",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Architecture reviews",
+      "posting_says": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "architecture reviews"
+      ]
+    },
+    {
+      "id": "R25",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Incident management",
+      "posting_says": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "incident management"
+      ]
+    },
+    {
+      "id": "R27",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Performance management",
+      "posting_says": "Build and execute talent plans: hiring, onboarding, performance management, career development, succession planning, and retention.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "performance management"
+      ]
+    },
+    {
+      "id": "R29",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Headcount, staffing and budgets",
+      "posting_says": "Manage headcount, staffing plans, budgets, and vendor or partner relationships as applicable.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "budgets"
+      ]
+    },
+    {
+      "id": "R31",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Developer or data platforms",
+      "posting_says": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "developer platforms",
+        "data platforms"
+      ]
+    },
+    {
+      "id": "R33",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Global distributed engineering organization",
+      "posting_says": "Experience working in a global, distributed engineering organization.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "distributed engineering"
+      ]
+    },
+    {
+      "id": "R34",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Building teams in Morocco or EMEA",
+      "posting_says": "Experience building or scaling engineering teams in Morocco or the broader EMEA region.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "EMEA"
+      ]
+    },
+    {
+      "id": "R35",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Familiarity with Oracle products",
+      "posting_says": "Familiarity with Oracle products, Oracle Support processes, or enterprise customer environments.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "Oracle products"
+      ]
+    },
+    {
+      "id": "R36",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Workforce planning and budget management",
+      "posting_says": "Experience with workforce planning, organizational design, and budget management.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "workforce planning",
+        "budget management"
+      ]
+    }
+  ]
+}

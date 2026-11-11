@@ -302,6 +302,43 @@ def compare(old: dict, new: dict) -> tuple[list[str], list[str]]:
     return changes, regressions
 
 
+def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bool = False,
+            md_path: Path | None = None) -> dict:
+    """Review the PDF, print what changed since the last saved report (and the verdict), then save the
+    report, interview.json and the dashboard. Runs after every job PDF build, so the dashboard is never stale."""
+    content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
+    md_path = md_path or job_path.parent / "review.md"
+    previous = md_path.with_suffix(".json")
+    rep = review(job, cv, content, network=network)
+    if previous.exists():
+        changes, regressions = compare(summary(json.loads(previous.read_text(encoding="utf-8"))), summary(rep))
+        print(f"Compared with the previous report:")
+        print("\n".join(f"  {c}" for c in changes) or "  no change")
+        print(f"Verdict: {'REGRESSION: ' + '; '.join(regressions) if regressions else 'no regression'}")
+    inputs = {"cv": rel(cv), "job": rel(job_path), "content": rel(content_path) if content else "no content file"}
+    md_path.parent.mkdir(parents=True, exist_ok=True)
+    md_path.write_text(markdown(rep, inputs), encoding="utf-8")
+    rep["pdf_check"]["pdf"] = inputs["cv"]
+    previous.write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    interview_path = md_path.parent / "interview.json"
+    interview_path.write_text(json.dumps(interview(rep, job), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    c, cov = rep["counts"], rep["evidence_coverage"]
+    errors = sum(f["severity"] == "error" for f in rep["pdf_check"]["findings"])
+    print(f"{rep['title']}\n  PDF: {errors} error(s), "
+          f"{sum(f['severity'] == 'warning' for f in rep['pdf_check']['findings'])} warning(s)")
+    if rep.get("unreviewed"):
+        print(f"  Draft: {rep['unreviewed']} requirement(s) not reviewed yet; quotes and priorities may change.")
+    if rep.get("job_title") and not rep["job_title"]["match"]:
+        print(f"  [warning] {rep['job_title']['message']}")
+    print(f"  Requirements: {c['met']} met, {c['partial']} partial, {c['missing']} missing, {c['uncertain']} uncertain "
+          f"({rep['overridden']} overridden)")
+    print(f"  Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} (not an ATS score)")
+    print(f"  Report: {rel(md_path)} (+ .json); interview prep: {rel(interview_path)}")
+    print(f"  Dashboard: {rel(dashboard.build(job_path.parent))}")
+    return rep
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--job", type=Path, required=True)
@@ -322,6 +359,8 @@ def main() -> None:
             print(f"  [error] {f['message']}")
         sys.exit(1)
     cv = args.cv or args.job.parent / job.get("pdf_name", "resume.pdf")
+    if not cv.exists() and cv.with_name("_" + cv.name).exists():  # not ready to send (see build_resume.mark_readiness)
+        cv = cv.with_name("_" + cv.name)
     content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
                                           if p.exists()), cv.parent / "content.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
@@ -338,29 +377,8 @@ def main() -> None:
         print("\n".join(f"  {c}" for c in changes) or "  no change")
         print(f"Verdict: {'REGRESSION: ' + '; '.join(regressions) if regressions else 'no regression'}")
         return
-    rep = review(job, cv, content, network=not args.no_network)
-    inputs = {"cv": rel(cv), "job": rel(args.job), "content": rel(content_path) if content else "no content file"}
-    md_path = args.out or args.job.parent / "review.md"
-    md_path.parent.mkdir(parents=True, exist_ok=True)
-    md_path.write_text(markdown(rep, inputs), encoding="utf-8")
-    rep["pdf_check"]["pdf"] = inputs["cv"]
-    md_path.with_suffix(".json").write_text(json.dumps({**inputs, **rep}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    interview_path = md_path.parent / "interview.json"
-    interview_path.write_text(json.dumps(interview(rep, job), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
-    c, cov = rep["counts"], rep["evidence_coverage"]
+    rep = refresh(args.job, job, cv, content_path, network=not args.no_network, md_path=args.out)
     errors = sum(f["severity"] == "error" for f in rep["pdf_check"]["findings"])
-    print(f"{rep['title']}\n  PDF: {errors} error(s), "
-          f"{sum(f['severity'] == 'warning' for f in rep['pdf_check']['findings'])} warning(s)")
-    if rep.get("unreviewed"):
-        print(f"  Draft: {rep['unreviewed']} requirement(s) not reviewed yet; quotes and priorities may change.")
-    if rep.get("job_title") and not rep["job_title"]["match"]:
-        print(f"  [warning] {rep['job_title']['message']}")
-    print(f"  Requirements: {c['met']} met, {c['partial']} partial, {c['missing']} missing, {c['uncertain']} uncertain "
-          f"({rep['overridden']} overridden)")
-    print(f"  Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} (not an ATS score)")
-    print(f"  Report: {rel(md_path)} (+ .json); interview prep: {rel(interview_path)}")
-    print(f"  Dashboard: {rel(dashboard.build(args.job.parent))}")
     sys.exit(1 if errors or not rep["pdf_check"]["pages"] else 0)
 
 

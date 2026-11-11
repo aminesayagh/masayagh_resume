@@ -1,0 +1,16 @@
+{
+  "lang": "en",
+  "date": "",
+  "company": "Y Strategie",
+  "hiring_contact": "",
+  "job_title": "Senior Front-End Developer",
+  "reference": "",
+  "greeting": "Dear Hiring Team,",
+  "paragraphs": [
+    "I am applying for the Senior Front-End Developer position at Y Strategie. I build product experiences that turn complex, manual workflows into practical tools, combining engineering, interface design and AI-assisted development, and I would like to bring that focus to your team.",
+    "At Hypeo, a MENA creator-marketing SaaS platform, I delivered a contextual AI chat that turns open-ended client conversations into configured marketing campaigns, connected to the internal influencer database. I built and refined the front-end experience in close collaboration with a senior technical lead, adapting the workflows as backend integration and business requirements evolved.",
+    "Earlier, at Cyber Cohesion, I led web development of a CTF platform used at events such as OWASP AppSec Days and BSides Singapore, including a Go API service that orchestrated isolated application deployments. At Cogy Tech, I brought 02Book, an AI-powered writing assistant for B2B writers, to production and helped roll out a standardized delivery process across the team.",
+    "Thank you for your time and consideration. I would welcome the opportunity to discuss how I could contribute to the work at Y Strategie."
+  ],
+  "closing": "Best regards,"
+}

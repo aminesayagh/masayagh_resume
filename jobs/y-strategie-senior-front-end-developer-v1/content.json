@@ -73,7 +73,7 @@
         "Built and refined the front-end experience in Next.js, TypeScript and Tailwind CSS, creating reusable component libraries on Radix UI, in close collaboration with a senior technical lead.",
         "Automated the manipulation and extraction of influencer data from web-scraping outputs and database pipelines used across the platform.",
         "Took ownership of maintenance, deployment support, access/IP handover, and bug-fix coordination during a technical leadership transition.",
-        "Documented core business modules, missing implementation areas, and architectural solutions to support future development planning.",
+        "Delivered a moderation platform in Vue 3 that let the team review and onboard creator profiles from one place, connected to Hypeo's account API endpoints.",
         "Developed an external data-metrics solution for creator audience and professional collaboration insights, later accepted and integrated into the company workflow."
       ]
     },
@@ -97,7 +97,7 @@
       "role": "Software Developer",
       "description": "Designed and integrated product features for Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data for campaign planning.",
       "bullets": [
-        "Designed UI flows and prototypes for Inflauditor to validate product direction and accelerate development decisions.",
+        "Owned UI design, UX flows and prototypes for Inflauditor to validate product direction and accelerate development decisions.",
         "Integrated data insights such as creator scoring, language detection, and sentiment indicators to support campaign planning."
       ]
     },
@@ -116,8 +116,8 @@
       "role": "Software Developer",
       "description": "Led web development of a CTF platform for security competitions, used in global events such as OWASP AppSec Days, BSides Singapore, and ISACA.",
       "bullets": [
-        "Implemented a Go API service to orchestrate isolated application deployments, providing a secure training environment for participants.",
-        "Developed the web experience of Warzone, a dashboard to track team progress, scoring and overall competition gamification."
+        "Implemented Go API endpoints to orchestrate isolated application deployments, providing a secure training environment for participants.",
+        "Provided coaching and mentoring to developers on the platform's web experience."
       ]
     },
     {
@@ -125,7 +125,7 @@
       "company": "Sodiadd,",
       "detail": "France",
       "role": "Software Developer",
-      "description": "Developed a responsive subscription website for individual real estate investment plans.",
+      "description": "Developed a responsive, accessible subscription website in HTML, CSS and JavaScript for individual real estate investment plans.",
       "bullets": []
     },
     {

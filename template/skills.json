@@ -1,0 +1,373 @@
+{
+  "skills": [
+    {
+      "name": "Accessibility",
+      "match": [
+        "WCAG"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Agent Tooling",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "AI Agent Workflows",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Angular",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Blade",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "CI/CD",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Claude",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Claude Code",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Codex",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "CSS",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Cypress",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Data integration",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Data scraping",
+      "match": [
+        "Web scraping"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Docker",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Express",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "FastAPI",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Figma",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Framer",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Git",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Harness Eng",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Hermes",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "HTML",
+      "match": [
+        "HTML5"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Interactive design",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Java",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "JavaScript",
+      "match": [
+        "ES6+"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Jest",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "jQuery",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Laravel",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "LLM API Integration",
+      "match": [
+        "LLM Integration"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "MCP Integrations",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "NestJS",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Next.js",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Node.js",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Nuxt.js",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Obsidian",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Odoo",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "PHP",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Pinia",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "PostgreSQL",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Prototyping",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Python",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "RAG",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "React",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "REST APIs",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "SCSS",
+      "match": [
+        "SASS"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "SDKs",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Spring Boot",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "SQL",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Symfony",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "System design",
+      "match": [
+        "Technical designs",
+        "technical design"
+      ],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Tailwind CSS",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Testing Practices",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "TypeScript",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "UI Design",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Vite",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Vitest",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Vue 3",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "Vue.js",
+      "match": [],
+      "start": null,
+      "end": null
+    },
+    {
+      "name": "WordPress",
+      "match": [],
+      "start": null,
+      "end": null
+    }
+  ]
+}

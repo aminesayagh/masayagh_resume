@@ -1,0 +1,432 @@
+{
+  "job": "Oracle — Senior AI Software Engineer",
+  "generated": "2026-11-10",
+  "draft_requirements_unreviewed": 34,
+  "summary": {
+    "prove_claim": 12,
+    "prepare_story": 13,
+    "gap": 9
+  },
+  "how_to_prepare": {
+    "source": "General interview-prep guidance (STAR: situation, task, action, result), the same for every job. Only 'topics' comes from this posting and this resume.",
+    "prepare_story": "Interviewers ask about what's written. Prepare the story behind the line: the situation, what you built, your choices, the result, and what you'd do differently.",
+    "prove_claim": "Your resume only claims this (skills, summary, or some of the terms). Prepare one concrete example that turns the claim into proof: scope, your role, a decision, the result.",
+    "gap": "Not on your resume. Prepare an honest answer: related experience, or how you would learn it."
+  },
+  "topics": [
+    {
+      "id": "R11",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Bachelor's or Master's degree in Computer Science, Software Engineering or related field",
+      "posting_says": "Bachelor’s or Master’s degree in Computer Science, Software Engineering, or a related technical field.",
+      "your_resume_says": [
+        "2020 - 2023 Bachelor's in Computer Science",
+        "software engineering, visual design, business understanding, and AI-assisted engineering to"
+      ],
+      "terms_not_met": [
+        "Software Engineering"
+      ]
+    },
+    {
+      "id": "R14",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Proficiency in one or more programming languages (Java, Python, C++)",
+      "posting_says": "Proficiency in one or more programming languages such as Java, Python, C++, or similar.",
+      "your_resume_says": [
+        "Skills JavaScript Java Python PHP",
+        "Python · CLI · AI Agent · SQLite · SQL · JEV · GLiNER2"
+      ],
+      "terms_not_met": [
+        "Java",
+        "C++"
+      ]
+    },
+    {
+      "id": "R16",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Strong understanding of system design and software architecture",
+      "posting_says": "Strong understanding of data structures, algorithms, system design, and software architecture.",
+      "your_resume_says": [
+        "Figma System design Interactive design Prototyping",
+        "areas, and software architecture solutions to support future"
+      ],
+      "terms_not_met": [
+        "system design"
+      ]
+    },
+    {
+      "id": "R17",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Built production-grade services, APIs, SDKs or libraries",
+      "posting_says": "Experience designing and building production-grade services, APIs, SDKs, libraries, or platform components.",
+      "your_resume_says": [
+        "Implemented a Go API service to orchestrate isolated application",
+        "FastAPI WordPress SDKs PostgreSQL"
+      ],
+      "terms_not_met": [
+        "SDKs",
+        "libraries"
+      ]
+    },
+    {
+      "id": "R19",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Working knowledge of AI systems and LLMs",
+      "posting_says": "Working knowledge of modern AI systems, Large Language Models, AI application development, or AI platform integration.",
+      "your_resume_says": [
+        "Delivered a contextual AI chat built on Large Language Models that"
+      ],
+      "terms_not_met": [
+        "AI systems",
+        "AI application development"
+      ]
+    },
+    {
+      "id": "R21",
+      "priority": "must_have",
+      "focus": "prove_claim",
+      "requirement": "Testing, debugging and performance analysis in production support",
+      "posting_says": "Experience with testing, debugging, performance analysis, CI/CD, and production support practices.",
+      "your_resume_says": [
+        "Data scraping CI/CD Docker Testing Practices",
+        "debugging and bug-fix coordination during a technical leadership"
+      ],
+      "terms_not_met": [
+        "testing",
+        "performance analysis"
+      ]
+    },
+    {
+      "id": "R01",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Role based in Casablanca, Morocco",
+      "posting_says": "Location: Casablanca, Morocco",
+      "your_resume_says": [
+        "Casablanca, Morocco"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R20",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "CI/CD practices",
+      "posting_says": "Experience with testing, debugging, performance analysis, CI/CD, and production support practices.",
+      "your_resume_says": [
+        "Experience Took ownership of production-grade software maintenance, CI/CD"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R22",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Strong technical leadership skills",
+      "posting_says": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "your_resume_says": [
+        "debugging and bug-fix coordination during a technical leadership"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R23",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Code review",
+      "posting_says": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "your_resume_says": [
+        "and code review with a senior technical lead, continuously"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R25",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Mentoring engineers",
+      "posting_says": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "your_resume_says": [
+        "Provided coaching and mentoring to developers on the platform's"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R26",
+      "priority": "must_have",
+      "focus": "prepare_story",
+      "requirement": "Engineering planning",
+      "posting_says": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "your_resume_says": [
+        "engineering planning."
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R15",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Strong understanding of data structures and algorithms",
+      "posting_says": "Strong understanding of data structures, algorithms, system design, and software architecture.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "data structures",
+        "algorithms"
+      ]
+    },
+    {
+      "id": "R18",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Works effectively in large, complex codebases",
+      "posting_says": "Ability to work effectively in large, complex codebases and deliver high-quality changes with limited ramp-up time.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "codebases"
+      ]
+    },
+    {
+      "id": "R24",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Design review",
+      "posting_says": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "design review"
+      ]
+    },
+    {
+      "id": "R27",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Excellent problem-solving and ownership",
+      "posting_says": "Excellent problem-solving, ownership, communication, and collaboration skills.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "problem-solving"
+      ]
+    },
+    {
+      "id": "R28",
+      "priority": "must_have",
+      "focus": "gap",
+      "requirement": "Excellent communication and collaboration",
+      "posting_says": "Excellent problem-solving, ownership, communication, and collaboration skills.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "communication"
+      ]
+    },
+    {
+      "id": "R04",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Build scalable services, APIs and SDKs",
+      "posting_says": "Build scalable services, APIs, SDKs, and reusable platform components.",
+      "your_resume_says": [
+        "Implemented a Go API service to orchestrate isolated application",
+        "FastAPI WordPress SDKs PostgreSQL"
+      ],
+      "terms_not_met": [
+        "SDKs"
+      ]
+    },
+    {
+      "id": "R07",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Improve reliability, performance, maintainability and testing",
+      "posting_says": "Improve system quality across reliability, performance, maintainability, testing, and operational readiness.",
+      "your_resume_says": [
+        "Data scraping CI/CD Docker Testing Practices",
+        "performance for client campaigns."
+      ],
+      "terms_not_met": [
+        "testing"
+      ]
+    },
+    {
+      "id": "R12",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Strong professional software engineering experience",
+      "posting_says": "Strong professional experience in software engineering, preferably in backend, platform, infrastructure, or enterprise product development.",
+      "your_resume_says": [
+        "software engineering, visual design, business understanding, and AI-assisted engineering to"
+      ],
+      "terms_not_met": [
+        "software engineering"
+      ]
+    },
+    {
+      "id": "R30",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Distributed systems, cloud services or large-scale backend platforms",
+      "posting_says": "Experience with distributed systems, cloud services, or large-scale backend platforms.",
+      "your_resume_says": [
+        "deployment support on cloud services, access/IP handover,"
+      ],
+      "terms_not_met": [
+        "distributed systems"
+      ]
+    },
+    {
+      "id": "R31",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Developer-facing tools, SDKs, APIs or internal engineering frameworks",
+      "posting_says": "Experience developing developer-facing tools, SDKs, APIs, or internal engineering frameworks.",
+      "your_resume_says": [
+        "FastAPI WordPress SDKs PostgreSQL",
+        "Implemented a Go API service to orchestrate isolated application"
+      ],
+      "terms_not_met": [
+        "SDKs"
+      ]
+    },
+    {
+      "id": "R32",
+      "priority": "preferred",
+      "focus": "prove_claim",
+      "requirement": "Familiarity with LLM orchestration, RAG or agentic workflows",
+      "posting_says": "Familiarity with LLM orchestration, evaluation, RAG, agentic workflows, observability, or AI governance.",
+      "your_resume_says": [
+        "Claude Code & Codex RAG LLM API Integration AI Agent Workflows"
+      ],
+      "terms_not_met": [
+        "RAG",
+        "LLM orchestration",
+        "agentic workflows"
+      ]
+    },
+    {
+      "id": "R02",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Senior AI Software Engineer role on Oracle MADC",
+      "posting_says": "As a Senior AI Software Engineer at Oracle MADC, you will help build AI capabilities into Oracle products through strong software engineering, technical leadership, and high-quality execution.",
+      "your_resume_says": [
+        "AI Software Engineer"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R03",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Design, develop and maintain production-grade software",
+      "posting_says": "Design, develop, and maintain production-grade software for AI-enabled Oracle products.",
+      "your_resume_says": [
+        "Experience Took ownership of production-grade software maintenance, CI/CD"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R06",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Integrate LLM capabilities into enterprise software",
+      "posting_says": "Integrate modern AI and Large Language Model capabilities into reliable enterprise software systems.",
+      "your_resume_says": [
+        "Delivered a contextual AI chat built on Large Language Models that"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R10",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Raise engineering standards",
+      "posting_says": "Mentor engineers and help raise engineering standards across the team.",
+      "your_resume_says": [
+        "Co-developed engineering standards for code quality and shipping,"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R13",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Backend, platform or enterprise product background",
+      "posting_says": "Strong professional experience in software engineering, preferably in backend, platform, infrastructure, or enterprise product development.",
+      "your_resume_says": [
+        "adapting workflows to backend integration and evolving business"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R29",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Building AI-enabled enterprise applications or AI platform capabilities",
+      "posting_says": "Experience building AI-enabled enterprise applications or AI platform capabilities.",
+      "your_resume_says": [
+        "Brought 02Book to production, an AI-enabled writing assistant for"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R34",
+      "priority": "preferred",
+      "focus": "prepare_story",
+      "requirement": "Prior experience as a technical lead or senior engineer",
+      "posting_says": "Prior experience as a technical lead or senior engineer driving execution across multiple contributors.",
+      "your_resume_says": [
+        "and code review with a senior technical lead, continuously"
+      ],
+      "terms_not_met": []
+    },
+    {
+      "id": "R05",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Work across large codebases",
+      "posting_says": "Work across large codebases, quickly understanding existing architectures, patterns, and dependencies.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "codebases"
+      ]
+    },
+    {
+      "id": "R08",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Review technical designs and code changes",
+      "posting_says": "Review technical designs and code changes with strong attention to correctness and long-term impact.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "technical designs"
+      ]
+    },
+    {
+      "id": "R09",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Lead engineering execution across sprints",
+      "posting_says": "Lead engineering execution across sprints, including planning, prioritization, task breakdown, and delivery tracking.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "engineering execution"
+      ]
+    },
+    {
+      "id": "R33",
+      "priority": "preferred",
+      "focus": "gap",
+      "requirement": "Familiarity with observability or AI governance",
+      "posting_says": "Familiarity with LLM orchestration, evaluation, RAG, agentic workflows, observability, or AI governance.",
+      "your_resume_says": [],
+      "terms_not_met": [
+        "observability",
+        "AI governance"
+      ]
+    }
+  ]
+}

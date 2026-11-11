@@ -103,6 +103,36 @@ def default_pdf(data_path: Path) -> Path:
     return folder / (name or "resume.pdf")
 
 
+def mark_readiness(data_path: Path, pdf_file: Path, output_path: Path | None, ready: bool) -> Path:
+    """A job PDF that is not ready to send (over 3 pages, broken skills layout) is renamed with a leading '_'
+    and the ready-named file is removed, so a not-ready resume can't be attached or published by mistake."""
+    if output_path is not None or not (data_path.resolve().parent / "job.json").exists():
+        return pdf_file
+    draft = pdf_file.with_name("_" + pdf_file.name)
+    if ready:
+        draft.unlink(missing_ok=True)
+        return pdf_file
+    shutil.move(str(pdf_file), draft)
+    print(f"NOT READY TO SEND: saved as {draft.name}; fix the warnings above, then rebuild.")
+    return draft
+
+
+def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None) -> None:
+    """A job's own PDF changed: re-run its review so report, interview prep and dashboard match it.
+    Skipped for the template, for -o builds elsewhere, and before requirements are drafted."""
+    job_file = data_path.resolve().parent / "job.json"
+    if output_path is not None or not job_file.exists():
+        return
+    job = json.loads(job_file.read_text(encoding="utf-8"))
+    if not job.get("requirements"):
+        return
+    import check_job, review_ats  # late: review_ats is heavier and not needed for template builds
+    if [f for f in check_job.validate(job, ROOT, draft=True) if f["severity"] == "error"]:
+        print("Job file has errors; report not refreshed (run src/check_job.py).")
+        return
+    review_ats.refresh(job_file, job, pdf_file, data_path.resolve())
+
+
 def build(data_path: Path, output_path: Path | None = None) -> Path:
     """Render and print `data_path` to PDF. Returns the PDF path."""
     data = load_data(data_path.resolve(strict=True))
@@ -146,12 +176,18 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
         shutil.move(str(rendered_pdf), pdf_file)
         page_count = match.group(1)
     print(f"Created {pdf_file} ({page_count} pages)")
-    if problem := skills_problem(data["skills"]):
+    problem = skills_problem(data["skills"])
+    if problem:
         print(f"WARNING: {problem}.")
     if int(page_count) > MAX_PAGES:
         from pypdf import PdfReader
         spill = " ".join(PdfReader(pdf_file).pages[-1].extract_text().split())[:160]
         print(f"WARNING: over {MAX_PAGES} pages. Last page starts with: {spill}")
+    pdf_file = mark_readiness(data_path, pdf_file, output_path, int(page_count) <= MAX_PAGES and not problem)
+    refresh_job_report(data_path, pdf_file, output_path)
+    if output_path is None and (data_path.resolve().parent / "job.json").exists():
+        import build_cover  # late: imports this module
+        build_cover.build(data_path.resolve().parent)
     return pdf_file
 
 

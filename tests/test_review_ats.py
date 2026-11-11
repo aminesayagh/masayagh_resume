@@ -22,15 +22,15 @@ class ReviewTest(unittest.TestCase):
     def test_override_keeps_automated_finding_and_flags_stale(self):
         job = copy.deepcopy(JOB)
         job["overrides"] = [
-            {"id": "R07", "status": "met", "reason": "React is used daily at Phoenix AI",
-             "pdf_quote": "React / Next.js Angular Node.js / NestJS Spring Boot"},
+            {"id": "R04", "status": "met", "reason": "Docker and CI/CD used daily at Phoenix AI",
+             "pdf_quote": "Data scraping CI/CD Docker Testing Practices"},
             {"id": "R11", "status": "partial", "reason": "Wrote tests at Cogy Tech", "pdf_quote": "A line that is not in the PDF"},
             {"id": "R14", "status": "missing", "reason": "Agree, no AWS", "pdf_quote": None},
         ]
         self.assertEqual([f for f in check_job.validate(job) if f["severity"] == "error"], [])
         rep = run(job)
         r = {x["id"]: x for x in rep["results"]}
-        self.assertEqual((r["R07"]["status"], r["R07"]["automated"]["status"], r["R07"]["override"]["stale"]),
+        self.assertEqual((r["R04"]["status"], r["R04"]["automated"]["status"], r["R04"]["override"]["stale"]),
                          ("met", "partial", False))
         self.assertTrue(r["R11"]["override"]["stale"])
         self.assertFalse(r["R14"]["override"]["stale"])
@@ -49,7 +49,8 @@ class ReviewTest(unittest.TestCase):
     def test_suggestions_are_rule_based(self):
         rep = run(JOB)
         r = {x["id"]: x for x in rep["results"]}
-        self.assertIn("only in your skills list", r["R07"]["suggestion"])
+        partial = next(x for x in rep["results"] if x["status"] == "partial")  # any: depends on template wording
+        self.assertIn("only in your skills list", partial["suggestion"])
         missing = next(x for x in rep["results"] if x["status"] == "missing")  # any: depends on template wording
         self.assertIn("does not appear", missing["suggestion"])
         self.assertIn("The posting says 'APIs'", r["R02"]["suggestion"])   # wording differs

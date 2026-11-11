@@ -1,0 +1,41 @@
+Source: https://careers.oracle.com/en/sites/jobsearch/job/338502/?utm_source=external%20referral&utm_medium=referral
+Location: Casablanca, Morocco
+
+We are looking for a senior engineer with strong coding ability, sound technical judgment, and the ability to lead engineering work from design through delivery. The ideal candidate is comfortable owning complex technical areas, reviewing code, mentoring others, and driving execution across teams.
+
+As a Senior AI Software Engineer at Oracle MADC, you will help build AI capabilities into Oracle products through strong software engineering, technical leadership, and high-quality execution.
+
+This is a software engineering role for someone who can work confidently across large codebases, design reliable systems, and deliver production-ready features at speed. You will contribute to the architecture, implementation, and evolution of AI-enabled product capabilities, working closely with engineering, product, and AI teams.
+
+In this role, you will
+- Design, develop, and maintain production-grade software for AI-enabled Oracle products.
+- Build scalable services, APIs, SDKs, and reusable platform components.
+- Work across large codebases, quickly understanding existing architectures, patterns, and dependencies.
+- Translate product and business requirements into practical technical designs and implementation plans.
+- Integrate modern AI and Large Language Model capabilities into reliable enterprise software systems.
+- Improve system quality across reliability, performance, maintainability, testing, and operational readiness.
+- Review technical designs and code changes with strong attention to correctness and long-term impact.
+- Lead engineering execution across sprints, including planning, prioritization, task breakdown, and delivery tracking.
+- Mentor engineers and help raise engineering standards across the team.
+
+Requirements
+- Bachelor’s or Master’s degree in Computer Science, Software Engineering, or a related technical field.
+- Strong professional experience in software engineering, preferably in backend, platform, infrastructure, or enterprise product development.
+- Proficiency in one or more programming languages such as Java, Python, C++, or similar.
+- Strong understanding of data structures, algorithms, system design, and software architecture.
+- Experience designing and building production-grade services, APIs, SDKs, libraries, or platform components.
+- Ability to work effectively in large, complex codebases and deliver high-quality changes with limited ramp-up time.
+- Working knowledge of modern AI systems, Large Language Models, AI application development, or AI platform integration.
+- Experience with testing, debugging, performance analysis, CI/CD, and production support practices.
+- Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.
+- Excellent problem-solving, ownership, communication, and collaboration skills.
+
+Preferred Qualifications
+- Experience building AI-enabled enterprise applications or AI platform capabilities.
+- Experience with distributed systems, cloud services, or large-scale backend platforms.
+- Experience developing developer-facing tools, SDKs, APIs, or internal engineering frameworks.
+- Familiarity with LLM orchestration, evaluation, RAG, agentic workflows, observability, or AI governance.
+- Prior experience as a technical lead or senior engineer driving execution across multiple contributors.
+
+As a member of the software engineering division, you will assist in defining and developing software for tasks associated with the developing, debugging or designing of software applications or operating systems. Provide technical leadership to other software developers. Specify, design and implement modest changes to existing software architecture to meet changing needs.
+Career Level - IC3

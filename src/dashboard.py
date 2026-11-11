@@ -14,6 +14,8 @@ from datetime import datetime
 from html import escape
 from pathlib import Path
 
+import skills_inventory
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 JOBS = ROOT / "jobs"
@@ -64,7 +66,8 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict) -> str:
     links = " · ".join(x for x in (
         f'<a href="{escape(url)}">job posting</a>' if url else "",
         f'<a href="{escape(published)}">published resume</a>' if published else "",
-        f'<a href="{escape(pdf)}">local PDF</a>' if pdf and (folder / pdf).exists() else "",
+        f'<a href="{escape(pdf)}">local PDF (ready to send)</a>' if pdf and (folder / pdf).exists() else
+        f'<a href="_{escape(pdf)}">local PDF: NOT READY, do not send</a>' if pdf and (folder / f"_{pdf}").exists() else "",
         f'<a href="review.md">review.md</a>' if (folder / "review.md").exists() else "") if x)
     unreviewed = review.get("unreviewed", 0)
     parts = [f'<div class="card" id="{escape(folder.name)}"><h2>{escape(job.get("title", folder.name))}</h2>',
@@ -111,6 +114,19 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict) -> str:
         hints = "".join(f"<li>{tag(k)} {escape(v)}</li>" for k, v in prep.get("how_to_prepare", {}).items() if k != "source")
         parts.append(f"<h3>Interview prep</h3><ul>{hints}</ul><p class='muted'>{escape(prep['how_to_prepare'].get('source', ''))}</p>"
                      f"<table><tr><th>Id</th><th>Focus</th><th>Requirement</th><th>Your resume says</th><th>Terms not met</th></tr>{rows}</table>")
+
+    content_file = folder / "content.json"
+    if content_file.exists():
+        skills = skills_inventory.job_skills(job, json.loads(content_file.read_text(encoding="utf-8")))
+        rows = "".join(f"<tr><td>{escape(k['name'])}</td><td>{escape(skills_inventory.label(k['years']))}</td>"
+                       f"<td>{tag('asked', 'met') if k['in_job'] else ''}</td></tr>" for k in skills)
+        paste = ", ".join(f"{k['name']}: {skills_inventory.label(k['years'])}" for k in skills if k["years"] is not None)
+        missing = [k["name"] for k in skills if k["years"] is None]
+        parts.append(f"<h3>Skills for application forms</h3><p class='muted'>Years from template/skills.json "
+                     f"(start date to today). 'asked' = the posting asks for it.</p>"
+                     f"<textarea readonly rows='4' style='width:100%'>{escape(paste)}</textarea>"
+                     + (f"<p>{tag('start date needed', 'missing')} {escape(', '.join(missing))}</p>" if missing else "")
+                     + f"<table><tr><th>Skill</th><th>Experience</th><th>In posting</th></tr>{rows}</table>")
 
     posting = folder / "posting.txt"
     if posting.exists():

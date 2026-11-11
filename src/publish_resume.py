@@ -36,7 +36,9 @@ def publish(job_path: Path) -> str:
         sys.exit(f"{job_path} needs 'company' ([a-z0-9-]+) to publish.")
     pdf = job_path.parent / job.get("pdf_name", "resume.pdf")
     if not pdf.exists():
-        sys.exit(f"{pdf} does not exist; build it first.")
+        draft = pdf.with_name("_" + pdf.name)
+        sys.exit(f"Not published: only {draft.name} exists, which is NOT READY to send (see the build warnings)."
+                 if draft.exists() else f"{pdf} does not exist; build it first.")
 
     if not PUBLISH_CLONE.exists():
         url = subprocess.run(["git", "-C", str(PORTFOLIO), "remote", "get-url", "origin"],

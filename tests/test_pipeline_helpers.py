@@ -13,6 +13,8 @@ import check_spelling  # noqa: E402
 import draft_job  # noqa: E402,F401  (its asserts check line numbering, quotes and candidates)
 import fetch_posting  # noqa: E402,F401  (its asserts check the JobPosting parsing)
 import review_ats  # noqa: E402
+import tailor  # noqa: E402
+import skills_inventory  # noqa: E402,F401  (its asserts check skill splitting and year math)
 
 
 class AddAllowTest(unittest.TestCase):
@@ -91,6 +93,18 @@ class TargetsTest(unittest.TestCase):
         rep = {"results": [{"id": "R01", "priority": "must_have", "targets": ["skills", "experience"],
                             "terms": [{"term": "Vue 3", "found_in": ["skills"], "missing_from": ["experience"]}]}]}
         self.assertEqual(review_ats.placement_gaps(rep)[0]["missing_from"], ["experience"])
+
+
+class GapTableTest(unittest.TestCase):
+    def test_lists_every_unmet_term_and_skips_met(self):
+        review = {"results": [
+            {"id": "R01", "priority": "must_have", "status": "met", "terms": [{"term": "APIs", "status": "met"}]},
+            {"id": "R02", "priority": "preferred", "status": "partial", "terms": [
+                {"term": "cloud", "status": "met", "missing_from": []},
+                {"term": "automation", "status": "missing", "missing_from": ["skills", "experience"]}]}]}
+        rows = tailor.gap_table(review)
+        self.assertEqual(len(rows), 3)
+        self.assertIn("automation | missing | skills, experience", rows[2])
 
 
 if __name__ == "__main__":

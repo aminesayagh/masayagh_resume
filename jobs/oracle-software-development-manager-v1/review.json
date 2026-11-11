@@ -1,0 +1,1418 @@
+{
+  "cv": "jobs/oracle-software-development-manager-v1/_Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf",
+  "job": "jobs/oracle-software-development-manager-v1/job.json",
+  "content": "jobs/oracle-software-development-manager-v1/content.json",
+  "title": "Oracle — Software Development Manager",
+  "generated": "2026-11-10",
+  "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
+  "unreviewed": 36,
+  "job_title": {
+    "posting": "Software Development Manager",
+    "resume": "Software Engineer",
+    "match": false,
+    "severity": "warning",
+    "message": "Resume title 'Software Engineer' differs from the posting's title 'Software Development Manager'. Recruiters and ATS searches match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you."
+  },
+  "pdf_check": {
+    "pdf": "jobs/oracle-software-development-manager-v1/_Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf",
+    "pages": [
+      {
+        "page": 1,
+        "chars": 1945
+      },
+      {
+        "page": 2,
+        "chars": 2233
+      },
+      {
+        "page": 3,
+        "chars": 1593
+      },
+      {
+        "page": 4,
+        "chars": 121
+      }
+    ],
+    "experience_years": null,
+    "findings": [
+      {
+        "severity": "info",
+        "code": "meta_author",
+        "message": "The PDF has no author field; set it to your name."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_line",
+        "message": "'mohamed amine sayagh resume | p# masayagh.com/hire' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section."
+      }
+    ]
+  },
+  "spelling": {
+    "findings": []
+  },
+  "style": {
+    "findings": [
+      {
+        "severity": "info",
+        "code": "measurable",
+        "field": "experience",
+        "message": "experience: 1 of 24 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_opener",
+        "field": "experience",
+        "message": "experience: 3 lines start with 'Developed'; vary the verbs."
+      }
+    ]
+  },
+  "match_version": 2,
+  "results": [
+    {
+      "id": "R01",
+      "section": "location",
+      "priority": "must_have",
+      "description": "Role based in Casablanca",
+      "posting_quote": "Location: Casablanca, Morocco",
+      "targets": null,
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Casablanca, Morocco",
+      "page": 1,
+      "rationale": "'Casablanca' found in header text.",
+      "terms": [
+        {
+          "term": "Casablanca",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Casablanca, Morocco",
+          "page": 1,
+          "section": "header",
+          "rationale": "'Casablanca' found in header text.",
+          "found_in": [
+            "education",
+            "header"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R02",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Bachelor's in CS/engineering or equivalent practical experience",
+      "posting_quote": "Bachelor’s degree in Computer Science, Engineering, or a related field, or equivalent practical experience.",
+      "targets": [
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "2020 - 2023 Bachelor's in Computer Science",
+      "page": 3,
+      "rationale": "'Computer Science' found in education text.",
+      "terms": [
+        {
+          "term": "Computer Science",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "2020 - 2023 Bachelor's in Computer Science",
+          "page": 3,
+          "section": "education",
+          "rationale": "'Computer Science' found in education text.",
+          "found_in": [
+            "education"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R03",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "10+ years of software engineering",
+      "posting_quote": "10+ years of software engineering, systems engineering, data engineering, or related technical experience.",
+      "keyword": null,
+      "status": "met",
+      "method": "computed",
+      "quote": "2016 – 2020 Freelance, Morocco",
+      "page": 3,
+      "years": {
+        "merged": 10.8,
+        "summed": 10.9
+      },
+      "rationale": "10.8 years with overlaps counted once (needs 10). Computed from the job dates; the quote is your earliest date range.",
+      "terms": [],
+      "kind_years": true,
+      "suggestion": null
+    },
+    {
+      "id": "R04",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "5+ years of people management",
+      "posting_quote": "5+ years of people-management experience, including experience managing managers and/or leading sizable engineering teams.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'people-management' not found in this PDF.",
+      "terms": [
+        {
+          "term": "people-management",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'people-management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'people-management' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R05",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Managing managers or sizable teams",
+      "posting_quote": "5+ years of people-management experience, including experience managing managers and/or leading sizable engineering teams.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'managing managers' not found in this PDF.",
+      "terms": [
+        {
+          "term": "managing managers",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'managing managers' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'managing managers' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R06",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Delivering complex initiatives across teams",
+      "posting_quote": "Demonstrated success delivering complex software, platform, support, data, or AI-related initiatives across multiple teams and stakeholders.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'complex software' not found in this PDF.",
+      "terms": [
+        {
+          "term": "complex software",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'complex software' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'complex software' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R07",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Delivery across multiple teams and stakeholders",
+      "posting_quote": "Demonstrated success delivering complex software, platform, support, data, or AI-related initiatives across multiple teams and stakeholders.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "stakeholders.",
+      "page": 1,
+      "rationale": "'stakeholders' found in experience text.",
+      "terms": [
+        {
+          "term": "stakeholders",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "stakeholders.",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'stakeholders' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R08",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Cloud services",
+      "posting_quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "support on cloud services, access/IP handover, incident response",
+      "page": 2,
+      "rationale": "'cloud services' found in experience text.",
+      "terms": [
+        {
+          "term": "cloud services",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "support on cloud services, access/IP handover, incident response",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'cloud services' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "skills"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R09",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Agile delivery",
+      "posting_quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Tracked agile sprint KPIs in Odoo and surfaced bottlenecks to",
+      "page": 2,
+      "rationale": "'agile' found in experience text.",
+      "terms": [
+        {
+          "term": "agile",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Tracked agile sprint KPIs in Odoo and surfaced bottlenecks to",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'agile' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R10",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Security",
+      "posting_quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Led web development of a CTF platform for security competitions,",
+      "page": 2,
+      "rationale": "'security' found in experience text.",
+      "terms": [
+        {
+          "term": "security",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Led web development of a CTF platform for security competitions,",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'security' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R11",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Operational reliability",
+      "posting_quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'operational reliability' not found in this PDF.",
+      "terms": [
+        {
+          "term": "operational reliability",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'operational reliability' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'operational reliability' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R12",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Leading teams supporting production systems",
+      "posting_quote": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Experience Took ownership of production systems maintenance, deployment",
+      "page": 2,
+      "rationale": "'production systems' found in experience text.",
+      "terms": [
+        {
+          "term": "production systems",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Experience Took ownership of production systems maintenance, deployment",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'production systems' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R13",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Supporting enterprise customers",
+      "posting_quote": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "delivering standardized software to enterprise customers at lower",
+      "page": 2,
+      "rationale": "'enterprise customers' found in experience text.",
+      "terms": [
+        {
+          "term": "enterprise customers",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "delivering standardized software to enterprise customers at lower",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'enterprise customers' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R14",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Incident response",
+      "posting_quote": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "support on cloud services, access/IP handover, incident response",
+      "page": 2,
+      "rationale": "'incident response' found in experience text.",
+      "terms": [
+        {
+          "term": "incident response",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "support on cloud services, access/IP handover, incident response",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'incident response' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R15",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Turning business needs into technical priorities",
+      "posting_quote": "Ability to translate business and customer needs into clear technical priorities and executable plans.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "requirements and set technical priorities before development.",
+      "page": 2,
+      "rationale": "'technical priorities' found in experience text.",
+      "terms": [
+        {
+          "term": "technical priorities",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "requirements and set technical priorities before development.",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'technical priorities' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R16",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Communication",
+      "posting_quote": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'communication' not found in this PDF.",
+      "terms": [
+        {
+          "term": "communication",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'communication' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'communication' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R17",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Stakeholder management",
+      "posting_quote": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'stakeholder-management' not found in this PDF.",
+      "terms": [
+        {
+          "term": "stakeholder-management",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'stakeholder-management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'stakeholder-management' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R18",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Organizational leadership",
+      "posting_quote": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'organizational leadership' not found in this PDF.",
+      "terms": [
+        {
+          "term": "organizational leadership",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'organizational leadership' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'organizational leadership' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R19",
+      "section": "requirement",
+      "priority": "preferred",
+      "description": "Professional English",
+      "posting_quote": "Professional fluency in English; French and/or Arabic are strongly preferred.",
+      "targets": [
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Languages Arabic - Native French - Professional English - Professional",
+      "page": 4,
+      "rationale": "'English' found in languages text.",
+      "terms": [
+        {
+          "term": "English",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Languages Arabic - Native French - Professional English - Professional",
+          "page": 4,
+          "section": "languages",
+          "rationale": "'English' found in languages text.",
+          "found_in": [
+            "languages"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R20",
+      "section": "requirement",
+      "priority": "preferred",
+      "description": "French and/or Arabic",
+      "posting_quote": "Professional fluency in English; French and/or Arabic are strongly preferred.",
+      "targets": [
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Tarifpublic.fr, provide technical consulting for a French state-",
+      "page": 1,
+      "rationale": "Backed by experience: French, Arabic.",
+      "terms": [
+        {
+          "term": "French",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Tarifpublic.fr, provide technical consulting for a French state-",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'French' found in experience text.",
+          "found_in": [
+            "experience",
+            "languages"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        },
+        {
+          "term": "Arabic",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Languages Arabic - Native French - Professional English - Professional",
+          "page": 4,
+          "section": "languages",
+          "rationale": "'Arabic' found in languages text.",
+          "found_in": [
+            "languages"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R21",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Lead and coach an engineering organization",
+      "posting_quote": "Lead, coach, and develop an engineering organization of 30 or more employees, including engineering managers, technical leads, and individual contributors.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'coach' not found in this PDF.",
+      "terms": [
+        {
+          "term": "coach",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'coach' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'coach' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R22",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Define roadmaps with global teams",
+      "posting_quote": "Partner closely with global engineering, product, support, data, security, and operations teams to define roadmaps, resolve dependencies, and deliver measurable outcomes.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'roadmaps' not found in this PDF.",
+      "terms": [
+        {
+          "term": "roadmaps",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'roadmaps' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'roadmaps' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R23",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Architecture reviews",
+      "posting_quote": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'architecture reviews' not found in this PDF.",
+      "terms": [
+        {
+          "term": "architecture reviews",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'architecture reviews' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'architecture reviews' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R24",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Code quality and testing",
+      "posting_quote": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Data scraping CI/CD Docker Testing Practices",
+      "page": 1,
+      "rationale": "Backed by experience: code quality. Skills list or summary only: testing.",
+      "terms": [
+        {
+          "term": "code quality",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Co-developed engineering standards for code quality and shipping,",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'code quality' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        },
+        {
+          "term": "testing",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Data scraping CI/CD Docker Testing Practices",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'testing' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'testing' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R25",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Incident management",
+      "posting_quote": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'incident management' not found in this PDF.",
+      "terms": [
+        {
+          "term": "incident management",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'incident management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'incident management' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R26",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Hiring",
+      "posting_quote": "Build and execute talent plans: hiring, onboarding, performance management, career development, succession planning, and retention.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "hiring of new engineers.",
+      "page": 2,
+      "rationale": "'hiring' found in experience text.",
+      "terms": [
+        {
+          "term": "hiring",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "hiring of new engineers.",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'hiring' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R27",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Performance management",
+      "posting_quote": "Build and execute talent plans: hiring, onboarding, performance management, career development, succession planning, and retention.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'performance management' not found in this PDF.",
+      "terms": [
+        {
+          "term": "performance management",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'performance management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'performance management' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R28",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Data, cloud, automation and AI capability",
+      "posting_quote": "Develop technical and leadership capability in modern data, cloud, automation, and AI technologies, ensuring practical and responsible adoption.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": "exact",
+      "quote": "support on cloud services, access/IP handover, incident response",
+      "page": 2,
+      "rationale": "Backed by experience: cloud, AI. Not found: automation.",
+      "terms": [
+        {
+          "term": "cloud",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "support on cloud services, access/IP handover, incident response",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'cloud' found in experience text.",
+          "found_in": [
+            "education",
+            "experience"
+          ],
+          "missing_from": [
+            "skills"
+          ]
+        },
+        {
+          "term": "automation",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'automation' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        },
+        {
+          "term": "AI",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Develop enterprise software with AI agent workflows that automate",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'AI' found in experience text.",
+          "found_in": [
+            "experience",
+            "projects",
+            "skills",
+            "summary"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'automation' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R29",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Headcount, staffing and budgets",
+      "posting_quote": "Manage headcount, staffing plans, budgets, and vendor or partner relationships as applicable.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'budgets' not found in this PDF.",
+      "terms": [
+        {
+          "term": "budgets",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'budgets' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'budgets' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R30",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Enterprise software",
+      "posting_quote": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Develop enterprise software with AI agent workflows that automate",
+      "page": 1,
+      "rationale": "'enterprise software' found in experience text.",
+      "terms": [
+        {
+          "term": "enterprise software",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Develop enterprise software with AI agent workflows that automate",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'enterprise software' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R31",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Developer or data platforms",
+      "posting_quote": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Not found: developer platforms, data platforms.",
+      "terms": [
+        {
+          "term": "developer platforms",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'developer platforms' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "data platforms",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'data platforms' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'developer platforms' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'data platforms' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R32",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Machine learning or generative AI",
+      "posting_quote": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Backed by experience: generative AI. Not found: machine learning.",
+      "terms": [
+        {
+          "term": "machine learning",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'machine learning' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        },
+        {
+          "term": "generative AI",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Delivered a contextual generative AI chat that transforms open-",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'generative AI' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "skills"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'machine learning' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R33",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Global distributed engineering organization",
+      "posting_quote": "Experience working in a global, distributed engineering organization.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'distributed engineering' not found in this PDF.",
+      "terms": [
+        {
+          "term": "distributed engineering",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'distributed engineering' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'distributed engineering' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R34",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Building teams in Morocco or EMEA",
+      "posting_quote": "Experience building or scaling engineering teams in Morocco or the broader EMEA region.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'EMEA' not found in this PDF.",
+      "terms": [
+        {
+          "term": "EMEA",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'EMEA' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'EMEA' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R35",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Familiarity with Oracle products",
+      "posting_quote": "Familiarity with Oracle products, Oracle Support processes, or enterprise customer environments.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'Oracle products' not found in this PDF.",
+      "terms": [
+        {
+          "term": "Oracle products",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'Oracle products' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Oracle products' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R36",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Workforce planning and budget management",
+      "posting_quote": "Experience with workforce planning, organizational design, and budget management.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Not found: workforce planning, budget management.",
+      "terms": [
+        {
+          "term": "workforce planning",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'workforce planning' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "budget management",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'budget management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'workforce planning' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'budget management' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    }
+  ],
+  "counts": {
+    "met": 15,
+    "partial": 3,
+    "missing": 18,
+    "uncertain": 0
+  },
+  "overridden": 0,
+  "evidence_coverage": {
+    "version": 1,
+    "formula": "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0",
+    "must_have": 0.61,
+    "preferred": 0.31
+  }
+}

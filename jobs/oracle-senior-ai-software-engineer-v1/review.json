@@ -1,0 +1,1553 @@
+{
+  "cv": "jobs/oracle-senior-ai-software-engineer-v1/Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf",
+  "job": "jobs/oracle-senior-ai-software-engineer-v1/job.json",
+  "content": "jobs/oracle-senior-ai-software-engineer-v1/content.json",
+  "title": "Oracle — Senior AI Software Engineer",
+  "generated": "2026-11-10",
+  "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
+  "unreviewed": 34,
+  "job_title": {
+    "posting": "Senior AI Software Engineer",
+    "resume": "AI Software Engineer",
+    "match": true,
+    "severity": "ok",
+    "message": "Resume title 'AI Software Engineer' matches the posting's 'Senior AI Software Engineer' (seniority and developer/engineer wording aside)."
+  },
+  "pdf_check": {
+    "pdf": "jobs/oracle-senior-ai-software-engineer-v1/Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf",
+    "pages": [
+      {
+        "page": 1,
+        "chars": 1815
+      },
+      {
+        "page": 2,
+        "chars": 2164
+      },
+      {
+        "page": 3,
+        "chars": 1448
+      }
+    ],
+    "experience_years": null,
+    "findings": [
+      {
+        "severity": "info",
+        "code": "meta_author",
+        "message": "The PDF has no author field; set it to your name."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_line",
+        "message": "'mohamed amine sayagh resume | p# masayagh.com/hire' appears on every page (header/footer?). Usually harmless, but some parsers fold it into the surrounding section."
+      }
+    ]
+  },
+  "spelling": {
+    "findings": []
+  },
+  "style": {
+    "findings": [
+      {
+        "severity": "info",
+        "code": "measurable",
+        "field": "experience",
+        "message": "experience: 1 of 22 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them."
+      }
+    ]
+  },
+  "match_version": 2,
+  "results": [
+    {
+      "id": "R01",
+      "section": "location",
+      "priority": "must_have",
+      "description": "Role based in Casablanca, Morocco",
+      "posting_quote": "Location: Casablanca, Morocco",
+      "targets": [
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Casablanca, Morocco",
+      "page": 1,
+      "rationale": "'Casablanca' found in header text.",
+      "terms": [
+        {
+          "term": "Casablanca",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Casablanca, Morocco",
+          "page": 1,
+          "section": "header",
+          "rationale": "'Casablanca' found in header text.",
+          "found_in": [
+            "education",
+            "header"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R02",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Senior AI Software Engineer role on Oracle MADC",
+      "posting_quote": "As a Senior AI Software Engineer at Oracle MADC, you will help build AI capabilities into Oracle products through strong software engineering, technical leadership, and high-quality execution.",
+      "targets": [
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "AI Software Engineer",
+      "page": 1,
+      "rationale": "'AI Software Engineer' found in header text.",
+      "terms": [
+        {
+          "term": "AI Software Engineer",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "AI Software Engineer",
+          "page": 1,
+          "section": "header",
+          "rationale": "'AI Software Engineer' found in header text.",
+          "found_in": [
+            "header"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R03",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Design, develop and maintain production-grade software",
+      "posting_quote": "Design, develop, and maintain production-grade software for AI-enabled Oracle products.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Experience Took ownership of production-grade software maintenance, CI/CD",
+      "page": 2,
+      "rationale": "'production-grade software' found in experience text.",
+      "terms": [
+        {
+          "term": "production-grade software",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Experience Took ownership of production-grade software maintenance, CI/CD",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'production-grade software' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R04",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Build scalable services, APIs and SDKs",
+      "posting_quote": "Build scalable services, APIs, SDKs, and reusable platform components.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "alias",
+      "status": "partial",
+      "method": "exact",
+      "quote": "FastAPI WordPress SDKs PostgreSQL",
+      "page": 1,
+      "rationale": "Backed by experience: APIs. Skills list or summary only: SDKs. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.",
+      "terms": [
+        {
+          "term": "APIs",
+          "keyword": "alias",
+          "status": "met",
+          "method": "alias",
+          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term.",
+          "found_in": [
+            "certifications",
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
+        },
+        {
+          "term": "SDKs",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "FastAPI WordPress SDKs PostgreSQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'SDKs' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p2). Use 'APIs' if it describes the same thing. 'SDKs' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R05",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Work across large codebases",
+      "posting_quote": "Work across large codebases, quickly understanding existing architectures, patterns, and dependencies.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'codebases' not found in this PDF.",
+      "terms": [
+        {
+          "term": "codebases",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'codebases' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'codebases' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R06",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Integrate LLM capabilities into enterprise software",
+      "posting_quote": "Integrate modern AI and Large Language Model capabilities into reliable enterprise software systems.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Delivered a contextual AI chat built on Large Language Models that",
+      "page": 1,
+      "rationale": "'Large Language Model' found in experience text.",
+      "terms": [
+        {
+          "term": "Large Language Model",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Delivered a contextual AI chat built on Large Language Models that",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'Large Language Model' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "skills"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R07",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Improve reliability, performance, maintainability and testing",
+      "posting_quote": "Improve system quality across reliability, performance, maintainability, testing, and operational readiness.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Data scraping CI/CD Docker Testing Practices",
+      "page": 1,
+      "rationale": "Backed by experience: performance. Skills list or summary only: testing.",
+      "terms": [
+        {
+          "term": "testing",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Data scraping CI/CD Docker Testing Practices",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'testing' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "performance",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "performance for client campaigns.",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'performance' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'testing' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R08",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Review technical designs and code changes",
+      "posting_quote": "Review technical designs and code changes with strong attention to correctness and long-term impact.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'technical designs' not found in this PDF.",
+      "terms": [
+        {
+          "term": "technical designs",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'technical designs' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'technical designs' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R09",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Lead engineering execution across sprints",
+      "posting_quote": "Lead engineering execution across sprints, including planning, prioritization, task breakdown, and delivery tracking.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'engineering execution' not found in this PDF.",
+      "terms": [
+        {
+          "term": "engineering execution",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'engineering execution' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'engineering execution' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R10",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Raise engineering standards",
+      "posting_quote": "Mentor engineers and help raise engineering standards across the team.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Co-developed engineering standards for code quality and shipping,",
+      "page": 2,
+      "rationale": "'engineering standards' found in experience text.",
+      "terms": [
+        {
+          "term": "engineering standards",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Co-developed engineering standards for code quality and shipping,",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'engineering standards' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R11",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Bachelor's or Master's degree in Computer Science, Software Engineering or related field",
+      "posting_quote": "Bachelor’s or Master’s degree in Computer Science, Software Engineering, or a related technical field.",
+      "targets": [
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "software engineering, visual design, business understanding, and AI-assisted engineering to",
+      "page": 1,
+      "rationale": "Backed by experience: Computer Science. Skills list or summary only: Software Engineering.",
+      "terms": [
+        {
+          "term": "Computer Science",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "2020 - 2023 Bachelor's in Computer Science",
+          "page": 3,
+          "section": "education",
+          "rationale": "'Computer Science' found in education text.",
+          "found_in": [
+            "education"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        },
+        {
+          "term": "Software Engineering",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "software engineering, visual design, business understanding, and AI-assisted engineering to",
+          "page": 1,
+          "section": "summary",
+          "rationale": "'Software Engineering' found in the summary only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "summary"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Software Engineering' is only in your summary. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R12",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Strong professional software engineering experience",
+      "posting_quote": "Strong professional experience in software engineering, preferably in backend, platform, infrastructure, or enterprise product development.",
+      "targets": [
+        "experience",
+        "summary"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "software engineering, visual design, business understanding, and AI-assisted engineering to",
+      "page": 1,
+      "rationale": "'software engineering' found in the summary only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "terms": [
+        {
+          "term": "software engineering",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "software engineering, visual design, business understanding, and AI-assisted engineering to",
+          "page": 1,
+          "section": "summary",
+          "rationale": "'software engineering' found in the summary only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "summary"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'software engineering' is only in your summary. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R13",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Backend, platform or enterprise product background",
+      "posting_quote": "Strong professional experience in software engineering, preferably in backend, platform, infrastructure, or enterprise product development.",
+      "targets": [
+        "summary",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "adapting workflows to backend integration and evolving business",
+      "page": 1,
+      "rationale": "'backend' found in experience text.",
+      "terms": [
+        {
+          "term": "backend",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "adapting workflows to backend integration and evolving business",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'backend' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R14",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Proficiency in one or more programming languages (Java, Python, C++)",
+      "posting_quote": "Proficiency in one or more programming languages such as Java, Python, C++, or similar.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Skills JavaScript Java Python PHP",
+      "page": 1,
+      "rationale": "Backed by experience: Python. Skills list or summary only: Java. Not found: C++.",
+      "terms": [
+        {
+          "term": "Java",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Skills JavaScript Java Python PHP",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'Java' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "Python",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Python · CLI · AI Agent · SQLite · SQL · JEV · GLiNER2",
+          "page": 3,
+          "section": "projects",
+          "rationale": "'Python' found in projects text.",
+          "found_in": [
+            "projects",
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "C++",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'C++' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Java' is only in your skills list. If you used it in a job, name it in that job's bullet. 'C++' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R15",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Strong understanding of data structures and algorithms",
+      "posting_quote": "Strong understanding of data structures, algorithms, system design, and software architecture.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Not found: data structures, algorithms.",
+      "terms": [
+        {
+          "term": "data structures",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'data structures' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "algorithms",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'algorithms' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'data structures' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'algorithms' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R16",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Strong understanding of system design and software architecture",
+      "posting_quote": "Strong understanding of data structures, algorithms, system design, and software architecture.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Figma System design Interactive design Prototyping",
+      "page": 1,
+      "rationale": "Backed by experience: software architecture. Skills list or summary only: system design.",
+      "terms": [
+        {
+          "term": "system design",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Figma System design Interactive design Prototyping",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'system design' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "software architecture",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "areas, and software architecture solutions to support future",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'software architecture' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'system design' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R17",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Built production-grade services, APIs, SDKs or libraries",
+      "posting_quote": "Experience designing and building production-grade services, APIs, SDKs, libraries, or platform components.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": "exact",
+      "quote": "FastAPI WordPress SDKs PostgreSQL",
+      "page": 1,
+      "rationale": "Backed by experience: APIs. Skills list or summary only: SDKs. Not found: libraries. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.",
+      "terms": [
+        {
+          "term": "APIs",
+          "keyword": "alias",
+          "status": "met",
+          "method": "alias",
+          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term.",
+          "found_in": [
+            "certifications",
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
+        },
+        {
+          "term": "SDKs",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "FastAPI WordPress SDKs PostgreSQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'SDKs' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "libraries",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'libraries' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p2). Use 'APIs' if it describes the same thing. 'SDKs' is only in your skills list. If you used it in a job, name it in that job's bullet. 'libraries' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R18",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Works effectively in large, complex codebases",
+      "posting_quote": "Ability to work effectively in large, complex codebases and deliver high-quality changes with limited ramp-up time.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'codebases' not found in this PDF.",
+      "terms": [
+        {
+          "term": "codebases",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'codebases' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'codebases' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R19",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Working knowledge of AI systems and LLMs",
+      "posting_quote": "Working knowledge of modern AI systems, Large Language Models, AI application development, or AI platform integration.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Backed by experience: Large Language Models. Not found: AI systems, AI application development.",
+      "terms": [
+        {
+          "term": "AI systems",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'AI systems' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        },
+        {
+          "term": "Large Language Models",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Delivered a contextual AI chat built on Large Language Models that",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'Large Language Models' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "skills"
+          ]
+        },
+        {
+          "term": "AI application development",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'AI application development' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'AI systems' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'AI application development' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R20",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "CI/CD practices",
+      "posting_quote": "Experience with testing, debugging, performance analysis, CI/CD, and production support practices.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Experience Took ownership of production-grade software maintenance, CI/CD",
+      "page": 2,
+      "rationale": "'CI/CD' found in experience text.",
+      "terms": [
+        {
+          "term": "CI/CD",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Experience Took ownership of production-grade software maintenance, CI/CD",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'CI/CD' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R21",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Testing, debugging and performance analysis in production support",
+      "posting_quote": "Experience with testing, debugging, performance analysis, CI/CD, and production support practices.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Data scraping CI/CD Docker Testing Practices",
+      "page": 1,
+      "rationale": "Backed by experience: debugging. Skills list or summary only: testing. Not found: performance analysis.",
+      "terms": [
+        {
+          "term": "testing",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Data scraping CI/CD Docker Testing Practices",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'testing' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "debugging",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "debugging and bug-fix coordination during a technical leadership",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'debugging' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        },
+        {
+          "term": "performance analysis",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'performance analysis' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'testing' is only in your skills list. If you used it in a job, name it in that job's bullet. 'performance analysis' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R22",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Strong technical leadership skills",
+      "posting_quote": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "targets": [
+        "summary",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "debugging and bug-fix coordination during a technical leadership",
+      "page": 2,
+      "rationale": "'technical leadership' found in experience text.",
+      "terms": [
+        {
+          "term": "technical leadership",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "debugging and bug-fix coordination during a technical leadership",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'technical leadership' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R23",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Code review",
+      "posting_quote": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "and code review with a senior technical lead, continuously",
+      "page": 1,
+      "rationale": "'code review' found in experience text.",
+      "terms": [
+        {
+          "term": "code review",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "and code review with a senior technical lead, continuously",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'code review' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R24",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Design review",
+      "posting_quote": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'design review' not found in this PDF.",
+      "terms": [
+        {
+          "term": "design review",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'design review' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'design review' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R25",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Mentoring engineers",
+      "posting_quote": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Provided coaching and mentoring to developers on the platform's",
+      "page": 2,
+      "rationale": "'mentoring' found in experience text.",
+      "terms": [
+        {
+          "term": "mentoring",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Provided coaching and mentoring to developers on the platform's",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'mentoring' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R26",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Engineering planning",
+      "posting_quote": "Strong technical leadership skills, including code review, design review, mentoring, and engineering planning.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "engineering planning.",
+      "page": 2,
+      "rationale": "'engineering planning' found in experience text.",
+      "terms": [
+        {
+          "term": "engineering planning",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "engineering planning.",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'engineering planning' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R27",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Excellent problem-solving and ownership",
+      "posting_quote": "Excellent problem-solving, ownership, communication, and collaboration skills.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'problem-solving' not found in this PDF.",
+      "terms": [
+        {
+          "term": "problem-solving",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'problem-solving' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'problem-solving' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R28",
+      "section": "requirement",
+      "priority": "must_have",
+      "description": "Excellent communication and collaboration",
+      "posting_quote": "Excellent problem-solving, ownership, communication, and collaboration skills.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'communication' not found in this PDF.",
+      "terms": [
+        {
+          "term": "communication",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'communication' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'communication' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R29",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Building AI-enabled enterprise applications or AI platform capabilities",
+      "posting_quote": "Experience building AI-enabled enterprise applications or AI platform capabilities.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Brought 02Book to production, an AI-enabled writing assistant for",
+      "page": 2,
+      "rationale": "'AI-enabled' found in experience text.",
+      "terms": [
+        {
+          "term": "AI-enabled",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Brought 02Book to production, an AI-enabled writing assistant for",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'AI-enabled' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R30",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Distributed systems, cloud services or large-scale backend platforms",
+      "posting_quote": "Experience with distributed systems, cloud services, or large-scale backend platforms.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Backed by experience: cloud services. Not found: distributed systems.",
+      "terms": [
+        {
+          "term": "distributed systems",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'distributed systems' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        },
+        {
+          "term": "cloud services",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "deployment support on cloud services, access/IP handover,",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'cloud services' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "skills"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'distributed systems' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R31",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Developer-facing tools, SDKs, APIs or internal engineering frameworks",
+      "posting_quote": "Experience developing developer-facing tools, SDKs, APIs, or internal engineering frameworks.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "alias",
+      "status": "partial",
+      "method": "exact",
+      "quote": "FastAPI WordPress SDKs PostgreSQL",
+      "page": 1,
+      "rationale": "Backed by experience: APIs. Skills list or summary only: SDKs. Wording differs for 'APIs' (PDF: 'Implemented a Go API service to orchestrate isolated application'); use the posting's term.",
+      "terms": [
+        {
+          "term": "SDKs",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "FastAPI WordPress SDKs PostgreSQL",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'SDKs' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "APIs",
+          "keyword": "alias",
+          "status": "met",
+          "method": "alias",
+          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'APIs' found in experience text. Wording differs: the PDF says 'API'; the posting says 'APIs'. Use the posting's term.",
+          "found_in": [
+            "certifications",
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'SDKs' is only in your skills list. If you used it in a job, name it in that job's bullet. The posting says 'APIs'; your PDF says 'Implemented a Go API service to orchestrate isolated application' (p2). Use 'APIs' if it describes the same thing."
+    },
+    {
+      "id": "R32",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Familiarity with LLM orchestration, RAG or agentic workflows",
+      "posting_quote": "Familiarity with LLM orchestration, evaluation, RAG, agentic workflows, observability, or AI governance.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Claude Code & Codex RAG LLM API Integration AI Agent Workflows",
+      "page": 1,
+      "rationale": "Skills list or summary only: RAG. Not found: LLM orchestration, agentic workflows.",
+      "terms": [
+        {
+          "term": "RAG",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Claude Code & Codex RAG LLM API Integration AI Agent Workflows",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'RAG' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "LLM orchestration",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'LLM orchestration' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        },
+        {
+          "term": "agentic workflows",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'agentic workflows' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'RAG' is only in your skills list. If you used it in a job, name it in that job's bullet. 'LLM orchestration' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'agentic workflows' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R33",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Familiarity with observability or AI governance",
+      "posting_quote": "Familiarity with LLM orchestration, evaluation, RAG, agentic workflows, observability, or AI governance.",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "Not found: observability, AI governance.",
+      "terms": [
+        {
+          "term": "observability",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'observability' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        },
+        {
+          "term": "AI governance",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'AI governance' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'observability' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'AI governance' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R34",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Prior experience as a technical lead or senior engineer",
+      "posting_quote": "Prior experience as a technical lead or senior engineer driving execution across multiple contributors.",
+      "targets": [
+        "summary",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "and code review with a senior technical lead, continuously",
+      "page": 1,
+      "rationale": "'technical lead' found in experience text.",
+      "terms": [
+        {
+          "term": "technical lead",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "and code review with a senior technical lead, continuously",
+          "page": 1,
+          "section": "experience",
+          "rationale": "'technical lead' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": [
+            "summary"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    }
+  ],
+  "counts": {
+    "met": 13,
+    "partial": 12,
+    "missing": 9,
+    "uncertain": 0
+  },
+  "overridden": 0,
+  "evidence_coverage": {
+    "version": 1,
+    "formula": "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0",
+    "must_have": 0.53,
+    "preferred": 0.59
+  }
+}

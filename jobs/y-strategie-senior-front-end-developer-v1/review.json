@@ -3,9 +3,9 @@
   "job": "jobs/y-strategie-senior-front-end-developer-v1/job.json",
   "content": "jobs/y-strategie-senior-front-end-developer-v1/content.json",
   "title": "Y Strategie — Senior Front-End Developer",
-  "generated": "2026-11-09",
+  "generated": "2026-11-10",
   "disclaimer": "This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.",
-  "unreviewed": 25,
+  "unreviewed": 35,
   "job_title": {
     "posting": "Senior Front-End Developer",
     "resume": "Front-End Engineer",
@@ -22,11 +22,11 @@
       },
       {
         "page": 2,
-        "chars": 2235
+        "chars": 2266
       },
       {
         "page": 3,
-        "chars": 1571
+        "chars": 1568
       }
     ],
     "experience_years": {
@@ -68,13 +68,19 @@
         "severity": "info",
         "code": "measurable",
         "field": "experience",
-        "message": "experience: 1 of 24 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them."
+        "message": "experience: 2 of 24 lines include a number or measurable result. Recruiters look for scale and outcomes (users, clients, %, time saved) where you truthfully have them."
       },
       {
         "severity": "info",
         "code": "repeated_opener",
         "field": "experience",
-        "message": "experience: 4 lines start with 'Developed'; vary the verbs."
+        "message": "experience: 3 lines start with 'Developed'; vary the verbs."
+      },
+      {
+        "severity": "info",
+        "code": "repeated_opener",
+        "field": "experience",
+        "message": "experience: 3 lines start with 'Delivered'; vary the verbs."
       }
     ]
   },
@@ -106,33 +112,46 @@
       "priority": "must_have",
       "description": "Vue 3 in production",
       "posting_quote": "2+ years working with Vue 3 composition API in production applications",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
-      "status": "partial",
+      "status": "met",
       "method": "exact",
-      "quote": "Vue 3 / Pinia React / Next.js Angular jQuery",
-      "page": 1,
-      "rationale": "'Vue 3' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "quote": "Delivered a moderation platform in Vue 3 that let the team review",
+      "page": 2,
+      "rationale": "'Vue 3' found in experience text.",
       "terms": [
         {
           "term": "Vue 3",
           "keyword": "exact",
-          "status": "partial",
+          "status": "met",
           "method": "exact",
-          "quote": "Vue 3 / Pinia React / Next.js Angular jQuery",
-          "page": 1,
-          "section": "skills",
-          "rationale": "'Vue 3' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "quote": "Delivered a moderation platform in Vue 3 that let the team review",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'Vue 3' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "'Vue 3' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": null
     },
     {
       "id": "R03",
       "section": "requirement",
       "priority": "must_have",
-      "description": "Vue composition API",
+      "description": "Vue composition API in production",
       "posting_quote": "2+ years working with Vue 3 composition API in production applications",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -148,7 +167,12 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'composition API' not found in this PDF."
+          "rationale": "'composition API' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
@@ -158,8 +182,12 @@
       "id": "R04",
       "section": "requirement",
       "priority": "must_have",
-      "description": "Tailwind CSS",
+      "description": "Tailwind CSS for responsive UIs at scale",
       "posting_quote": "Strong Tailwind CSS skills building responsive, maintainable UIs at scale",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -175,7 +203,12 @@
           "quote": "Tailwind CSS, creating reusable component libraries on Radix UI, in",
           "page": 1,
           "section": "experience",
-          "rationale": "'Tailwind CSS' found in experience text."
+          "rationale": "'Tailwind CSS' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -185,45 +218,81 @@
       "id": "R05",
       "section": "requirement",
       "priority": "must_have",
-      "description": "Valid, accessible HTML",
+      "description": "Strong HTML markup, valid per W3C rules",
       "posting_quote": "Strong understanding of HTML markup Making sure the HTML is valid, confirms wc3 rules and is accessible for users.",
-      "keyword": "some",
-      "status": "partial",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
       "method": "exact",
-      "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
-      "page": 1,
-      "rationale": "Skills list or summary only: HTML. Not found: accessible.",
+      "quote": "Developed a responsive, accessible subscription website in HTML, CSS",
+      "page": 3,
+      "rationale": "'HTML' found in experience text.",
       "terms": [
         {
           "term": "HTML",
           "keyword": "exact",
-          "status": "partial",
+          "status": "met",
           "method": "exact",
-          "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
-          "page": 1,
-          "section": "skills",
-          "rationale": "'HTML' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
-        },
-        {
-          "term": "accessible",
-          "keyword": "absent",
-          "status": "missing",
-          "method": null,
-          "quote": null,
-          "page": null,
-          "section": null,
-          "rationale": "'accessible' not found in this PDF."
+          "quote": "Developed a responsive, accessible subscription website in HTML, CSS",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'HTML' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "'HTML' is only in your skills list. If you used it in a job, name it in that job's bullet. 'accessible' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+      "suggestion": null
     },
     {
       "id": "R06",
       "section": "requirement",
       "priority": "must_have",
+      "description": "Accessible markup for users",
+      "posting_quote": "Strong understanding of HTML markup Making sure the HTML is valid, confirms wc3 rules and is accessible for users.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Developed a responsive, accessible subscription website in HTML, CSS",
+      "page": 3,
+      "rationale": "'accessible' found in experience text.",
+      "terms": [
+        {
+          "term": "accessible",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Developed a responsive, accessible subscription website in HTML, CSS",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'accessible' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R07",
+      "section": "requirement",
+      "priority": "must_have",
       "description": "Reusable component libraries or design systems",
       "posting_quote": "Proven experience creating reusable component libraries or design systems",
+      "targets": [
+        "experience"
+      ],
       "keyword": "some",
       "status": "partial",
       "method": "exact",
@@ -239,7 +308,11 @@
           "quote": "Tailwind CSS, creating reusable component libraries on Radix UI, in",
           "page": 1,
           "section": "experience",
-          "rationale": "'component libraries' found in experience text."
+          "rationale": "'component libraries' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "design systems",
@@ -249,18 +322,26 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'design systems' not found in this PDF."
+          "rationale": "'design systems' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'design systems' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
     },
     {
-      "id": "R07",
+      "id": "R08",
       "section": "requirement",
       "priority": "must_have",
       "description": "Laravel Blade templating",
       "posting_quote": "Laravel Blade templating experience you'll need to navigate and enhance existing Blade views",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -276,7 +357,13 @@
           "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
           "page": 1,
           "section": "skills",
-          "rationale": "'Laravel' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Laravel' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         },
         {
           "term": "Blade",
@@ -286,22 +373,31 @@
           "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
           "page": 1,
           "section": "skills",
-          "rationale": "'Blade' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Blade' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'Laravel' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Blade' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R08",
+      "id": "R09",
       "section": "requirement",
       "priority": "must_have",
-      "description": "API development with Laravel or backend collaboration",
+      "description": "API development with Laravel endpoints or API design with backend team",
       "posting_quote": "API development - comfortable writing Laravel endpoints or strong ability to collaborate with backend developers on API design",
+      "targets": [
+        "experience"
+      ],
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Implemented a Go API service to orchestrate isolated application",
+      "quote": "account API endpoints.",
       "page": 2,
       "rationale": "'API' found in experience text.",
       "terms": [
@@ -310,21 +406,31 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Implemented a Go API service to orchestrate isolated application",
+          "quote": "account API endpoints.",
           "page": 2,
           "section": "experience",
-          "rationale": "'API' found in experience text."
+          "rationale": "'API' found in experience text.",
+          "found_in": [
+            "experience",
+            "other",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
       "suggestion": null
     },
     {
-      "id": "R09",
+      "id": "R10",
       "section": "requirement",
       "priority": "must_have",
-      "description": "jQuery",
+      "description": "jQuery experience (legacy code being migrated)",
       "posting_quote": "jQuery experience you'll be migrating it, so you need to understand what you're replacing",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -340,82 +446,146 @@
           "quote": "Vue 3 / Pinia React / Next.js Angular jQuery",
           "page": 1,
           "section": "skills",
-          "rationale": "'jQuery' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'jQuery' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'jQuery' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R10",
+      "id": "R11",
       "section": "requirement",
       "priority": "must_have",
-      "description": "Coaching or mentoring developers",
+      "description": "Coaching or mentoring junior to mid-level developers",
       "posting_quote": "Coaching or mentoring experience supporting junior to mid-level developers",
-      "keyword": "absent",
-      "status": "missing",
-      "method": null,
-      "quote": null,
-      "page": null,
-      "rationale": "Not found: Coaching, mentoring.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "Experience Provided coaching and mentoring to developers on the platform's",
+      "page": 3,
+      "rationale": "Backed by experience: Coaching, mentoring.",
       "terms": [
         {
           "term": "Coaching",
-          "keyword": "absent",
-          "status": "missing",
-          "method": null,
-          "quote": null,
-          "page": null,
-          "section": null,
-          "rationale": "'Coaching' not found in this PDF."
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Experience Provided coaching and mentoring to developers on the platform's",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'Coaching' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         },
         {
           "term": "mentoring",
-          "keyword": "absent",
-          "status": "missing",
-          "method": null,
-          "quote": null,
-          "page": null,
-          "section": null,
-          "rationale": "'mentoring' not found in this PDF."
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Experience Provided coaching and mentoring to developers on the platform's",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'mentoring' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "'Coaching' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'mentoring' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+      "suggestion": null
     },
     {
-      "id": "R11",
+      "id": "R12",
       "section": "requirement",
       "priority": "preferred",
-      "description": "JavaScript",
+      "description": "JavaScript (ES6+)",
       "posting_quote": "JavaScript/TypeScript (ES6+)",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "and JavaScript for individual real estate investment plans.",
+      "page": 3,
+      "rationale": "'JavaScript' found in experience text.",
+      "terms": [
+        {
+          "term": "JavaScript",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "and JavaScript for individual real estate investment plans.",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'JavaScript' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R13",
+      "section": "requirement",
+      "priority": "preferred",
+      "description": "ES6+ syntax",
+      "posting_quote": "JavaScript/TypeScript (ES6+)",
+      "targets": [
+        "skills"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
       "quote": "Skills JavaScript (ES6+) TypeScript PHP Python",
       "page": 1,
-      "rationale": "'JavaScript' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "rationale": "'ES6' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
       "terms": [
         {
-          "term": "JavaScript",
+          "term": "ES6",
           "keyword": "exact",
           "status": "partial",
           "method": "exact",
           "quote": "Skills JavaScript (ES6+) TypeScript PHP Python",
           "page": 1,
           "section": "skills",
-          "rationale": "'JavaScript' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'ES6' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "'JavaScript' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": "'ES6' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R12",
+      "id": "R14",
       "section": "requirement",
       "priority": "preferred",
       "description": "TypeScript",
       "posting_quote": "JavaScript/TypeScript (ES6+)",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -431,24 +601,32 @@
           "quote": "Built and refined the front-end experience in Next.js, TypeScript and",
           "page": 1,
           "section": "experience",
-          "rationale": "'TypeScript' found in experience text."
+          "rationale": "'TypeScript' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
       "suggestion": null
     },
     {
-      "id": "R13",
+      "id": "R15",
       "section": "requirement",
       "priority": "preferred",
-      "description": "HTML5 and modern CSS/SCSS/SASS",
+      "description": "HTML5",
       "posting_quote": "HTML5 and modern CSS/SCSS/SASS",
+      "targets": [
+        "skills"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
       "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
       "page": 1,
-      "rationale": "Backed by experience: CSS. Skills list or summary only: HTML5, SCSS.",
+      "rationale": "'HTML5' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
       "terms": [
         {
           "term": "HTML5",
@@ -458,8 +636,32 @@
           "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
           "page": 1,
           "section": "skills",
-          "rationale": "'HTML5' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
-        },
+          "rationale": "'HTML5' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'HTML5' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R16",
+      "section": "requirement",
+      "priority": "preferred",
+      "description": "Modern CSS, SCSS or SASS",
+      "posting_quote": "HTML5 and modern CSS/SCSS/SASS",
+      "targets": [
+        "skills"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+      "page": 1,
+      "rationale": "Backed by experience: CSS. Skills list or summary only: SCSS, SASS.",
+      "terms": [
         {
           "term": "CSS",
           "keyword": "exact",
@@ -468,7 +670,12 @@
           "quote": "Tailwind CSS, creating reusable component libraries on Radix UI, in",
           "page": 1,
           "section": "experience",
-          "rationale": "'CSS' found in experience text."
+          "rationale": "'CSS' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "SCSS",
@@ -478,18 +685,40 @@
           "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
           "page": 1,
           "section": "skills",
-          "rationale": "'SCSS' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'SCSS' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
+        },
+        {
+          "term": "SASS",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'SASS' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "'HTML5' is only in your skills list. If you used it in a job, name it in that job's bullet. 'SCSS' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": "'SCSS' is only in your skills list. If you used it in a job, name it in that job's bullet. 'SASS' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R14",
+      "id": "R17",
       "section": "requirement",
       "priority": "preferred",
-      "description": "Git",
+      "description": "Git: merge, conflict resolution, branching",
       "posting_quote": "Using Version control Git (how to merge, resolve merge conflicts and create and push branches)",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -505,18 +734,27 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'Git' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Git' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'Git' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R15",
+      "id": "R18",
       "section": "requirement",
       "priority": "preferred",
-      "description": "CI/CD",
+      "description": "CI/CD basics",
       "posting_quote": "Git workflow and CI/CD basics",
+      "targets": [
+        "skills"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -532,18 +770,25 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'CI/CD' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'CI/CD' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
       "suggestion": "'CI/CD' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R16",
+      "id": "R19",
       "section": "requirement",
       "priority": "preferred",
-      "description": "Performance optimisation",
+      "description": "Performance optimisation techniques",
       "posting_quote": "Understanding of performance optimisation techniques",
+      "targets": [
+        "experience"
+      ],
       "keyword": "absent",
       "status": "missing",
       "method": null,
@@ -559,34 +804,47 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'performance optimisation' not found in this PDF."
+          "rationale": "'performance optimisation' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'performance optimisation' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
     },
     {
-      "id": "R17",
+      "id": "R20",
       "section": "preferred",
       "priority": "preferred",
-      "description": "Laravel ecosystem incl. Vite",
+      "description": "Laravel ecosystem (Laravel Mix, Vite, Sanctum)",
       "posting_quote": "Experience with Laravel ecosystem (e.g., Laravel Mix, Vite, Sanctum)",
-      "keyword": "exact",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "some",
       "status": "partial",
       "method": "exact",
-      "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+      "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
       "page": 1,
-      "rationale": "Skills list or summary only: Laravel, Vite.",
+      "rationale": "Skills list or summary only: Vite. Not found: Laravel Mix, Sanctum.",
       "terms": [
         {
-          "term": "Laravel",
-          "keyword": "exact",
-          "status": "partial",
-          "method": "exact",
-          "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
-          "page": 1,
-          "section": "skills",
-          "rationale": "'Laravel' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "term": "Laravel Mix",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'Laravel Mix' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
         },
         {
           "term": "Vite",
@@ -596,24 +854,48 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'Vite' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Vite' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "Sanctum",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'Sanctum' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills",
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
-      "suggestion": "'Laravel' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Vite' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": "'Laravel Mix' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'Vite' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Sanctum' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
     },
     {
-      "id": "R18",
+      "id": "R21",
       "section": "preferred",
       "priority": "preferred",
-      "description": "Docker",
+      "description": "Docker or WAMP/LAMP",
       "posting_quote": "Docker/ WAMP/LAMP",
-      "keyword": "exact",
+      "targets": [
+        "skills"
+      ],
+      "keyword": "some",
       "status": "partial",
       "method": "exact",
       "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
       "page": 1,
-      "rationale": "'Docker' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "rationale": "Skills list or summary only: Docker. Not found: WAMP, LAMP.",
       "terms": [
         {
           "term": "Docker",
@@ -623,18 +905,87 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'Docker' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Docker' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
+        },
+        {
+          "term": "WAMP",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'WAMP' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills"
+          ]
+        },
+        {
+          "term": "LAMP",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'LAMP' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills"
+          ]
         }
       ],
       "kind_years": false,
-      "suggestion": "'Docker' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": "'Docker' is only in your skills list. If you used it in a job, name it in that job's bullet. 'WAMP' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out. 'LAMP' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
     },
     {
-      "id": "R19",
+      "id": "R22",
       "section": "preferred",
       "priority": "preferred",
-      "description": "Pinia / Vue state management",
+      "description": "Writing and maintaining API endpoints for front end",
+      "posting_quote": "Able to write and maintain API endpoints to support front end functionality",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "met",
+      "method": "exact",
+      "quote": "account API endpoints.",
+      "page": 2,
+      "rationale": "'API endpoints' found in experience text.",
+      "terms": [
+        {
+          "term": "API endpoints",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "account API endpoints.",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'API endpoints' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": null
+    },
+    {
+      "id": "R23",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Pinia or other Vue state management",
       "posting_quote": "Pinia or other Vue state management",
+      "targets": [
+        "skills"
+      ],
       "keyword": "some",
       "status": "partial",
       "method": "exact",
@@ -650,7 +1001,11 @@
           "quote": "Vue 3 / Pinia React / Next.js Angular jQuery",
           "page": 1,
           "section": "skills",
-          "rationale": "'Pinia' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Pinia' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": []
         },
         {
           "term": "state management",
@@ -660,18 +1015,59 @@
           "quote": null,
           "page": null,
           "section": null,
-          "rationale": "'state management' not found in this PDF."
+          "rationale": "'state management' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'Pinia' is only in your skills list. If you used it in a job, name it in that job's bullet. 'state management' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
     },
     {
-      "id": "R20",
+      "id": "R24",
       "section": "preferred",
       "priority": "preferred",
-      "description": "Accessibility (WCAG)",
+      "description": "VeeValidate",
+      "posting_quote": "VeeValidate",
+      "targets": [
+        "skills"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'VeeValidate' not found in this PDF.",
+      "terms": [
+        {
+          "term": "VeeValidate",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'VeeValidate' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'VeeValidate' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R25",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "Accessibility (WCAG) expertise",
       "posting_quote": "Accessibility (WCAG) expertise",
+      "targets": [
+        "experience"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -687,7 +1083,13 @@
           "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
           "page": 1,
           "section": "skills",
-          "rationale": "'Accessibility' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Accessibility' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         },
         {
           "term": "WCAG",
@@ -697,76 +1099,168 @@
           "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
           "page": 1,
           "section": "skills",
-          "rationale": "'WCAG' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'WCAG' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'Accessibility' is only in your skills list. If you used it in a job, name it in that job's bullet. 'WCAG' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R21",
+      "id": "R26",
       "section": "preferred",
       "priority": "preferred",
-      "description": "AI application interfaces",
+      "description": "Maizzle",
+      "posting_quote": "Have used or have experience within Maizzle",
+      "targets": [
+        "skills"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'Maizzle' not found in this PDF.",
+      "terms": [
+        {
+          "term": "Maizzle",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'Maizzle' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "skills"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'Maizzle' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R27",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "AI/ML application interfaces",
       "posting_quote": "AI/ML application interfaces",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'AI/ML' not found in this PDF.",
+      "terms": [
+        {
+          "term": "AI/ML",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'AI/ML' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'AI/ML' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R28",
+      "section": "preferred",
+      "priority": "preferred",
+      "description": "UI design experience",
+      "posting_quote": "UI Design experience background",
+      "targets": [
+        "experience"
+      ],
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Develop AI agent workflows to automate business decisions for",
-      "page": 1,
-      "rationale": "'AI' found in experience text.",
+      "quote": "Owned UI design, UX flows and prototypes for Inflauditor to validate",
+      "page": 2,
+      "rationale": "'UI Design' found in experience text.",
       "terms": [
         {
-          "term": "AI",
+          "term": "UI Design",
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Develop AI agent workflows to automate business decisions for",
-          "page": 1,
+          "quote": "Owned UI design, UX flows and prototypes for Inflauditor to validate",
+          "page": 2,
           "section": "experience",
-          "rationale": "'AI' found in experience text."
+          "rationale": "'UI Design' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
       "suggestion": null
     },
     {
-      "id": "R22",
+      "id": "R29",
       "section": "preferred",
       "priority": "preferred",
-      "description": "UI design background",
-      "posting_quote": "UI Design experience background",
+      "description": "UX focus on a slick user experience",
+      "posting_quote": "UX Making sure the experience for the user is as slick as possible",
+      "targets": [
+        "experience"
+      ],
       "keyword": "exact",
-      "status": "partial",
+      "status": "met",
       "method": "exact",
-      "quote": "Figma Tailwind CSS UI Design Prototyping",
-      "page": 1,
-      "rationale": "'UI Design' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+      "quote": "Owned UI design, UX flows and prototypes for Inflauditor to validate",
+      "page": 2,
+      "rationale": "'UX' found in experience text.",
       "terms": [
         {
-          "term": "UI Design",
+          "term": "UX",
           "keyword": "exact",
-          "status": "partial",
+          "status": "met",
           "method": "exact",
-          "quote": "Figma Tailwind CSS UI Design Prototyping",
-          "page": 1,
-          "section": "skills",
-          "rationale": "'UI Design' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "quote": "Owned UI design, UX flows and prototypes for Inflauditor to validate",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'UX' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
-      "suggestion": "'UI Design' is only in your skills list. If you used it in a job, name it in that job's bullet."
+      "suggestion": null
     },
     {
-      "id": "R23",
+      "id": "R30",
       "section": "preferred",
       "priority": "preferred",
       "description": "Rapid prototyping",
       "posting_quote": "Able to rapidly prototype",
+      "targets": [
+        "experience"
+      ],
       "keyword": "exact",
       "status": "met",
       "method": "exact",
-      "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
+      "quote": "Owned UI design, UX flows and prototypes for Inflauditor to validate",
       "page": 2,
       "rationale": "'prototype' found in experience text.",
       "terms": [
@@ -775,21 +1269,29 @@
           "keyword": "exact",
           "status": "met",
           "method": "exact",
-          "quote": "Designed UI flows and prototypes for Inflauditor to validate product",
+          "quote": "Owned UI design, UX flows and prototypes for Inflauditor to validate",
           "page": 2,
           "section": "experience",
-          "rationale": "'prototype' found in experience text."
+          "rationale": "'prototype' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
       "suggestion": null
     },
     {
-      "id": "R24",
+      "id": "R31",
       "section": "preferred",
       "priority": "preferred",
-      "description": "Testing frameworks",
+      "description": "Testing frameworks (Jest, Vitest or Cypress)",
       "posting_quote": "Testing frameworks (Jest, Vitest, or Cypress)",
+      "targets": [
+        "skills",
+        "experience"
+      ],
       "keyword": "exact",
       "status": "partial",
       "method": "exact",
@@ -805,7 +1307,13 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'Jest' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Jest' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         },
         {
           "term": "Vitest",
@@ -815,7 +1323,13 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'Vitest' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Vitest' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         },
         {
           "term": "Cypress",
@@ -825,18 +1339,161 @@
           "quote": "Vite Git / CI/CD Docker Jest / Vitest / Cypress",
           "page": 1,
           "section": "skills",
-          "rationale": "'Cypress' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience."
+          "rationale": "'Cypress' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
         }
       ],
       "kind_years": false,
       "suggestion": "'Jest' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Vitest' is only in your skills list. If you used it in a job, name it in that job's bullet. 'Cypress' is only in your skills list. If you used it in a job, name it in that job's bullet."
     },
     {
-      "id": "R25",
+      "id": "R32",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Migrate legacy jQuery code to Vue 3",
+      "posting_quote": "Migrate our legacy jQuery-based code to Vue 3 (a current modernisation project)",
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "Vue 3 / Pinia React / Next.js Angular jQuery",
+      "page": 1,
+      "rationale": "Backed by experience: Vue 3. Skills list or summary only: jQuery.",
+      "terms": [
+        {
+          "term": "jQuery",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "Vue 3 / Pinia React / Next.js Angular jQuery",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'jQuery' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "Vue 3",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "Delivered a moderation platform in Vue 3 that let the team review",
+          "page": 2,
+          "section": "experience",
+          "rationale": "'Vue 3' found in experience text.",
+          "found_in": [
+            "experience",
+            "skills"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'jQuery' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R33",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Build and document a component library",
+      "posting_quote": "Build a component library, with references and documenting components for the team to use.",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "absent",
+      "status": "missing",
+      "method": null,
+      "quote": null,
+      "page": null,
+      "rationale": "'component library' not found in this PDF.",
+      "terms": [
+        {
+          "term": "component library",
+          "keyword": "absent",
+          "status": "missing",
+          "method": null,
+          "quote": null,
+          "page": null,
+          "section": null,
+          "rationale": "'component library' not found in this PDF.",
+          "found_in": [],
+          "missing_from": [
+            "experience"
+          ]
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'component library' does not appear. If you truthfully have it, add it in the posting's words; if not, leave it out."
+    },
+    {
+      "id": "R34",
+      "section": "responsibility",
+      "priority": "preferred",
+      "description": "Champion accessibility and performance best practices",
+      "posting_quote": "Champion best practices in component architecture, performance, and accessibility",
+      "targets": [
+        "experience"
+      ],
+      "keyword": "exact",
+      "status": "partial",
+      "method": "exact",
+      "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+      "page": 1,
+      "rationale": "Backed by experience: performance. Skills list or summary only: accessibility.",
+      "terms": [
+        {
+          "term": "accessibility",
+          "keyword": "exact",
+          "status": "partial",
+          "method": "exact",
+          "quote": "HTML / HTML5 CSS / SCSS / SASS Accessibility (WCAG) Laravel / Blade",
+          "page": 1,
+          "section": "skills",
+          "rationale": "'accessibility' found in the skills list only. A skills-list or summary mention is a claim, not proof of professional experience.",
+          "found_in": [
+            "skills"
+          ],
+          "missing_from": [
+            "experience"
+          ]
+        },
+        {
+          "term": "performance",
+          "keyword": "exact",
+          "status": "met",
+          "method": "exact",
+          "quote": "performance for client campaigns.",
+          "page": 3,
+          "section": "experience",
+          "rationale": "'performance' found in experience text.",
+          "found_in": [
+            "experience"
+          ],
+          "missing_from": []
+        }
+      ],
+      "kind_years": false,
+      "suggestion": "'accessibility' is only in your skills list. If you used it in a job, name it in that job's bullet."
+    },
+    {
+      "id": "R35",
       "section": "location",
       "priority": "must_have",
       "description": "Role based in Casablanca",
-      "posting_quote": "Casablanca, Morocco",
+      "posting_quote": "Location: Casablanca, Morocco",
+      "targets": null,
       "keyword": "exact",
       "status": "met",
       "method": "exact",
@@ -852,7 +1509,12 @@
           "quote": "Casablanca, Morocco",
           "page": 1,
           "section": "header",
-          "rationale": "'Casablanca' found in header text."
+          "rationale": "'Casablanca' found in header text.",
+          "found_in": [
+            "education",
+            "header"
+          ],
+          "missing_from": []
         }
       ],
       "kind_years": false,
@@ -860,16 +1522,16 @@
     }
   ],
   "counts": {
-    "met": 7,
+    "met": 14,
     "partial": 15,
-    "missing": 3,
+    "missing": 6,
     "uncertain": 0
   },
   "overridden": 0,
   "evidence_coverage": {
     "version": 1,
     "formula": "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0",
-    "must_have": 0.59,
-    "preferred": 0.57
+    "must_have": 0.79,
+    "preferred": 0.52
   }
 }

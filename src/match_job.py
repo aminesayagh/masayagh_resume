@@ -29,11 +29,12 @@ import check_pdf
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
-VERSION = 1  # bump when matching rules change, so old reports can be told apart
-EVIDENCE_SECTIONS = {"experience", "education", "languages", "header"}
+VERSION = 2  # 2: Languages heading found, Projects and Certifications count as evidence. Bump when matching rules change, so old reports can be told apart
+EVIDENCE_SECTIONS = {"experience", "projects", "certifications", "education", "languages", "header"}
 CLAIM_SECTIONS = {"skills", "summary"}
 SECTION_WORDS = [("summary", "summary"), ("skills", "skill"), ("skills", "proficienc"), ("education", "education"),
-                 ("languages", "language"), ("experience", "experience")]  # first match wins: "Summary of Experience" is summary
+                 ("languages", "language"), ("experience", "experience"), ("projects", "project"),
+                 ("certifications", "certific")]  # first match wins: "Summary of Experience" is summary
 
 
 def section_kind(heading: str) -> str:

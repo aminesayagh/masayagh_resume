@@ -22,6 +22,9 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 | `jobs/<slug>/job.json` | One posting as structured requirements | You draft it, the user reviews it |
 | `jobs/<slug>/content.json` | Tailored resume content for this application, starts as a copy of `template/default.json` | The user, or you with approval |
 | `jobs/<slug>/<pdf_name>` | Built PDF for this application, named by `job.json`'s `pdf_name` (your name, job title, company) | `src/build_resume.py` |
+| `template/default-cover.json`, `template/cover-letter.html` | Default cover letter text and its layout | The user, or you with approval |
+| `jobs/<slug>/cover.json` | This job's cover letter text, created from `default-cover.json` on the first build | You, only when the user asks (`.claude/skills/draft-cover-letter/SKILL.md`) |
+| `jobs/<slug>/<stem>-Cover-Letter.pdf`, `<stem>-Resume-and-Cover-Letter.pdf` | Cover letter alone, and resume + cover letter in one file; rebuilt with every resume build | `src/build_cover.py` (run it alone after editing `cover.json`) |
 | `jobs/<slug>/review.json`, `review.md`, `interview.json`, `dashboard.html` | Generated report, interview prep sheet and one-page overview | The tools only, never edited by hand |
 | `src/spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it, via `check_spelling.py --add` |
 | `src/aliases.json` | True synonyms (Postgres = PostgreSQL) | Keep it small; no loose matches |
@@ -47,6 +50,14 @@ Each tool defaults to its input's own folder: run against `template/default.json
 ```
 
 **From a link:** `src/fetch_posting.py URL` prints what it can read (title, company, location vs the user's, description) without creating anything. It reads schema.org JobPosting data, the Greenhouse API, schema.org microdata (SAP SuccessFactors), the Oracle Recruiting Cloud API, or the page rendered in Chrome. Works with LinkedIn, Greenhouse, Lever, careers.oracle.com and Capgemini; when a site blocks it, ask the user to paste the posting. `new_job.py --url` stores `url`, `location` and `location_match` in `job.json`; tell the user the location verdict.
+
+**After any edit to a job's `content.json`, run `src/tailor.py jobs/<slug>`:** it builds (which refreshes the review, interview prep and dashboard), publishes unless the PDF is over 3 pages or has errors, and prints the full table of everything not met. **Show that table to the user as printed, before any comment;** never summarize or drop rows.
+
+**Years of experience per skill:** `template/skills.json` holds every resume skill, its posting synonyms (`match`) and the user's start date; years are computed to today. Each dashboard has a "Skills for application forms" box ready to paste. After adding skills to any `content.json`, run `src/skills_inventory.py sync`, then `missing`, and **ask the user for each start date** (never guess); record with `src/skills_inventory.py set "<skill>" YYYY-MM`.
+
+**Not ready = `_` prefix:** a job PDF over 3 pages or with a broken skills layout is saved as `_<pdf_name>` and the ready-named file is removed. `publish_resume.py` refuses it and the dashboard labels it "NOT READY, do not send". Never rename it by hand; fix the content and rebuild.
+
+**Every job PDF build refreshes the review:** `src/build_resume.py jobs/<slug>/content.json` re-runs the review (no network), prints what changed since the previous report with a verdict, and saves `review.md`/`review.json`, `interview.json` and `dashboard.html`. The dashboard is therefore never older than the PDF. (Skipped for the template, for `-o` builds and before requirements exist.)
 
 **While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `src/spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (`job.json`'s `template_sha`); those are safe to refresh with `cp template/default.json`, rebuild and publish.
 

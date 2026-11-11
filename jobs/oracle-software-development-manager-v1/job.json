@@ -1,0 +1,535 @@
+{
+  "title": "Oracle — Software Development Manager",
+  "posting_file": "jobs/oracle-software-development-manager-v1/posting.txt",
+  "pdf_name": "Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf",
+  "company": "oracle",
+  "url": "https://careers.oracle.com/en/sites/jobsearch/job/344557/?utm_source=external%20referral&utm_medium=referral",
+  "location": "Casablanca, Morocco",
+  "location_match": "same city",
+  "template_sha": "9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f",
+  "requirements": [
+    {
+      "id": "R01",
+      "section": "location",
+      "priority": "must_have",
+      "quote": "Location: Casablanca, Morocco",
+      "description": "Role based in Casablanca",
+      "terms": [
+        "Casablanca"
+      ],
+      "note": "On-site role; location kept must-have.",
+      "reviewed": false
+    },
+    {
+      "id": "R02",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Bachelor’s degree in Computer Science, Engineering, or a related field, or equivalent practical experience.",
+      "description": "Bachelor's in CS/engineering or equivalent practical experience",
+      "terms": [
+        "Computer Science"
+      ],
+      "targets": [
+        "summary"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R03",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "10+ years of software engineering, systems engineering, data engineering, or related technical experience.",
+      "description": "10+ years of software engineering",
+      "terms": [],
+      "kind": "years_experience",
+      "min_years": 10,
+      "reviewed": false
+    },
+    {
+      "id": "R04",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "5+ years of people-management experience, including experience managing managers and/or leading sizable engineering teams.",
+      "description": "5+ years of people management",
+      "terms": [
+        "people-management"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "note": "Manager years can't be computed from dates; matched on the term.",
+      "reviewed": false
+    },
+    {
+      "id": "R05",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "5+ years of people-management experience, including experience managing managers and/or leading sizable engineering teams.",
+      "description": "Managing managers or sizable teams",
+      "terms": [
+        "managing managers"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R06",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Demonstrated success delivering complex software, platform, support, data, or AI-related initiatives across multiple teams and stakeholders.",
+      "description": "Delivering complex initiatives across teams",
+      "terms": [
+        "complex software"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R07",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Demonstrated success delivering complex software, platform, support, data, or AI-related initiatives across multiple teams and stakeholders.",
+      "description": "Delivery across multiple teams and stakeholders",
+      "terms": [
+        "stakeholders"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R08",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "description": "Cloud services",
+      "terms": [
+        "cloud services"
+      ],
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R09",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "description": "Agile delivery",
+      "terms": [
+        "agile"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R10",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "description": "Security",
+      "terms": [
+        "security"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R11",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Strong understanding of modern software development practices, cloud services, operational reliability, security, and agile delivery.",
+      "description": "Operational reliability",
+      "terms": [
+        "operational reliability"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R12",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "description": "Leading teams supporting production systems",
+      "terms": [
+        "production systems"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R13",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "description": "Supporting enterprise customers",
+      "terms": [
+        "enterprise customers"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R14",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Experience leading teams that support production systems or enterprise customers, including incident response and service improvement.",
+      "description": "Incident response",
+      "terms": [
+        "incident response"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R15",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Ability to translate business and customer needs into clear technical priorities and executable plans.",
+      "description": "Turning business needs into technical priorities",
+      "terms": [
+        "technical priorities"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R16",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "description": "Communication",
+      "terms": [
+        "communication"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R17",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "description": "Stakeholder management",
+      "terms": [
+        "stakeholder-management"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R18",
+      "section": "requirement",
+      "priority": "must_have",
+      "quote": "Excellent communication, stakeholder-management, and organizational leadership skills.",
+      "description": "Organizational leadership",
+      "terms": [
+        "organizational leadership"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R19",
+      "section": "requirement",
+      "priority": "preferred",
+      "quote": "Professional fluency in English; French and/or Arabic are strongly preferred.",
+      "description": "Professional English",
+      "terms": [
+        "English"
+      ],
+      "targets": [
+        "summary"
+      ],
+      "note": "Required by the posting, but the line also says 'strongly preferred', which the validator won't mark must-have; English is on the resume anyway.",
+      "reviewed": false
+    },
+    {
+      "id": "R20",
+      "section": "requirement",
+      "priority": "preferred",
+      "quote": "Professional fluency in English; French and/or Arabic are strongly preferred.",
+      "description": "French and/or Arabic",
+      "terms": [
+        "French",
+        "Arabic"
+      ],
+      "targets": [
+        "summary"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R21",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Lead, coach, and develop an engineering organization of 30 or more employees, including engineering managers, technical leads, and individual contributors.",
+      "description": "Lead and coach an engineering organization",
+      "terms": [
+        "coach"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R22",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Partner closely with global engineering, product, support, data, security, and operations teams to define roadmaps, resolve dependencies, and deliver measurable outcomes.",
+      "description": "Define roadmaps with global teams",
+      "terms": [
+        "roadmaps"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R23",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "description": "Architecture reviews",
+      "terms": [
+        "architecture reviews"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R24",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "description": "Code quality and testing",
+      "terms": [
+        "code quality",
+        "testing"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R25",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Drive engineering best practices, including architecture reviews, design quality, code quality, testing, release readiness, incident management, and post-incident learning.",
+      "description": "Incident management",
+      "terms": [
+        "incident management"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R26",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Build and execute talent plans: hiring, onboarding, performance management, career development, succession planning, and retention.",
+      "description": "Hiring",
+      "terms": [
+        "hiring"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R27",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Build and execute talent plans: hiring, onboarding, performance management, career development, succession planning, and retention.",
+      "description": "Performance management",
+      "terms": [
+        "performance management"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R28",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Develop technical and leadership capability in modern data, cloud, automation, and AI technologies, ensuring practical and responsible adoption.",
+      "description": "Data, cloud, automation and AI capability",
+      "terms": [
+        "cloud",
+        "automation",
+        "AI"
+      ],
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R29",
+      "section": "responsibility",
+      "priority": "preferred",
+      "quote": "Manage headcount, staffing plans, budgets, and vendor or partner relationships as applicable.",
+      "description": "Headcount, staffing and budgets",
+      "terms": [
+        "budgets"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R30",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "description": "Enterprise software",
+      "terms": [
+        "enterprise software"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R31",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "description": "Developer or data platforms",
+      "terms": [
+        "developer platforms",
+        "data platforms"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R32",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience in enterprise software, cloud infrastructure, developer platforms, data platforms, analytics, machine learning, or generative AI.",
+      "description": "Machine learning or generative AI",
+      "terms": [
+        "machine learning",
+        "generative AI"
+      ],
+      "targets": [
+        "skills",
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R33",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience working in a global, distributed engineering organization.",
+      "description": "Global distributed engineering organization",
+      "terms": [
+        "distributed engineering"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R34",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience building or scaling engineering teams in Morocco or the broader EMEA region.",
+      "description": "Building teams in Morocco or EMEA",
+      "terms": [
+        "EMEA"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R35",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Familiarity with Oracle products, Oracle Support processes, or enterprise customer environments.",
+      "description": "Familiarity with Oracle products",
+      "terms": [
+        "Oracle products"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    },
+    {
+      "id": "R36",
+      "section": "preferred",
+      "priority": "preferred",
+      "quote": "Experience with workforce planning, organizational design, and budget management.",
+      "description": "Workforce planning and budget management",
+      "terms": [
+        "workforce planning",
+        "budget management"
+      ],
+      "targets": [
+        "experience"
+      ],
+      "reviewed": false
+    }
+  ],
+  "skipped_terms": {
+    "AI-enabled": "product-area description in the intro (Oracle AI-enabled capabilities), not a skill the candidate uses",
+    "AI-related": "appears in the Required line about delivering initiatives; covered by the delivery requirement wording, no tool named",
+    "and/or": "grammar word, not a technology",
+    "Center": "part of the location name 'Morocco Development Center'",
+    "Development": "title and location words, handled by the title check",
+    "Manager": "seniority/title word, handled by the title check",
+    "Operations": "Oracle Operations is a product area in the intro, not a tool",
+    "Software": "title word, handled by the title check",
+    "Morocco": "covered by the Casablanca location requirement",
+    "Support": "part of the product name 'Oracle Support', covered by Oracle products"
+  }
+}
