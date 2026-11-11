@@ -4,8 +4,8 @@
 Usage: python3 src/build_fr.py jobs/<slug>
 
 Applies when job.json has "french_version": true (a French posting that doesn't ask for English).
-1. Translates jobs/<slug>/content.json line by line: unchanged template lines reuse template/default-fr.json,
-   tailored lines reuse template/translations-fr.json. Any line still untranslated is written to
+1. Translates jobs/<slug>/content.json line by line: unchanged template lines reuse template/content/default-fr.json,
+   tailored lines reuse template/content/translations-fr.json. Any line still untranslated is written to
    jobs/<slug>/translate-fr.json ({"English line": ""}); fill it in, rerun, and the entries move to
    translations-fr.json for every future job.
 2. Writes content-fr.json and builds <stem>-FR.pdf, with the same rules as English: over 3 pages or a broken
@@ -23,11 +23,12 @@ from pathlib import Path
 from pypdf import PdfReader
 
 import build_resume
+import db
 
 ROOT = build_resume.ROOT
-TEMPLATE_EN = ROOT / "template" / "default.json"
-TEMPLATE_FR = ROOT / "template" / "default-fr.json"
-MEMORY = ROOT / "template" / "translations-fr.json"
+TEMPLATE_EN = ROOT / "template" / "content" / "default.json"
+TEMPLATE_FR = ROOT / "template" / "content" / "default-fr.json"
+MEMORY = ROOT / "template" / "content" / "translations-fr.json"
 KEEP = {"lang", "phone", "phone_link", "email", "website", "website_link", "github", "linkedin", "qr_url", "link", "name"}
 FRENCH_WORDS = re.compile(r"\b(le|la|les|des|du|et|vous|nous|une|pour|avec|dans|sur)\b", re.I)
 ENGLISH_WORDS = re.compile(r"\b(the|and|you|we|with|for|our|your|this|that)\b", re.I)
@@ -53,10 +54,13 @@ def strings(node, key=None):
 def translation_memory() -> dict:
     en, fr = (list(strings(json.loads(p.read_text(encoding="utf-8")))) for p in (TEMPLATE_EN, TEMPLATE_FR))
     if len(en) != len(fr):
-        raise ValueError("template/default.json and default-fr.json differ in shape; keep them in step")
+        raise ValueError("template/content/default.json and default-fr.json differ in shape; keep them in step")
     memory = dict(zip(en, fr))
     if MEMORY.exists():
         memory.update(json.loads(MEMORY.read_text(encoding="utf-8")))
+    con = db.connect()  # French of library lines and skills
+    memory.update({en: fr for en, fr in con.execute("SELECT text_en, text_fr FROM descriptions WHERE text_fr IS NOT NULL")})
+    memory.update({en: fr for en, fr in con.execute("SELECT name_en, name_fr FROM skills WHERE name_fr IS NOT NULL")})
     return memory
 
 
@@ -85,7 +89,16 @@ def build(folder: Path) -> Path | None:
     if pending.exists():  # merge what was filled in, keep the rest pending
         filled = {k: v for k, v in json.loads(pending.read_text(encoding="utf-8")).items() if v.strip()}
         memory = json.loads(MEMORY.read_text(encoding="utf-8")) if MEMORY.exists() else {}
-        MEMORY.write_text(json.dumps({**memory, **filled}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        con = db.connect()  # library lines and skills keep their French in the db, other strings in translations-fr.json
+        rest = {}
+        for en_text, fr_text in filled.items():
+            hit = con.execute("UPDATE descriptions SET text_fr = ? WHERE text_en = ?", (fr_text, en_text)).rowcount
+            hit += con.execute("UPDATE skills SET name_fr = ? WHERE name_en = ?", (fr_text, en_text)).rowcount
+            if not hit:
+                rest[en_text] = fr_text
+        con.commit()
+        db.dump(con)
+        MEMORY.write_text(json.dumps({**memory, **rest}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         pending.unlink()
 
     english = json.loads((folder / "content.json").read_text(encoding="utf-8"))

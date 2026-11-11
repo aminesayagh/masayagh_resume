@@ -9,7 +9,7 @@ Usage: python3 src/new_job.py --url JOB_URL
 (src/fetch_posting.py); --company/--title override what it found.
 
 Prompts for anything not given: the company, the job title, and the posting text
-(paste it, then press Ctrl-D). Refuses to run if template/default.json has any unresolved spelling, style
+(paste it, then press Ctrl-D). Refuses to run if template/content/default.json has any unresolved spelling, style
 or PDF-readability finding — every new application starts from that baseline, so it
 must be clean first. Creates jobs/<company>-<title>-v<N>/ with the posting, a job.json
 skeleton (no requirements yet), a copy of the default content, the built resume, and a
@@ -94,7 +94,7 @@ def main() -> None:
 
     problems = check_template.check()
     if problems:
-        print("template/default.json has unresolved findings; fix those before starting a new job\n"
+        print("template/content/default.json has unresolved findings; fix those before starting a new job\n"
               "(or run src/check_template.py on its own to see this list anytime):\n")
         for f in problems:
             print(f"[{f['severity']}] {f['message']}")
@@ -118,7 +118,7 @@ def main() -> None:
 
     (folder / "posting.txt").write_text(posting + "\n", encoding="utf-8")
     content_path = folder / "content.json"
-    shutil.copyfile(TEMPLATE_DIR / "default.json", content_path)
+    shutil.copyfile(TEMPLATE_DIR / "content" / "default.json", content_path)
     name = json.loads(content_path.read_text(encoding="utf-8"))["name"]
     job = {"title": f"{company} — {title}", "posting_file": f"jobs/{folder.name}/posting.txt",
            "pdf_name": pdf_name(name, title, company),

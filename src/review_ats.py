@@ -29,6 +29,7 @@ from pypdf import PdfReader
 
 import check_job
 import check_pdf
+import db
 import check_spelling
 import check_style
 import match_job
@@ -118,7 +119,7 @@ def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
     headings = check_pdf.template_headings(check_pdf.TEMPLATE)
     pdf_report = check_pdf.check(pdf, content, headings, network=network)
     pages = [p.extract_text() or "" for p in PdfReader(pdf).pages] if pdf_report["pages"] else []
-    aliases = json.loads((HERE / "aliases.json").read_text(encoding="utf-8"))
+    aliases = db.aliases()  # skills + keywords in data/resume.db (was src/aliases.json)
     match = match_job.assess(job, pages, content, headings, aliases)
     reqs = {r["id"]: r for r in job["requirements"]}
     for r in match["results"]:

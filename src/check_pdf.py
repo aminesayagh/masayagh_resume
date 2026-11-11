@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that a generated resume PDF reads back as clean text (ATS reviewer, milestone 1).
 
-Usage: python3 src/check_pdf.py [template/resume.pdf] [--content template/default.json] [--out report.json]
+Usage: python3 src/check_pdf.py [template/build/resume.pdf] [--content template/content/default.json] [--out report.json]
 
 This checks parseability only: whether the text an ATS parser would extract matches the
 resume content. It never claims compatibility with any employer's ATS.
@@ -22,7 +22,7 @@ from pypdf import PdfReader
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
-TEMPLATE = ROOT / "template" / "resume.html"
+TEMPLATE = ROOT / "template" / "layout" / "resume.html"
 
 # Section names most resume parsers recognise. Heading text outside this list may still
 # parse, but it is a gamble, so it is reported as a warning.
@@ -265,7 +265,7 @@ def check(pdf: Path, content: dict | None, headings: list[str], network: bool = 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("pdf", nargs="?", type=Path, default=ROOT / "template" / "resume.pdf")
+    parser.add_argument("pdf", nargs="?", type=Path, default=ROOT / "template" / "build" / "resume.pdf")
     parser.add_argument("--content", type=Path, help="content JSON (default: content.json or default.json next to the PDF)")
     parser.add_argument("--out", type=Path, help="JSON report path (default: pdf-check.json next to the PDF)")
     parser.add_argument("--no-network", action="store_true", help="skip opening the links in the PDF")

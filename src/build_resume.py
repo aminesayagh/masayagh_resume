@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a tailored PDF resume from a JSON content file.
 
-Usage: python3 src/build_resume.py [template/default.json] [-o path/to/resume.pdf]
+Usage: python3 src/build_resume.py [template/content/default.json] [-o path/to/resume.pdf]
 Requires Jinja2 and Google Chrome in WSL.
 """
 
@@ -24,13 +24,13 @@ TEMPLATE_DIR = ROOT / "template"
 FR_LABELS = {"Summary": "Profil", "Skills": "Compétences", "Experience": "Expérience", "Projects": "Projets",
              "Education": "Formation", "Certifications": "Certifications", "Languages": "Langues",
              "Resume": "CV", "en": "fr"}
-DEFAULT_DATA = TEMPLATE_DIR / "default.json"
+DEFAULT_DATA = TEMPLATE_DIR / "content" / "default.json"
 MAX_PAGES = 3  # the user's limit; going over warns, it doesn't fail
 SKILL_ROWS = 6  # languages, 3 rows of development technologies, design tools, AI
 
 
 def skills_problem(skills: list) -> str | None:
-    """The user's limit: 6 rows, and as many skills per row as template/default.json."""
+    """The user's limit: 6 rows, and as many skills per row as template/content/default.json."""
     template = [len(r) for r in json.loads(DEFAULT_DATA.read_text(encoding="utf-8"))["skills"]]
     shape = [len(r) for r in skills]
     if len(shape) != SKILL_ROWS:
@@ -144,6 +144,8 @@ def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None
         print("Job file has errors; report not refreshed (run src/check_job.py).")
         return
     review_ats.refresh(job_file, job, pdf_file, data_path.resolve())
+    import db_sync  # the offer, its requirements and any new approved lines join data/resume.db
+    db_sync.sync_job(job_file.parent)
 
 
 def build(data_path: Path, output_path: Path | None = None) -> Path:
@@ -159,7 +161,7 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
     if browser is None:
         raise RuntimeError("Google Chrome is unavailable in WSL")
     env = Environment(
-        loader=FileSystemLoader(TEMPLATE_DIR),
+        loader=FileSystemLoader(TEMPLATE_DIR / "layout"),
         autoescape=select_autoescape(["html"]),
         undefined=StrictUndefined,
     )
@@ -173,8 +175,8 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
                 data=data,
                 experience_date_parts=experience_date_parts,
                 qr_svg=qr_svg(qr_url),
-                font_base=(TEMPLATE_DIR / "fonts").resolve().as_uri() + "/",
-                asset_base=(TEMPLATE_DIR / "assets").resolve().as_uri() + "/",
+                font_base=(TEMPLATE_DIR / "layout" / "fonts").resolve().as_uri() + "/",
+                asset_base=(TEMPLATE_DIR / "layout" / "assets").resolve().as_uri() + "/",
             ),
             encoding="utf-8",
         )
@@ -214,7 +216,7 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("data", nargs="?", type=Path, default=DEFAULT_DATA,
-                        help="JSON file for this job application (default: template/default.json)")
+                        help="JSON file for this job application (default: template/content/default.json)")
     parser.add_argument("-o", "--output", type=Path,
                         help="PDF path (default: job.json's pdf_name in the JSON file's folder, else resume.pdf)")
     args = parser.parse_args()

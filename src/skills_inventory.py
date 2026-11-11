@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Years of experience per skill, for application forms. Data: template/skills.json.
+"""Years of experience per skill, for application forms. Data: the skills table of data/resume.db.
 
 Usage:
   python3 src/skills_inventory.py sync                  # add every skill found on any resume (start unknown)
   python3 src/skills_inventory.py missing               # skills that still need a start date
   python3 src/skills_inventory.py set "Vue 3" 2026-10   # record a start date (YYYY or YYYY-MM); optional end date
   python3 src/skills_inventory.py job jobs/<slug>       # the job's skills with years, as on its dashboard
+  python3 src/skills_inventory.py keyword "PostgreSQL" "Postgres" [en|fr]   # a true synonym (matching uses it)
 
-Each entry: {"name", "match": [other words for it in postings], "start": "YYYY-MM" | null, "end": null}.
+Each skill: {"name", "match": [English keywords], "start": "YYYY-MM" | null, "end": null} (skills + skill_keywords).
 A resume skill item like "React / Next.js" or "Accessibility (WCAG)" counts as several skills.
 """
 
@@ -17,8 +18,9 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import db
+
 ROOT = Path(__file__).resolve().parent.parent
-INVENTORY = ROOT / "template" / "skills.json"
 
 
 def atoms(item: str) -> list[tuple[str, list[str]]]:
@@ -34,12 +36,24 @@ def atoms(item: str) -> list[tuple[str, list[str]]]:
 
 
 def load() -> dict:
-    return json.loads(INVENTORY.read_text(encoding="utf-8")) if INVENTORY.exists() else {"skills": []}
+    con = db.connect()
+    skills = []
+    for sid, name, start, end in con.execute("SELECT id, name_en, start_at, end_at FROM skills ORDER BY lower(name_en)"):
+        match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en'", (sid,))]
+        skills.append({"id": sid, "name": name, "match": match, "start": start, "end": end})
+    return {"skills": skills}
 
 
 def save(inv: dict) -> None:
-    inv["skills"].sort(key=lambda s: s["name"].casefold())
-    INVENTORY.write_text(json.dumps(inv, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    con = db.connect()
+    for s in inv["skills"]:
+        if "id" not in s:
+            s["id"] = con.execute("INSERT INTO skills (type, name_en) VALUES ('technical', ?)", (s["name"],)).lastrowid
+        con.execute("UPDATE skills SET start_at = ?, end_at = ? WHERE id = ?", (s.get("start"), s.get("end"), s["id"]))
+        for m in s.get("match", []):
+            con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, 'en')", (s["id"], m))
+    con.commit()
+    db.dump(con)
 
 
 def months(value: str, end_of_period: bool = False) -> int:
@@ -73,7 +87,7 @@ def resume_skills(content: dict) -> list[str]:
 
 def sync(inv: dict) -> list[str]:
     added = []
-    for path in [ROOT / "template" / "default.json", *sorted((ROOT / "jobs").glob("*/content.json"))]:
+    for path in [ROOT / "template" / "content" / "default.json", *sorted((ROOT / "jobs").glob("*/content.json"))]:
         for row in json.loads(path.read_text(encoding="utf-8")).get("skills", []):
             for item in row:
                 for name, aliases in atoms(item):
@@ -101,15 +115,29 @@ def job_skills(job: dict, content: dict, inv: dict | None = None) -> list[dict]:
 
 
 def main() -> None:
-    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job"}:
+    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword"}:
         sys.exit(__doc__)
     inv = load()
+    if sys.argv[1] == "keyword":
+        skill = find(inv, sys.argv[2]) or {"name": sys.argv[2], "match": []}
+        lang = sys.argv[4] if len(sys.argv) > 4 else "en"
+        save({"skills": [skill]} if "id" not in skill else {"skills": []})
+        con = db.connect()
+        con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, ?)",
+                    (find(load(), sys.argv[2])["id"], sys.argv[3], lang))
+        con.commit()
+        db.dump(con)
+        print(f"{sys.argv[3]} ({lang}) now counts as {sys.argv[2]}")
+        return
     if sys.argv[1] == "sync":
         added = sync(inv)
         save(inv)
         print(f"Added {len(added)} skill(s): {', '.join(added) or 'none'}")
     elif sys.argv[1] == "missing":
-        todo = [s["name"] for s in inv["skills"] if not s.get("start")]
+        listed = {n.casefold() for path in [ROOT / "template" / "content" / "default.json", *(ROOT / "jobs").glob("*/content.json")]
+                  for n in resume_skills(json.loads(path.read_text(encoding="utf-8")))}
+        todo = [s["name"] for s in inv["skills"] if not s.get("start")  # only skills you list on a resume
+                and ({s["name"].casefold(), *(m.casefold() for m in s["match"])} & listed)]
         print("\n".join(f"{n}: YYYY-MM" for n in todo) or "Every skill has a start date.")
     elif sys.argv[1] == "set":
         skill = find(inv, sys.argv[2]) or sys.exit(f"Unknown skill '{sys.argv[2]}'; run sync first.")

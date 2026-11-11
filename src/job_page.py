@@ -5,15 +5,16 @@ Used by the local dashboard app (dashboard/app.py); it writes no files.
 """
 
 import json
+import re
 from html import escape
 from pathlib import Path
 
+import config
 import skills_inventory
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 JOBS = ROOT / "jobs"
-SITE = "https://www.masayagh.com"
 
 CSS = """
 body{font:14px/1.5 system-ui,sans-serif;color:#0f1828;background:#f6f7f9;margin:0;padding:24px;max-width:1200px;margin:auto}
@@ -53,7 +54,8 @@ def coverage(review: dict) -> str:
 
 def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "") -> str:
     url, pdf = job.get("url"), job.get("pdf_name")
-    published = f"{SITE}/resume/{job['company']}/{pdf}" if job.get("company") and pdf else None
+    version = int(m[1]) if (m := re.search(r"-v(\d+)$", folder.name)) else 1
+    published = config.public_url(job["company"], version, pdf) if job.get("company") and pdf else None
     pdf_check = review.get("pdf_check", {})
     errors = sum(f["severity"] == "error" for f in pdf_check.get("findings", []))
     warnings = sum(f["severity"] == "warning" for f in pdf_check.get("findings", []))
@@ -116,7 +118,7 @@ def job_card(folder: Path, job: dict, review: dict, prep: dict, files: str = "")
                        f"<td>{tag('asked', 'met') if k['in_job'] else ''}</td></tr>" for k in skills)
         paste = ", ".join(f"{k['name']}: {skills_inventory.label(k['years'])}" for k in skills if k["years"] is not None)
         missing = [k["name"] for k in skills if k["years"] is None]
-        parts.append(f"<h3>Skills for application forms</h3><p class='muted'>Years from template/skills.json "
+        parts.append(f"<h3>Skills for application forms</h3><p class='muted'>Years from the skills table (data/resume.db) "
                      f"(start date to today). 'asked' = the posting asks for it.</p>"
                      f"<textarea readonly rows='4' style='width:100%'>{escape(paste)}</textarea>"
                      + (f"<p>{tag('start date needed', 'missing')} {escape(', '.join(missing))}</p>" if missing else "")

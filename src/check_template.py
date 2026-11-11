@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Check whether template/default.json is ready to start a new job application.
+"""Check whether template/content/default.json is ready to start a new job application.
 
 Usage: python3 src/check_template.py
 
-Rebuilds template/resume.pdf from template/default.json and runs the spelling,
+Rebuilds template/build/resume.pdf from template/content/default.json and runs the spelling,
 style and PDF-readability checks against it -- the same gate src/new_job.py runs
 before scaffolding a new jobs/<slug>/ folder, so you can see what to fix without
 having to start (and abandon) a new application first.
@@ -27,8 +27,8 @@ def check() -> list[dict]:
     """Spelling/style/PDF-readability findings against the template baseline, if
     any. Reuses review_ats.review() with an empty-requirements job so it only
     runs the content checks, not job matching. "info" findings don't block."""
-    content_path = TEMPLATE_DIR / "default.json"
-    pdf_path = build_resume.build(content_path, TEMPLATE_DIR / "resume.pdf")
+    content_path = TEMPLATE_DIR / "content" / "default.json"
+    pdf_path = build_resume.build(content_path, TEMPLATE_DIR / "build" / "resume.pdf")
     content = json.loads(content_path.read_text(encoding="utf-8"))
     # network=True: every link in the PDF is opened; a broken one (HTTP 4xx/5xx) blocks, being offline doesn't
     rep = review_ats.review({"title": "template baseline", "requirements": []}, pdf_path, content, network=True)
@@ -38,7 +38,7 @@ def check() -> list[dict]:
                          "message": f"resume.pdf has {len(rep['pdf_check']['pages'])} pages; the limit is {build_resume.MAX_PAGES}"})
     if problem := build_resume.skills_problem(content["skills"]):
         findings.append({"severity": "error", "code": "skills_layout", "message": problem})
-    # template/resume.pdf is the repository's canonical internal artifact name,
+    # template/build/resume.pdf is the repository's canonical internal artifact name,
     # not the filename sent to a recruiter. Keep the upload-name warning in the
     # general PDF checker, but do not let it block creation of a job workspace.
     return [
@@ -50,7 +50,7 @@ def check() -> list[dict]:
 def stale_jobs() -> list[Path]:
     """Job folders whose content.json is still the untouched template copy (its hash equals
     job.json's template_sha) but the template has changed since. Safe to refresh."""
-    current = hashlib.sha256((TEMPLATE_DIR / "default.json").read_bytes()).hexdigest()
+    current = hashlib.sha256((TEMPLATE_DIR / "content" / "default.json").read_bytes()).hexdigest()
     stale = []
     for job_file in sorted((ROOT / "jobs").glob("*/job.json")):
         job = json.loads(job_file.read_text(encoding="utf-8"))
@@ -64,6 +64,8 @@ def stale_jobs() -> list[Path]:
 def main() -> None:
     findings = check()
     if not findings:
+        import db_sync  # new template lines join the knowledge base
+        db_sync.sync_template()
         print("template/ is ready: no spelling, style or PDF-readability findings.")
         for folder in stale_jobs():
             print(f"Untailored job behind the template (safe to refresh): {folder.relative_to(ROOT)}")

@@ -10,9 +10,14 @@ venv/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
-output/*.html
-output/*.png
 .serena
 .code-review-graph
 # drafting scratch file from src/draft_job.py; job.json holds the result
 jobs/*/draft-picks.json
+
+# local database; data/resume.sql is the reviewable copy (python3 src/db.py restore)
+data/resume.db
+jobs/*
+
+# personal settings (publishing); see config.example.json
+config.json

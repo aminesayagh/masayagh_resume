@@ -6,6 +6,7 @@ Reads jobs/ (dashboard/data.py). Changes go through the src/ scripts, so their r
 """
 
 import json
+import re
 import subprocess
 import sys
 from datetime import date
@@ -30,6 +31,11 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 ACTIONS = {
     "sent": ("Mark as sent", "Freezes this job: no rebuild, edit or republish afterwards.",
              lambda j: not j["sent"], None),
+    "reopen": ("Reopen (sent → in progress)",
+               "Removes the freeze so you can edit it again. A copy of every file as sent is kept in sent-<date>/ in "
+               "this folder. Warning: once you Tailor it, the published link the employer received shows the new version; "
+               "use “New version from this job” instead to leave that link untouched.",
+               lambda j: bool(j["sent"]), None),
     "tailor": ("Tailor (build + review + publish)", "Rebuilds the PDFs, refreshes the review and publishes the English resume and cover letter.",
                lambda j: not j["sent"], ["src/tailor.py", "jobs/{slug}"]),
     "french": ("Build French version", "Builds the local French resume and cover letter (never published).",
@@ -82,11 +88,12 @@ def skills(request: Request):
     return templates.TemplateResponse(request, "skills.html", {"rows": rows})
 
 
-@app.get("/files/{slug}/{name}")
+@app.get("/files/{slug}/{name:path}")
 def files(slug: str, name: str):
     job_or_404(slug)
     path = data.JOBS / slug / name
-    if "/" in name or not path.is_file() or path.suffix not in (".pdf", ".md"):
+    archived = re.fullmatch(r"sent-[\d-]+/[^/]+", name)  # a copy kept by Reopen
+    if ("/" in name and not archived) or ".." in name or not path.is_file() or path.suffix not in (".pdf", ".md"):
         raise HTTPException(404, "No such file")
     return FileResponse(path, media_type="application/pdf" if path.suffix == ".pdf" else "text/plain; charset=utf-8")
 
@@ -105,11 +112,16 @@ def run(request: Request, slug: str, action: str):
     j = job_or_404(slug)
     if action not in ACTIONS or not ACTIONS[action][2](j):
         raise HTTPException(400, "Action not available for this job")
+    if action == "reopen":
+        data.reopen(data.JOBS / slug)
+        return RedirectResponse(f"/job/{slug}", status_code=303)
     if action == "sent":
         path = data.JOBS / slug / "job.json"
         job_file = json.loads(path.read_text(encoding="utf-8"))
         job_file["sent"] = date.today().isoformat()
         path.write_text(json.dumps(job_file, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        import db_sync  # records the offer as sent, with a snapshot of its results
+        db_sync.sync_job(data.JOBS / slug)
         return RedirectResponse(f"/job/{slug}", status_code=303)
     command = [str(PYTHON)] + [part.format(slug=slug) for part in ACTIONS[action][3]]
     result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=900)

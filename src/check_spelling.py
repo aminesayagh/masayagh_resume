@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Spell-check a resume content file before building the PDF (ATS reviewer, step 0).
 
-Usage: python3 src/check_spelling.py [template/default.json] [--out report.json]
+Usage: python3 src/check_spelling.py [template/content/default.json] [--out report.json]
 
 Every unknown word is a WARNING with suggested fixes, never an error: product names,
 tech terms and proper nouns are often correct even when the dictionary does not know them.
@@ -96,7 +96,7 @@ def add_allow(words: list[str], path: Path = ALLOW_FILE) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "default.json")
+    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "content" / "default.json")
     parser.add_argument("--out", type=Path, help="JSON report path (default: spelling.json next to the content file)")
     parser.add_argument("--add", nargs="+", metavar="WORD", help="add confirmed words to src/spelling-allow.txt and exit")
     args = parser.parse_args()

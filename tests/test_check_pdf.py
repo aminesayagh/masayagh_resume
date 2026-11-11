@@ -32,16 +32,16 @@ class CheckPdfTest(unittest.TestCase):
             self.assertIn("unreadable", codes(check_pdf.check(pdf, None, []), "error"))
 
     def test_default_resume_has_all_critical_fields(self):
-        content = json.loads((ROOT / "template" / "default.json").read_text(encoding="utf-8"))
+        content = json.loads((ROOT / "template" / "content" / "default.json").read_text(encoding="utf-8"))
         headings = check_pdf.template_headings(check_pdf.TEMPLATE)
-        report = check_pdf.check(ROOT / "template" / "resume.pdf", content, headings)
+        report = check_pdf.check(ROOT / "template" / "build" / "resume.pdf", content, headings)
         self.assertEqual(codes(report, "error"), set())
         self.assertIn("Experience", headings)
         self.assertFalse(any("<br" in h for h in headings))
 
     def test_missing_field_is_an_error(self):
         content = {"name": "Nobody Atall", "contact": {}, "experience": [], "education": []}
-        report = check_pdf.check(ROOT / "template" / "resume.pdf", content, [])
+        report = check_pdf.check(ROOT / "template" / "build" / "resume.pdf", content, [])
         self.assertIn("field_missing", codes(report, "error"))
 
     def test_dates_years_overlap_and_single_date(self):
@@ -63,8 +63,8 @@ class CheckPdfTest(unittest.TestCase):
         self.assertEqual(found, ["phone_country", "link_icon_only"])
 
     def test_default_pdf_file_name_warns(self):
-        content = json.loads((ROOT / "template" / "default.json").read_text(encoding="utf-8"))
-        report = check_pdf.check(ROOT / "template" / "resume.pdf", content, [])
+        content = json.loads((ROOT / "template" / "content" / "default.json").read_text(encoding="utf-8"))
+        report = check_pdf.check(ROOT / "template" / "build" / "resume.pdf", content, [])
         self.assertIn("file_name", codes(report, "warning"))
         self.assertNotIn("meta_title", codes(report, "warning"))
 

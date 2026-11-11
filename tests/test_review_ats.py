@@ -10,8 +10,8 @@ import review_ats
 
 ROOT = Path(__file__).resolve().parents[1]
 JOB = json.loads((ROOT / "jobs" / "fictional-full-stack-v1" / "job.json").read_text(encoding="utf-8"))
-CONTENT = json.loads((ROOT / "template" / "default.json").read_text(encoding="utf-8"))
-PDF = ROOT / "template" / "resume.pdf"
+CONTENT = json.loads((ROOT / "template" / "content" / "default.json").read_text(encoding="utf-8"))
+PDF = ROOT / "template" / "build" / "resume.pdf"
 
 
 def run(job):

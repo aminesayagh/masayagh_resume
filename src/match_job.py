@@ -26,6 +26,7 @@ from pypdf import PdfReader
 
 import check_job
 import check_pdf
+import db
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
@@ -206,7 +207,7 @@ def main() -> None:
     content_path = args.content or next((p for p in (cv.parent / "content.json", cv.parent / "default.json")
                                           if p.exists()), cv.parent / "content.json")
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
-    aliases = json.loads((HERE / "aliases.json").read_text(encoding="utf-8"))
+    aliases = db.aliases()  # skills + keywords in data/resume.db (was src/aliases.json)
 
     report = assess(job, pages, content, check_pdf.template_headings(check_pdf.TEMPLATE), aliases)
     rel = lambda p: str(p.resolve().relative_to(ROOT)) if p.resolve().is_relative_to(ROOT) else str(p)

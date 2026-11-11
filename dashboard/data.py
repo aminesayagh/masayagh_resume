@@ -4,6 +4,7 @@ Nothing here writes to jobs/ or template/; changes go through the scripts in src
 """
 
 import json
+import shutil
 from collections import defaultdict
 from pathlib import Path
 
@@ -90,6 +91,8 @@ def files_by_language(folder: Path) -> dict[str, list[str]]:
     groups = {"English": [], "French": []}
     for p in sorted(folder.glob("*.pdf")):
         groups["French" if "-FR" in p.stem else "English"].append(p.name)
+    for archive in sorted(folder.glob("sent-*/")):  # copies kept by reopen()
+        groups[f"As sent on {archive.name[5:]}"] = [f"{archive.name}/{p.name}" for p in sorted(archive.glob("*.pdf"))]
     return {k: v for k, v in groups.items() if v}
 
 
@@ -107,3 +110,17 @@ def filter_requirements(results: list[dict], q: str = "", status_: str = "", pri
             continue
         out.append(r)
     return out
+
+
+def reopen(folder: Path) -> Path:
+    """The user's choice to edit a sent job again: archive every file as sent into sent-<date>/, then drop "sent"."""
+    job_file = folder / "job.json"
+    job = json.loads(job_file.read_text(encoding="utf-8"))
+    archive = folder / f"sent-{job['sent']}"
+    archive.mkdir(exist_ok=True)
+    for f in folder.iterdir():
+        if f.is_file():
+            shutil.copy2(f, archive / f.name)
+    job.pop("sent")
+    job_file.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return archive

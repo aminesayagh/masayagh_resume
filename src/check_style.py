@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Writing-style warnings for a resume content file (ATS reviewer).
 
-Usage: python3 src/check_style.py [template/default.json] [--out report.json]
+Usage: python3 src/check_style.py [template/content/default.json] [--out report.json]
 
 These help the recruiter who reads the resume after the ATS has parsed it. They are
 rule-based advice, never errors: style is your call. Always exits 0.
@@ -99,7 +99,7 @@ assert overused(["business a", "business b", "business c", "business d", "x"]) =
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "default.json")
+    parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "content" / "default.json")
     parser.add_argument("--out", type=Path, help="JSON report path (default: style.json next to the content file)")
     args = parser.parse_args()
 

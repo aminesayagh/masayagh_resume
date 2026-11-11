@@ -56,6 +56,18 @@ class RequirementFilterTest(unittest.TestCase):
             self.assertEqual(len(groups["English"]), 2)
 
 
+class ReopenTest(unittest.TestCase):
+    def test_keeps_a_copy_of_the_sent_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            (folder / "job.json").write_text(json.dumps({"title": "A — B", "sent": "2026-11-11"}), encoding="utf-8")
+            (folder / "resume.pdf").write_bytes(b"as sent")
+            archive = data.reopen(folder)
+            self.assertNotIn("sent", json.loads((folder / "job.json").read_text(encoding="utf-8")))
+            self.assertEqual((archive / "resume.pdf").read_bytes(), b"as sent")
+            self.assertIn("2026-11-11", json.loads((archive / "job.json").read_text(encoding="utf-8"))["sent"])
+
+
 class SkillsOverviewTest(unittest.TestCase):
     def test_each_job_counted_once_per_term(self):
         for row in data.skills_overview():

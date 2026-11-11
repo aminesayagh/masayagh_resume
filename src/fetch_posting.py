@@ -7,7 +7,7 @@ Most career sites (Greenhouse, Lever, Workday, Oracle, Ashby, many company sites
 a schema.org JobPosting block for search engines; this reads it. Pages that build it with
 JavaScript are retried through headless Chrome. LinkedIn and some boards refuse automated
 access: then paste the posting into src/new_job.py instead.
-Also compares the job's location with template/default.json's contact location.
+Also compares the job's location with template/content/default.json's contact location.
 """
 
 import html
@@ -220,7 +220,7 @@ def fetch(url: str) -> dict:
     org = posting.get("hiringOrganization") or {}
     places = locations(posting)
     remote = posting.get("jobLocationType") == "TELECOMMUTE"
-    mine = json.loads((ROOT / "template" / "default.json").read_text(encoding="utf-8"))["contact"]["location"]
+    mine = json.loads((ROOT / "template" / "content" / "default.json").read_text(encoding="utf-8"))["contact"]["location"]
     where = "; ".join(", ".join(x for x in (p["city"], p["country"]) if x) for p in places) or ("Remote" if remote else "")
     return {"url": url, "title": html.unescape(posting.get("title", "")).strip(),
             "company": html.unescape(org.get("name", "") if isinstance(org, dict) else str(org)).strip(),

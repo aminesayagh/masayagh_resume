@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Publish a job's tailored resume PDF to the portfolio site.
+"""Publish a job's English resume and cover letter, as set in config.json ("publish").
 
 Usage: python3 src/publish_resume.py jobs/<slug>/job.json
 
-Copies jobs/<slug>/<pdf_name> to public/resume/<company>/<pdf_name> in
-the portfolio repo, commits only that file, and pushes to main. Vercel deploys it to
-https://www.masayagh.com/resume/<company>/<pdf_name> in about a minute, so a
-download keeps the PDF's real name. Every update replaces the PDF at that link.
-
-Works in a dedicated clone (PUBLISH_CLONE), never in /home/amine/projects/portfolio:
-that shared working copy is often on a feature branch with uncommitted work.
+Modes (config.example.json documents them):
+  none    nothing is published (the default, no config.json needed)
+  folder  the PDFs are copied into a local folder, e.g. one a static host or a sync tool serves
+  git     the PDFs are committed to a portfolio repository and pushed, through a clone only this script uses
+          (never the repository's own working copy, which may hold other work)
+In every mode: sent (frozen) jobs, not-ready ('_') resumes and the French version are never published, and
+version 2+ of a job goes under v2/..., so the link an employer received for v1 never changes.
 """
 
 import json
@@ -19,18 +19,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-PORTFOLIO = Path("/home/amine/projects/portfolio")
-PUBLISH_CLONE = Path("/home/amine/projects/portfolio-publish")  # ponytail: owned by this script only
-SITE = "https://www.masayagh.com"
+import config
+import db
 
 
-def git(*args: str) -> str:
-    return subprocess.run(["git", "-C", str(PUBLISH_CLONE), *args], check=True,
-                          capture_output=True, text=True).stdout.strip()
+def git(clone: Path, *args: str) -> str:
+    return subprocess.run(["git", "-C", str(clone), *args], check=True, capture_output=True, text=True).stdout.strip()
 
 
-def publish(job_path: Path) -> str:
-    job = json.loads(job_path.read_text(encoding="utf-8"))
+def files_to_publish(job_path: Path, job: dict) -> tuple[str, int, list[Path]]:
+    """(company, version, [resume, cover letter if ready]) or exit with the reason it can't be published."""
     if job.get("sent"):
         sys.exit(f"{job_path.parent.name} was sent on {job['sent']}; the published copy stays as sent.")
     company = job.get("company")
@@ -41,39 +39,67 @@ def publish(job_path: Path) -> str:
         draft = pdf.with_name("_" + pdf.name)
         sys.exit(f"Not published: only {draft.name} exists, which is NOT READY to send (see the build warnings)."
                  if draft.exists() else f"{pdf} does not exist; build it first.")
-
-    if not PUBLISH_CLONE.exists():
-        url = subprocess.run(["git", "-C", str(PORTFOLIO), "remote", "get-url", "origin"],
-                             check=True, capture_output=True, text=True).stdout.strip()
-        subprocess.run(["git", "clone", "--quiet", url, str(PUBLISH_CLONE)], check=True)
-    # The clone is ours alone, so resetting it to origin/main loses nothing.
-    git("fetch", "--quiet", "origin", "main")
-    git("checkout", "--quiet", "-B", "main", "origin/main")
-
-    # Version 2+ of a job gets its own folder, so the copy an employer received under v1 never changes.
-    n = int(m[1]) if (m := re.search(r"-v(\d+)$", job_path.parent.name)) else 1
-    version_dir = f"v{n}/" if n > 1 else ""
-    # The English resume and its English cover letter are published; the French version (-FR) stays local.
+    version = int(m[1]) if (m := re.search(r"-v(\d+)$", job_path.parent.name)) else 1
     cover = pdf.with_name(f"{pdf.stem}-Cover-Letter.pdf")  # a not-ready letter is '_'-prefixed, so it's skipped
-    files = [pdf] + ([cover] if cover.exists() else [])
     if not cover.exists():
         print(f"Cover letter not published: {cover.name} is missing or NOT READY.")
-    for f in files:
-        rel = f"public/resume/{company}/{version_dir}{f.name}"  # ponytail: a renamed pdf_name leaves the old file; git rm it by hand
-        target = PUBLISH_CLONE / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(f, target)
-        git("add", "--", rel)
-    url = f"{SITE}/resume/{company}/{version_dir}{pdf.name}"
-    if not git("diff", "--cached", "--name-only"):
-        print(f"Already published, unchanged: {url}")
-        return url
-    git("commit", "--quiet", "-m", f"Publish resume {company}/{pdf.name}")
-    git("pull", "--quiet", "--rebase", "origin", "main")  # others push to main too
-    git("push", "--quiet", "origin", "HEAD:main")
-    print(f"Pushed {', '.join(f.name for f in files)} to main; live in about a minute at {url}"
-          + (f" and {SITE}/resume/{company}/{version_dir}{cover.name}" if cover in files else ""))
-    return url
+    return company, version, [pdf] + ([cover] if cover.exists() else [])
+
+
+def place(settings: dict, company: str, version: int, file: str) -> str:
+    return settings["path"].format(company=company, version=f"v{version}/" if version > 1 else "", file=file)
+
+
+def publish(job_path: Path) -> str | None:
+    settings = config.publish()
+    if settings["mode"] == "none":
+        print("Publishing is off (no config.json, or publish.mode = none): the PDFs stay in the job folder.")
+        return None
+    job = json.loads(job_path.read_text(encoding="utf-8"))
+    company, version, files = files_to_publish(job_path, job)
+
+    if settings["mode"] == "folder":
+        root = Path(settings["folder"]).expanduser()
+        for f in files:
+            target = root / place(settings, company, version, f.name)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(f, target)
+        print(f"Copied {', '.join(f.name for f in files)} to {root}")
+    elif settings["mode"] == "git":
+        repo = Path(settings["repo"]).expanduser()
+        clone = Path(settings["clone"]).expanduser() if settings["clone"] else repo.with_name(repo.name + "-publish")
+        branch = settings["branch"]
+        if not clone.exists():
+            remote = subprocess.run(["git", "-C", str(repo), "remote", "get-url", "origin"],
+                                    check=True, capture_output=True, text=True).stdout.strip()
+            subprocess.run(["git", "clone", "--quiet", remote, str(clone)], check=True)
+        git(clone, "fetch", "--quiet", "origin", branch)  # the clone is ours alone: resetting it loses nothing
+        git(clone, "checkout", "--quiet", "-B", branch, f"origin/{branch}")
+        for f in files:
+            rel = place(settings, company, version, f.name)  # ponytail: a renamed pdf_name leaves the old file
+            (clone / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(f, clone / rel)
+            git(clone, "add", "--", rel)
+        if git(clone, "diff", "--cached", "--name-only"):
+            git(clone, "commit", "--quiet", "-m", f"Publish resume {company}/{files[0].name}")
+            git(clone, "pull", "--quiet", "--rebase", "origin", branch)  # others may push too
+            git(clone, "push", "--quiet", "origin", f"HEAD:{branch}")
+            print(f"Pushed {', '.join(f.name for f in files)} to {branch}")
+        else:
+            print("Already published, unchanged.")
+    else:
+        sys.exit(f"config.json: unknown publish.mode '{settings['mode']}' (none, folder or git).")
+
+    urls = [config.public_url(company, version, f.name, settings) for f in files]
+    con = db.connect()  # the links the employer gets, kept with the offer
+    con.execute("UPDATE offers SET resume_url = ?, cover_letter_url = ?, published_at = date('now') WHERE folder = ?",
+                (urls[0], urls[1] if len(urls) > 1 else None, f"jobs/{job_path.parent.name}"))
+    con.commit()
+    db.dump(con)
+    for u in urls:
+        if u:
+            print(f"  {u}")
+    return urls[0]
 
 
 if __name__ == "__main__":

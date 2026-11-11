@@ -3,7 +3,7 @@
 {% block content %}
 <p><a href="/">← All jobs</a> · <span class="tag {{ job.status|replace(' ', '-') }}">{{ job.status }}</span>{% if job.sent %} sent {{ job.sent }} (frozen){% endif %}</p>
 <div class="card"><h3>Files</h3>
-{% for language, names in pdfs.items() %}<p><b>{{ language }}</b>{% if language == 'French' %} <span class="muted">(local only, never published)</span>{% endif %}</p>
+{% for language, names in pdfs.items() %}<p><b>{{ language }}</b>{% if language == 'French' %} <span class="muted">(local only, never published)</span>{% elif language.startswith('As sent') %} <span class="muted">(copy kept when the job was reopened)</span>{% endif %}</p>
 {% for p in names %}<div><a href="/files/{{ job.slug }}/{{ p }}">{{ p }}</a>{% if p.startswith('_') %} <span class="tag not-ready">NOT READY, do not send</span>{% endif %}</div>{% endfor %}
 {% else %}<p class="muted">No PDF yet.</p>{% endfor %}
 <h3>Actions</h3>

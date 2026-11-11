@@ -3,7 +3,7 @@
 
 Usage: python3 src/build_cover.py jobs/<slug>
 
-Reads jobs/<slug>/cover.json. If it doesn't exist yet, creates it from template/default-cover.json,
+Reads jobs/<slug>/cover.json. If it doesn't exist yet, creates it from template/content/default-cover.json,
 filling {company} and {job_title} from job.json. An empty "date" prints today's date.
 Writes next to the resume (job.json's pdf_name = <stem>.pdf):
   <stem>-Cover-Letter.pdf             the cover letter alone (one page)
@@ -28,7 +28,7 @@ import build_resume
 import check_style
 
 TEMPLATE_DIR = build_resume.TEMPLATE_DIR
-DEFAULT_COVER = TEMPLATE_DIR / "default-cover.json"
+DEFAULT_COVER = TEMPLATE_DIR / "content" / "default-cover.json"
 
 
 FR_MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
@@ -80,15 +80,15 @@ def render_pdf(data: dict, letter: dict, pdf_file: Path) -> bool:
     browser = shutil.which("google-chrome")
     if browser is None:
         raise RuntimeError("Google Chrome is unavailable in WSL")
-    env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), autoescape=select_autoescape(["html"]),
+    env = Environment(loader=FileSystemLoader(TEMPLATE_DIR / "layout"), autoescape=select_autoescape(["html"]),
                       undefined=StrictUndefined)
     with tempfile.TemporaryDirectory(prefix="cover-build-") as temporary:
         temporary_dir = Path(temporary)
         html_file = temporary_dir / "cover-letter.html"
         html_file.write_text(env.get_template("cover-letter.html").render(
             data=data, letter=letter,
-            font_base=(TEMPLATE_DIR / "fonts").resolve().as_uri() + "/",
-            asset_base=(TEMPLATE_DIR / "assets").resolve().as_uri() + "/",
+            font_base=(TEMPLATE_DIR / "layout" / "fonts").resolve().as_uri() + "/",
+            asset_base=(TEMPLATE_DIR / "layout" / "assets").resolve().as_uri() + "/",
         ), encoding="utf-8")
         rendered = temporary_dir / "cover.pdf"
         command = build_resume.chrome_command(browser, str(temporary_dir / "chrome-profile"), html_file)

@@ -15,25 +15,25 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 
 | Path | What it is | Who edits it |
 |---|---|---|
-| `template/default.json` | Master resume content | The user, or you with approval |
-| `template/resume.html`, `template/assets/`, `template/fonts/` | Layout only | Don't change the design; parse fixes need the user's approval |
-| `template/resume.pdf` | Baseline PDF built from `default.json` | `src/build_resume.py` |
+| `template/content/default.json` | Master resume content | The user, or you with approval |
+| `template/layout/resume.html`, `template/layout/assets/`, `template/layout/fonts/` | Layout only | Don't change the design; parse fixes need the user's approval |
+| `template/build/resume.pdf` | Baseline PDF built from `default.json` | `src/build_resume.py` |
 | `jobs/<slug>/posting.txt` | The pasted job posting text | Written once when the folder is created |
 | `jobs/<slug>/job.json` | One posting as structured requirements | You draft it, the user reviews it |
-| `jobs/<slug>/content.json` | Tailored resume content for this application, starts as a copy of `template/default.json` | The user, or you with approval |
+| `jobs/<slug>/content.json` | Tailored resume content for this application, starts as a copy of `template/content/default.json` | The user, or you with approval |
 | `jobs/<slug>/<pdf_name>` | Built PDF for this application, named by `job.json`'s `pdf_name` (your name, job title, company) | `src/build_resume.py` |
-| `template/default-cover.json`, `template/cover-letter.html` | Default cover letter text and its layout | The user, or you with approval |
+| `template/content/default-cover.json`, `template/layout/cover-letter.html` | Default cover letter text and its layout | The user, or you with approval |
 | `jobs/<slug>/cover.json` | This job's cover letter text, created from `default-cover.json` on the first build | You, only when the user asks (`.claude/skills/draft-cover-letter/SKILL.md`) |
 | `jobs/<slug>/<stem>-Cover-Letter.pdf`, `<stem>-Resume-and-Cover-Letter.pdf` | Cover letter alone, and resume + cover letter in one file; rebuilt with every resume build | `src/build_cover.py` (run it alone after editing `cover.json`) |
 | `jobs/<slug>/review.json`, `review.md`, `interview.json`, `dashboard.html` | Generated report, interview prep sheet and one-page overview | The tools only, never edited by hand |
 | `src/spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it, via `check_spelling.py --add` |
-| `src/aliases.json` | True synonyms (Postgres = PostgreSQL) | Keep it small; no loose matches |
+| `data/resume.db` (+ `data/resume.sql` in git) | Knowledge base: experiences and every approved line, cover paragraphs, skills with keywords (true synonyms) and years, offers, requirements, results of sent offers | Updated by the scripts (`src/db_sync.py` after every job build); add synonyms with `src/skills_inventory.py keyword`; no loose matches |
 
-`src/new_job.py` scaffolds a new `jobs/<slug>/` folder interactively (company, job title, pasted posting). It **refuses to run** if `template/default.json` has any unresolved spelling/style/PDF-readability finding (warning or error) — fix the baseline first, so every new application starts clean. Run `src/check_template.py` on its own anytime to see that same list without starting a new application.
+`src/new_job.py` scaffolds a new `jobs/<slug>/` folder interactively (company, job title, pasted posting). It **refuses to run** if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding (warning or error) — fix the baseline first, so every new application starts clean. Run `src/check_template.py` on its own anytime to see that same list without starting a new application.
 
 ## Pipeline
 
-Each tool defaults to its input's own folder: run against `template/default.json` for the baseline, or a `jobs/<slug>/` file for one application. Each step writes its report next to its input.
+Each tool defaults to its input's own folder: run against `template/content/default.json` for the baseline, or a `jobs/<slug>/` file for one application. Each step writes its report next to its input.
 
 ```bash
 .venv/bin/python src/check_template.py                        # is template/ ready? lists findings, exit 1 if not
@@ -53,9 +53,11 @@ Each tool defaults to its input's own folder: run against `template/default.json
 
 **After any edit to a job's `content.json`, run `src/tailor.py jobs/<slug>`:** it builds (which refreshes the review, interview prep and dashboard), publishes unless the PDF is over 3 pages or has errors, and prints the full table of everything not met. **Show that table to the user as printed, before any comment;** never summarize or drop rows.
 
-**Years of experience per skill:** `template/skills.json` holds every resume skill, its posting synonyms (`match`) and the user's start date; years are computed to today. Each dashboard has a "Skills for application forms" box ready to paste. After adding skills to any `content.json`, run `src/skills_inventory.py sync`, then `missing`, and **ask the user for each start date** (never guess); record with `src/skills_inventory.py set "<skill>" YYYY-MM`.
+**Years of experience per skill:** the `skills` table holds every resume skill, its keywords and the user's start date; years are computed to today. Each dashboard has a "Skills for application forms" box ready to paste. After adding skills to any `content.json`, run `src/skills_inventory.py sync`, then `missing`, and **ask the user for each start date** (never guess); record with `src/skills_inventory.py set "<skill>" YYYY-MM`.
 
-**French version (local only):** when the posting is French and doesn't ask for English, `job.json` gets `"french_version": true` (set by `new_job.py`). Every English build then runs `src/build_fr.py`: unchanged lines take their French from `template/default-fr.json`, tailored lines from `template/translations-fr.json`; anything new goes to `jobs/<slug>/translate-fr.json` for you to translate (concise, faithful, nothing added), then rerun. Output `<pdf_name stem>-FR.pdf` (+ French cover letter from `cover-fr.json`), same 3-page and `_` rules. Tailor and match in English only; the French version is never published. When `template/default.json` changes, update `default-fr.json` in step (same shape).
+**French version (local only):** when the posting is French and doesn't ask for English, `job.json` gets `"french_version": true` (set by `new_job.py`). Every English build then runs `src/build_fr.py`: unchanged lines take their French from `template/content/default-fr.json`, tailored lines from `template/content/translations-fr.json`; anything new goes to `jobs/<slug>/translate-fr.json` for you to translate (concise, faithful, nothing added), then rerun. Output `<pdf_name stem>-FR.pdf` (+ French cover letter from `cover-fr.json`), same 3-page and `_` rules. Tailor and match in English only; the French version is never published. When `template/content/default.json` changes, update `default-fr.json` in step (same shape).
+
+**Knowledge base:** before proposing experience edits, query the library for approved lines first: `SELECT d.text_en FROM descriptions d JOIN description_skills ds ON ds.description_id = d.id JOIN skills s ON s.id = ds.skill_id WHERE s.name_en = '<term>' AND d.status = 'approved'` (via `src/db.py`'s `connect()`). Reuse an approved line before writing a new one. Every build records new lines automatically.
 
 **Sent = frozen:** when the user sends an application, add `"sent": "YYYY-MM-DD"` to its `job.json`. From then on `build_resume.py`, `build_cover.py`, `build_fr.py`, `tailor.py` and `publish_resume.py` refuse that folder, and `check_template.py` no longer lists it for refresh. Never edit a sent folder or propagate template changes into it; changes go into a new version folder. See AGENTS.md.
 
@@ -63,7 +65,7 @@ Each tool defaults to its input's own folder: run against `template/default.json
 
 **Every job PDF build refreshes the review:** `src/build_resume.py jobs/<slug>/content.json` re-runs the review (no network), prints what changed since the previous report with a verdict, and saves `review.md`/`review.json`, `interview.json` and `dashboard.html`. The dashboard is therefore never older than the PDF. (Skipped for the template, for `-o` builds and before requirements exist.)
 
-**While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `src/spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (`job.json`'s `template_sha`); those are safe to refresh with `cp template/default.json`, rebuild and publish.
+**While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `src/spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (`job.json`'s `template_sha`); those are safe to refresh with `cp template/content/default.json`, rebuild and publish.
 
 **Dashboard:** run the local app (`dashboard/README.md`): `.venv/bin/python -m uvicorn dashboard.app:app --host 127.0.0.1`, then http://127.0.0.1:8000. Job pages are no longer written into `jobs/`; `dashboard/` is separate and only reads them. To change a sent job: `src/new_job.py --from jobs/<slug>` creates the next `-vN` folder with its tailoring (published under `/resume/<company>/vN/`).
 
@@ -118,7 +120,7 @@ When the user asks you to update a job's `content.json` from the review results,
   4. development technologies
   5. design tools
   6. AI
-- The **number of skills shown stays the same** as in `template/default.json`, in total and per row. You may replace skills, never add extra ones.
+- The **number of skills shown stays the same** as in `template/content/default.json`, in total and per row. You may replace skills, never add extra ones.
 - A skill is a language, framework, library or tool. Practices and qualities ("Performance optimisation", "Communication") are not skills; don't put them in the list.
 
 **Experience: propose, then wait for confirmation**
@@ -133,7 +135,7 @@ When the user asks you to update a job's `content.json` from the review results,
 - Apply only the proposals the user confirms, then rebuild, `--preview`, publish, and report the verdict.
 
 **Never**
-- Change the look of `template/resume.html`, `template/fonts/` or `template/assets/` without the user's explicit approval: no font, size, color, spacing, margin or other CSS edits, even to fit 3 pages. Fit content within the rules instead, or ask, showing the exact change proposed.
+- Change the look of `template/layout/resume.html`, `template/layout/fonts/` or `template/layout/assets/` without the user's explicit approval: no font, size, color, spacing, margin or other CSS edits, even to fit 3 pages. Fit content within the rules instead, or ask, showing the exact change proposed.
 - Invent experience, or claim a skill, version or sub-feature the user hasn't used ("Vue 3" was true, "Vue 3 / Composition API" was not).
 - Hide a regression: report the `--preview` verdict after every change, including when coverage drops because a false claim was removed.
 
@@ -142,7 +144,7 @@ When the user asks you to update a job's `content.json` from the review results,
 - **Never invent experience.** Suggestions say what the posting asks for and where the PDF stands. Only add a skill or term to a `content.json` when the user confirms it is true. "Missing" is information, not a gap to fill.
 - **Don't edit a `review.json`/`review.md` (or any generated report) by hand.** When a result is wrong, add an override to the job file with `id`, `status`, `reason` and `pdf_quote` (the PDF text the decision relies on, or null). The report keeps the automated finding and flags the override as stale when that quote leaves the PDF. Prefer fixing the resume over overriding.
 - **Don't weaken a check to make a report look better.** No loose aliases, no allowlisting words the user hasn't confirmed, and no downgrading errors.
-- **`template/default.json` must stay clean.** `src/new_job.py` blocks creating a new job folder while the baseline has any spelling/style/PDF-readability finding (warning or error), because every new application starts from it. Fix the baseline before scaffolding; don't bypass the gate.
+- **`template/content/default.json` must stay clean.** `src/new_job.py` blocks creating a new job folder while the baseline has any spelling/style/PDF-readability finding (warning or error), because every new application starts from it. Fix the baseline before scaffolding; don't bypass the gate.
 - **After editing content or the template,** rebuild the PDF before re-running `src/check_pdf.py` or `src/review_ats.py`. They read the PDF, not the JSON.
 - **The user values reports as a record.** Summarize findings, but keep the full list available. Don't trim reports.
 - **Tests:** `.venv/bin/python -m unittest discover -s tests -t .`. Run them after changing any tool.
@@ -151,6 +153,6 @@ When the user asks you to update a job's `content.json` from the review results,
 
 - English spelling only.
 - The style rules are text patterns, not judgement.
-- Matching is literal plus `src/aliases.json`. There is no semantic or AI matching, so related wording is missed unless it's an alias.
+- Matching is literal plus the skill keywords in `data/resume.db`. There is no semantic or AI matching, so related wording is missed unless it's an alias.
 - LinkedIn often refuses automated link checks, which is reported as "open it in a browser", not as broken.
-- The section split depends on the template headings. If the headings change, `check_pdf.template_headings` picks them up from `template/resume.html`.
+- The section split depends on the template headings. If the headings change, `check_pdf.template_headings` picks them up from `template/layout/resume.html`.
