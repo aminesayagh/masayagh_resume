@@ -159,3 +159,38 @@ class GapTableTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MasterTest(unittest.TestCase):
+    """The master resume is generated from the db; hand edits are refused, db edits regenerate both files."""
+
+    def setUp(self):
+        import shutil
+        import db
+        import master
+        self.db, self.master = db, master
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.saved = (db.DB, db.DUMP, dict(master.FILES), master.STAMP)
+        shutil.copyfile(db.connect() and db.DB, root / "copy.db")  # a copy of the real db, never the db itself
+        db.DB, db.DUMP = root / "copy.db", root / "copy.sql"
+        master.FILES.update(en=root / "default.json", fr=root / "default-fr.json")
+        master.STAMP = root / "stamp.json"
+        master.write()
+
+    def tearDown(self):
+        self.db.DB, self.db.DUMP, files, self.master.STAMP = self.saved
+        self.master.FILES.update(files)
+        self.tmp.cleanup()
+
+    def test_hand_edit_is_refused(self):
+        path = self.master.FILES["en"]
+        path.write_text(path.read_text(encoding="utf-8").replace("Software", "Hardware", 1), encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            self.master.write()
+
+    def test_db_edit_regenerates_both_languages(self):
+        self.master.set_value(["role", "Platform Engineer", "Ingénieur plateforme"])
+        import json
+        self.assertEqual(json.loads(self.master.FILES["en"].read_text(encoding="utf-8"))["role"], "Platform Engineer")
+        self.assertEqual(json.loads(self.master.FILES["fr"].read_text(encoding="utf-8"))["role"], "Ingénieur plateforme")

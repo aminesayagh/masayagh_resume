@@ -25,6 +25,34 @@ CREATE TABLE IF NOT EXISTS companies (
   international INTEGER NOT NULL DEFAULT 0,
   country TEXT
 );
+CREATE TABLE IF NOT EXISTS contact (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  phone_link TEXT NOT NULL,
+  location_en TEXT NOT NULL,
+  location_fr TEXT,
+  website TEXT NOT NULL,
+  website_link TEXT NOT NULL,
+  github TEXT,
+  linkedin TEXT
+);
+CREATE TABLE IF NOT EXISTS skill_layout (
+  row INTEGER NOT NULL,
+  position INTEGER NOT NULL,
+  label_en TEXT NOT NULL,
+  label_fr TEXT,
+  PRIMARY KEY (row, position)
+);
+CREATE TABLE IF NOT EXISTS languages (
+  id INTEGER PRIMARY KEY,
+  sort_order INTEGER NOT NULL,
+  name_en TEXT NOT NULL,
+  name_fr TEXT,
+  level_en TEXT NOT NULL,
+  level_fr TEXT
+);
 CREATE TABLE IF NOT EXISTS experiences (
   id INTEGER PRIMARY KEY,
   company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -95,7 +123,7 @@ CREATE TABLE IF NOT EXISTS skill_keywords (
 );
 CREATE TABLE IF NOT EXISTS profile (
   id INTEGER PRIMARY KEY,
-  key TEXT NOT NULL UNIQUE CHECK (key IN ('summary', 'role')),
+  key TEXT NOT NULL UNIQUE,
   text_en TEXT NOT NULL,
   text_fr TEXT
 );
@@ -194,10 +222,19 @@ def connect(path: Path | None = None, empty: bool = False) -> sqlite3.Connection
     con.execute("PRAGMA foreign_keys = ON")
     con.executescript(SCHEMA)
     for table, column, kind in (("descriptions", "activity_id", "INTEGER REFERENCES activities(id)"),
+                                ("experiences", "company_fr", "TEXT"), ("experiences", "role_fr", "TEXT"),
+                                ("experiences", "detail_fr", "TEXT"), ("projects", "tech_fr", "TEXT"),
+                                ("activities", "master_id", "INTEGER REFERENCES descriptions(id)"),
+                                ("cover_paragraphs", "default_order", "INTEGER"),
                                 ("offers", "company_slug", "TEXT"), ("offers", "template_sha", "TEXT"),
                                 ("offers", "skipped_terms", "TEXT"), ("requirements", "override_quote", "TEXT")):
         if column not in [c[1] for c in con.execute(f"PRAGMA table_info({table})")]:  # databases made before it
             con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
+    sql = con.execute("SELECT sql FROM sqlite_master WHERE name = 'profile'").fetchone()[0]
+    if "CHECK (key IN" in sql:  # profile once allowed only summary/role; it now also holds the cover greeting/closing
+        con.executescript("ALTER TABLE profile RENAME TO profile_old;"
+                          "CREATE TABLE profile (id INTEGER PRIMARY KEY, key TEXT NOT NULL UNIQUE, text_en TEXT NOT NULL, text_fr TEXT);"
+                          "INSERT INTO profile SELECT * FROM profile_old; DROP TABLE profile_old;")
     return con
 
 

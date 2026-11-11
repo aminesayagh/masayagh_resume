@@ -5,35 +5,35 @@ CREATE TABLE activities (
   label TEXT NOT NULL,
   sort_order INTEGER NOT NULL,
   active INTEGER NOT NULL DEFAULT 1
-);
-INSERT INTO "activities" VALUES(1,1,'Tarifpublic.fr consulting',1,1);
-INSERT INTO "activities" VALUES(2,1,'AI agent workflows',2,1);
-INSERT INTO "activities" VALUES(3,1,'LingoWP plugin support',3,0);
-INSERT INTO "activities" VALUES(4,2,'Hypeo product (description)',1,1);
-INSERT INTO "activities" VALUES(5,2,'AI agent experience',2,1);
-INSERT INTO "activities" VALUES(6,2,'Front-end with the tech lead',3,1);
-INSERT INTO "activities" VALUES(7,2,'Influencer data extraction',4,1);
-INSERT INTO "activities" VALUES(8,2,'Ownership during the leadership transition',5,1);
-INSERT INTO "activities" VALUES(9,2,'Documentation of modules and architecture',6,1);
-INSERT INTO "activities" VALUES(10,2,'Creator data-metrics solution',7,1);
-INSERT INTO "activities" VALUES(11,2,'Moderation platform',8,0);
-INSERT INTO "activities" VALUES(12,3,'Standardized delivery process (description)',1,1);
-INSERT INTO "activities" VALUES(13,3,'Reusable prototyping approach',2,1);
-INSERT INTO "activities" VALUES(14,3,'Sprint KPIs in Odoo',3,1);
-INSERT INTO "activities" VALUES(15,3,'02Book to production',4,1);
-INSERT INTO "activities" VALUES(16,3,'Growth under mentorship',5,1);
-INSERT INTO "activities" VALUES(17,4,'Inflauditor and landing pages (description)',1,1);
-INSERT INTO "activities" VALUES(18,4,'UI flows and prototypes',2,1);
-INSERT INTO "activities" VALUES(19,4,'Data insights',3,1);
-INSERT INTO "activities" VALUES(20,5,'CTF platform (description)',1,1);
-INSERT INTO "activities" VALUES(21,5,'Go API service',2,1);
-INSERT INTO "activities" VALUES(22,5,'Warzone dashboard',3,1);
-INSERT INTO "activities" VALUES(23,5,'Coaching and mentoring',4,0);
-INSERT INTO "activities" VALUES(24,6,'Subscription website (description)',1,1);
-INSERT INTO "activities" VALUES(25,7,'Solar onboarding experiences (description)',1,0);
-INSERT INTO "activities" VALUES(26,7,'Website delivery automation',2,1);
-INSERT INTO "activities" VALUES(27,7,'Lead-capture websites',3,1);
-INSERT INTO "activities" VALUES(28,4,'Landing pages (former Digital Consulting entry)',4,0);
+, master_id INTEGER REFERENCES descriptions(id));
+INSERT INTO "activities" VALUES(1,1,'Tarifpublic.fr consulting',1,1,1);
+INSERT INTO "activities" VALUES(2,1,'AI agent workflows',2,1,2);
+INSERT INTO "activities" VALUES(3,1,'LingoWP plugin support',3,0,NULL);
+INSERT INTO "activities" VALUES(4,2,'Hypeo product (description)',1,1,3);
+INSERT INTO "activities" VALUES(5,2,'AI agent experience',2,1,4);
+INSERT INTO "activities" VALUES(6,2,'Front-end with the tech lead',3,1,5);
+INSERT INTO "activities" VALUES(7,2,'Influencer data extraction',4,1,6);
+INSERT INTO "activities" VALUES(8,2,'Ownership during the leadership transition',5,1,7);
+INSERT INTO "activities" VALUES(9,2,'Documentation of modules and architecture',6,1,8);
+INSERT INTO "activities" VALUES(10,2,'Creator data-metrics solution',7,1,9);
+INSERT INTO "activities" VALUES(11,2,'Moderation platform',8,0,NULL);
+INSERT INTO "activities" VALUES(12,3,'Standardized delivery process (description)',1,1,10);
+INSERT INTO "activities" VALUES(13,3,'Reusable prototyping approach',2,1,11);
+INSERT INTO "activities" VALUES(14,3,'Sprint KPIs in Odoo',3,1,12);
+INSERT INTO "activities" VALUES(15,3,'02Book to production',4,1,13);
+INSERT INTO "activities" VALUES(16,3,'Growth under mentorship',5,1,14);
+INSERT INTO "activities" VALUES(17,4,'Inflauditor and landing pages (description)',1,1,15);
+INSERT INTO "activities" VALUES(18,4,'UI flows and prototypes',2,1,16);
+INSERT INTO "activities" VALUES(19,4,'Data insights',3,1,17);
+INSERT INTO "activities" VALUES(20,5,'CTF platform (description)',1,1,18);
+INSERT INTO "activities" VALUES(21,5,'Go API service',2,1,19);
+INSERT INTO "activities" VALUES(22,5,'Warzone dashboard',3,1,20);
+INSERT INTO "activities" VALUES(23,5,'Coaching and mentoring',4,0,NULL);
+INSERT INTO "activities" VALUES(24,6,'Subscription website (description)',1,1,21);
+INSERT INTO "activities" VALUES(25,7,'Solar onboarding experiences (description)',1,0,NULL);
+INSERT INTO "activities" VALUES(26,7,'Website delivery automation',1,1,22);
+INSERT INTO "activities" VALUES(27,7,'Lead-capture websites',2,1,23);
+INSERT INTO "activities" VALUES(28,4,'Landing pages (former Digital Consulting entry)',4,0,NULL);
 CREATE TABLE certifications (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -67,6 +67,20 @@ INSERT INTO "companies" VALUES(13,'Theodo','prospect',0,NULL);
 INSERT INTO "companies" VALUES(14,'Oracle','prospect',0,NULL);
 INSERT INTO "companies" VALUES(15,'Y Strategie','prospect',0,NULL);
 INSERT INTO "companies" VALUES(16,'CGI','prospect',0,NULL);
+CREATE TABLE contact (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  phone_link TEXT NOT NULL,
+  location_en TEXT NOT NULL,
+  location_fr TEXT,
+  website TEXT NOT NULL,
+  website_link TEXT NOT NULL,
+  github TEXT,
+  linkedin TEXT
+);
+INSERT INTO "contact" VALUES(1,'Mohamed Amine Sayagh','mohamedamine@masayagh.com','(+212) 616-13 71 24','tel:+212616137124','Casablanca, Morocco','Casablanca, Maroc','masayagh.com/hire','https://www.masayagh.com/hire','https://github.com/aminesayagh','https://linkedin.com/in/mohamedamine-sayagh');
 CREATE TABLE cover_paragraph_experiences (
   paragraph_id INTEGER NOT NULL REFERENCES cover_paragraphs(id),
   experience_id INTEGER NOT NULL REFERENCES experiences(id),
@@ -91,11 +105,11 @@ CREATE TABLE cover_paragraphs (
   status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved', 'rejected')),
   first_offer_id INTEGER REFERENCES offers(id),
   created_at TEXT NOT NULL DEFAULT (date('now'))
-);
-INSERT INTO "cover_paragraphs" VALUES(1,'opening','I am applying for the {job_title} role at {company}. My work has focused on building software that helps people carry out complex tasks, from campaign setup to security competitions.',NULL,'approved',NULL,'2026-11-11');
-INSERT INTO "cover_paragraphs" VALUES(2,'example','At Hypeo, I integrated an AI agent experience that turns client conversations into configured marketing campaigns using an internal influencer database. Working closely with a senior technical lead, I refined the front-end experience as the backend integration and business requirements evolved.',NULL,'approved',NULL,'2026-11-11');
-INSERT INTO "cover_paragraphs" VALUES(3,'support','At Cyber Cohesion, I led web development for a security competition platform used at events including OWASP AppSec Days and BSides Singapore. I also developed its Warzone dashboard, which tracks team progress and scores.',NULL,'approved',NULL,'2026-11-11');
-INSERT INTO "cover_paragraphs" VALUES(4,'close','I would welcome the opportunity to discuss how my experience could support the work at {company}. Thank you for your consideration.',NULL,'approved',NULL,'2026-11-11');
+, default_order INTEGER);
+INSERT INTO "cover_paragraphs" VALUES(1,'opening','I am applying for the {job_title} role at {company}. My work has focused on building software that helps people carry out complex tasks, from campaign setup to security competitions.',NULL,'approved',NULL,'2026-11-11',1);
+INSERT INTO "cover_paragraphs" VALUES(2,'example','At Hypeo, I integrated an AI agent experience that turns client conversations into configured marketing campaigns using an internal influencer database. Working closely with a senior technical lead, I refined the front-end experience as the backend integration and business requirements evolved.',NULL,'approved',NULL,'2026-11-11',2);
+INSERT INTO "cover_paragraphs" VALUES(3,'support','At Cyber Cohesion, I led web development for a security competition platform used at events including OWASP AppSec Days and BSides Singapore. I also developed its Warzone dashboard, which tracks team progress and scores.',NULL,'approved',NULL,'2026-11-11',3);
+INSERT INTO "cover_paragraphs" VALUES(4,'close','I would welcome the opportunity to discuss how my experience could support the work at {company}. Thank you for your consideration.',NULL,'approved',NULL,'2026-11-11',4);
 CREATE TABLE description_skills (
   description_id INTEGER NOT NULL REFERENCES descriptions(id),
   skill_id INTEGER NOT NULL REFERENCES skills(id),
@@ -231,18 +245,29 @@ CREATE TABLE experiences (
   start_at TEXT NOT NULL,
   end_at TEXT,
   sort_order INTEGER NOT NULL
+, company_fr TEXT, role_fr TEXT, detail_fr TEXT);
+INSERT INTO "experiences" VALUES(1,1,'Software Developer','France','France','job','2026-09',NULL,0,'Consultant technique','Développeur logiciel',NULL);
+INSERT INTO "experiences" VALUES(2,2,'Software Developer','- Hypeo, MENA',NULL,'job','2025-07','2026-09',1,NULL,'Développeur logiciel',NULL);
+INSERT INTO "experiences" VALUES(3,3,'Software Developer','Morocco','Morocco','job','2025-02','2025-06',2,NULL,'Développeur logiciel','Maroc');
+INSERT INTO "experiences" VALUES(4,4,'Software Developer','Morocco','Morocco','job','2024-08','2025-01',3,NULL,'Développeur logiciel','Maroc');
+INSERT INTO "experiences" VALUES(5,5,'Software Developer','Singapore','Singapore','job','2023-08','2024-07',4,NULL,'Développeur logiciel','Singapour');
+INSERT INTO "experiences" VALUES(6,6,'Software Developer','France','France','job','2023-05','2023-07',5,NULL,'Développeur logiciel',NULL);
+INSERT INTO "experiences" VALUES(7,7,'Full Stack Developer','London','London','job','2022-10','2023-04',6,NULL,'Développeur Full Stack','Londres');
+INSERT INTO "experiences" VALUES(8,8,'Software Developer','France','France','job','2022-07','2022-09',7,NULL,'Développeur logiciel',NULL);
+INSERT INTO "experiences" VALUES(9,9,'Software Developer','London','London','job','2021-08','2022-06',8,NULL,'Développeur logiciel','Londres');
+INSERT INTO "experiences" VALUES(10,10,'Software Developer','Morocco','Morocco','job','2021-01','2021-06',9,NULL,'Développeur logiciel','Maroc');
+INSERT INTO "experiences" VALUES(11,11,'Web Designer','Morocco','Morocco','freelance','2016','2020',10,NULL,'Web designer','Maroc');
+CREATE TABLE languages (
+  id INTEGER PRIMARY KEY,
+  sort_order INTEGER NOT NULL,
+  name_en TEXT NOT NULL,
+  name_fr TEXT,
+  level_en TEXT NOT NULL,
+  level_fr TEXT
 );
-INSERT INTO "experiences" VALUES(1,1,'Software Developer','France','France','job','2026-09',NULL,0);
-INSERT INTO "experiences" VALUES(2,2,'Software Developer','- Hypeo, MENA',NULL,'job','2025-07','2026-09',1);
-INSERT INTO "experiences" VALUES(3,3,'Software Developer','Morocco','Morocco','job','2025-02','2025-06',2);
-INSERT INTO "experiences" VALUES(4,4,'Software Developer','Morocco','Morocco','job','2024-08','2025-01',3);
-INSERT INTO "experiences" VALUES(5,5,'Software Developer','Singapore','Singapore','job','2023-08','2024-07',4);
-INSERT INTO "experiences" VALUES(6,6,'Software Developer','France','France','job','2023-05','2023-07',5);
-INSERT INTO "experiences" VALUES(7,7,'Full Stack Developer','London','London','job','2022-10','2023-04',6);
-INSERT INTO "experiences" VALUES(8,8,'Software Developer','France','France','job','2022-07','2022-09',7);
-INSERT INTO "experiences" VALUES(9,9,'Software Developer','London','London','job','2021-08','2022-06',8);
-INSERT INTO "experiences" VALUES(10,10,'Software Developer','Morocco','Morocco','job','2021-01','2021-06',9);
-INSERT INTO "experiences" VALUES(11,11,'Web Designer','Morocco','Morocco','freelance','2016','2020',10);
+INSERT INTO "languages" VALUES(1,1,'Arabic','Arabe','Native','Langue maternelle');
+INSERT INTO "languages" VALUES(2,2,'French','Français','Professional','Professionnel');
+INSERT INTO "languages" VALUES(3,3,'English','Anglais','Professional','Professionnel');
 CREATE TABLE offer_results (
   offer_id INTEGER NOT NULL REFERENCES offers(id),
   requirement_id INTEGER NOT NULL REFERENCES requirements(id),
@@ -980,14 +1005,11 @@ Ce même engagement envers l’équité s’étend à notre utilisation des tech
 
 Joignez-vous à nous, l’une des plus importantes entreprises de conseil en technologie de l’information (TI) et en management au monde.
 ','sent','2026-11-11','2026-11-11',NULL,'cgi','f3335ecb511d9b8dde24a9b92287bb5825b7ebf9084420c6201fceca3ab4a401','{"Bac+5": "degree level, covered by the degree requirement on line 19", "Minimum 10": "covered by the 10+ years years_experience pick", "Minimum 2": "covered by the 2+ years years_experience pick", "Senior": "seniority, handled by the title check", "Engineer": "job title, handled by the title check", "CGI": "company name, not a skill", "Joignez-vous": "company introduction wording", "bien-être": "company culture and benefits line (33 onward), skipped"}');
-CREATE TABLE profile (
-  id INTEGER PRIMARY KEY,
-  key TEXT NOT NULL UNIQUE CHECK (key IN ('summary', 'role')),
-  text_en TEXT NOT NULL,
-  text_fr TEXT
-);
+CREATE TABLE profile (id INTEGER PRIMARY KEY, key TEXT NOT NULL UNIQUE, text_en TEXT NOT NULL, text_fr TEXT);
 INSERT INTO "profile" VALUES(1,'summary','Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted development to turn inefficient workflows into practical tools that help teams get more done. Looking to join a team that ships products at scale.','Développeur logiciel qui conçoit des expériences produit simplifiant des processus complexes. J''allie ingénierie, design visuel, sens métier et développement assisté par l''IA pour transformer des workflows inefficaces en outils concrets qui rendent les équipes plus efficaces. Je souhaite rejoindre une équipe qui livre des produits à grande échelle.');
 INSERT INTO "profile" VALUES(2,'role','Software Engineer','Ingénieur logiciel');
+INSERT INTO "profile" VALUES(3,'cover_greeting','Dear Hiring Team,','Madame, Monsieur,');
+INSERT INTO "profile" VALUES(4,'cover_closing','Best regards,','');
 CREATE TABLE projects (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -995,9 +1017,9 @@ CREATE TABLE projects (
   link TEXT NOT NULL,
   duration TEXT NOT NULL,
   duration_fr TEXT
-);
-INSERT INTO "projects" VALUES(1,'OrbitRows CLI','Python · CLI · AI Agent · SQLite · SQL · JEV · GLiNER2','https://www.masayagh.com/work/orbitrows/','21 working days','21 jours ouvrés');
-INSERT INTO "projects" VALUES(2,'LingoWP','WordPress · React · Python · FastAPI · PostgreSQL · FreeBSD','https://www.masayagh.com/work/lingowp/','43 working days','43 jours ouvrés');
+, tech_fr TEXT);
+INSERT INTO "projects" VALUES(1,'OrbitRows CLI','Python · CLI · AI Agent · SQLite · SQL · JEV · GLiNER2','https://www.masayagh.com/work/orbitrows/','21 working days','21 jours ouvrés','Python · CLI · Agent IA · SQLite · SQL · JEV · GLiNER2');
+INSERT INTO "projects" VALUES(2,'LingoWP','WordPress · React · Python · FastAPI · PostgreSQL · FreeBSD','https://www.masayagh.com/work/lingowp/','43 working days','43 jours ouvrés',NULL);
 CREATE TABLE requirement_terms (
   requirement_id INTEGER NOT NULL REFERENCES requirements(id),
   term TEXT NOT NULL,
@@ -1455,6 +1477,37 @@ INSERT INTO "skill_keywords" VALUES(78,'choix d''architecture','fr');
 INSERT INTO "skill_keywords" VALUES(9,'revues de code','fr');
 INSERT INTO "skill_keywords" VALUES(81,'tests techniques','fr');
 INSERT INTO "skill_keywords" VALUES(85,'collaboration transverse','fr');
+CREATE TABLE skill_layout (
+  row INTEGER NOT NULL,
+  position INTEGER NOT NULL,
+  label_en TEXT NOT NULL,
+  label_fr TEXT,
+  PRIMARY KEY (row, position)
+);
+INSERT INTO "skill_layout" VALUES(1,1,'JavaScript',NULL);
+INSERT INTO "skill_layout" VALUES(1,2,'Java',NULL);
+INSERT INTO "skill_layout" VALUES(1,3,'Python',NULL);
+INSERT INTO "skill_layout" VALUES(1,4,'PHP',NULL);
+INSERT INTO "skill_layout" VALUES(2,1,'React / Next.js',NULL);
+INSERT INTO "skill_layout" VALUES(2,2,'Angular',NULL);
+INSERT INTO "skill_layout" VALUES(2,3,'Node.js / NestJS',NULL);
+INSERT INTO "skill_layout" VALUES(2,4,'Spring Boot',NULL);
+INSERT INTO "skill_layout" VALUES(3,1,'FastAPI',NULL);
+INSERT INTO "skill_layout" VALUES(3,2,'WordPress',NULL);
+INSERT INTO "skill_layout" VALUES(3,3,'Odoo',NULL);
+INSERT INTO "skill_layout" VALUES(3,4,'PostgreSQL',NULL);
+INSERT INTO "skill_layout" VALUES(4,1,'Data scraping','Scraping de données');
+INSERT INTO "skill_layout" VALUES(4,2,'CI/CD',NULL);
+INSERT INTO "skill_layout" VALUES(4,3,'Docker',NULL);
+INSERT INTO "skill_layout" VALUES(4,4,'Testing Practices','Pratiques de test');
+INSERT INTO "skill_layout" VALUES(5,1,'Figma',NULL);
+INSERT INTO "skill_layout" VALUES(5,2,'Framer',NULL);
+INSERT INTO "skill_layout" VALUES(5,3,'Interactive design','Design interactif');
+INSERT INTO "skill_layout" VALUES(5,4,'Prototyping','Prototypage');
+INSERT INTO "skill_layout" VALUES(6,1,'Claude Code & Codex',NULL);
+INSERT INTO "skill_layout" VALUES(6,2,'MCP Integrations','Intégrations MCP');
+INSERT INTO "skill_layout" VALUES(6,3,'LLM API Integration','Intégration d''API LLM');
+INSERT INTO "skill_layout" VALUES(6,4,'AI Agent Workflows','Workflows d''agents IA');
 CREATE TABLE skills (
   id INTEGER PRIMARY KEY,
   type TEXT NOT NULL CHECK (type IN ('technical', 'soft', 'language', 'location', 'design', 'ai')),

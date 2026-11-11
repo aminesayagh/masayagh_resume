@@ -5,7 +5,7 @@ Usage: python3 src/check_spelling.py [template/content/default.json] [--out repo
 
 Every unknown word is a WARNING with suggested fixes, never an error: product names,
 tech terms and proper nouns are often correct even when the dictionary does not know them.
-Add words you have confirmed with --add WORD [WORD ...] (writes src/spelling-allow.txt).
+Add words you have confirmed with --add WORD [WORD ...] (writes spelling-allow.txt).
 Always exits 0.
 """
 
@@ -20,7 +20,7 @@ import check_pdf
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
-ALLOW_FILE = HERE / "spelling-allow.txt"
+ALLOW_FILE = ROOT / "spelling-allow.txt"  # at the repo root, so it's easy to find and edit
 SKIP_KEYS = {"email", "phone", "phone_link", "website", "website_link", "github", "linkedin", "qr_url", "dates", "link"}
 # Names, not prose: their words are trusted, so a company or skill never warns.
 TRUSTED_KEYS = {"name", "company", "detail", "institution", "issuer", "tech", "location", "language", "level", "skills"}
@@ -75,7 +75,7 @@ def check(content: dict, headings: list[str], allow: set[str]) -> dict:
                 "suggestions": suggestions,
                 "message": f"'{word}' in {path} is not in the dictionary"
                 + (f"; did you mean {', '.join(repr(s) for s in suggestions)}?" if suggestions else "; no suggestion.")
-                + " Ignore it if the word is correct (name or term), or add it to src/spelling-allow.txt.",
+                + " Ignore it if the word is correct (name or term), or add it to spelling-allow.txt.",
             })
     return {"findings": findings}
 
@@ -98,7 +98,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("content", nargs="?", type=Path, default=ROOT / "template" / "content" / "default.json")
     parser.add_argument("--out", type=Path, help="JSON report path (default: spelling.json next to the content file)")
-    parser.add_argument("--add", nargs="+", metavar="WORD", help="add confirmed words to src/spelling-allow.txt and exit")
+    parser.add_argument("--add", nargs="+", metavar="WORD", help="add confirmed words to spelling-allow.txt and exit")
     args = parser.parse_args()
     if args.add:
         add_allow(args.add)

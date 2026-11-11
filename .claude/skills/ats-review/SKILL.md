@@ -15,18 +15,18 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 
 | Path | What it is | Who edits it |
 |---|---|---|
-| `template/content/default.json` | Master resume content | The user, or you with approval |
+| `template/content/default.json`, `default-fr.json` | Master resume, **generated** from `data/resume.db` by `src/master.py` | Never edit; change the db with `src/master.py set …` (user's approval), which regenerates both |
 | `template/layout/resume.html`, `template/layout/assets/`, `template/layout/fonts/` | Layout only | Don't change the design; parse fixes need the user's approval |
 | `template/build/resume.pdf` | Baseline PDF built from `default.json` | `src/build_resume.py` |
 | offer in `data/resume.db` (`src/offers.py`) | The posting, title, company, links, sent date, requirements and overrides; `offers.load(folder)` returns the old job.json shape | Created by `new_job.py`; requirements by the drafting agent (`draft_job.py apply`), reviewed by the user |
 | `jobs/<slug>` | One posting as structured requirements | You draft it, the user reviews it |
 | `jobs/<slug>/content/content.json` | Tailored resume content for this application, starts as a copy of `template/content/default.json` | The user, or you with approval |
 | `jobs/<slug>/pdf/<pdf_name>` | Built PDF for this application, named by the offer's `pdf_name` (your name, job title, company) | `src/build_resume.py` |
-| `template/content/default-cover.json`, `template/layout/cover-letter.html` | Default cover letter text and its layout | The user, or you with approval |
-| `jobs/<slug>/content/cover.json` | This job's cover letter text, created from `default-cover.json` on the first build | You, only when the user asks (`.claude/skills/draft-cover-letter/SKILL.md`) |
+| `template/layout/cover-letter.html` | Cover letter layout; the default letter text is in `data/resume.db` (`cover_paragraphs.default_order`, `profile` cover_greeting/cover_closing) | The user, or you with approval |
+| `jobs/<slug>/content/cover.json` | This job's cover letter text, created from the default letter in `data/resume.db` on the first build | You, only when the user asks (`.claude/skills/draft-cover-letter/SKILL.md`) |
 | `jobs/<slug>/<stem>-Cover-Letter.pdf`, `<stem>-Resume-and-Cover-Letter.pdf` | Cover letter alone, and resume + cover letter in one file; rebuilt with every resume build | `src/build_cover.py` (run it alone after editing `cover.json`) |
 | `jobs/<slug>/review/review.json`, `review.md`, `interview.json`, `dashboard.html` | Generated report, interview prep sheet and one-page overview | The tools only, never edited by hand |
-| `src/spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it, via `check_spelling.py --add` |
+| `spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it, via `check_spelling.py --add` |
 | `data/resume.db` (+ `data/resume.sql` in git) | Knowledge base: experiences and every approved line, cover paragraphs, skills with keywords (true synonyms) and years, offers, requirements, results of sent offers | Updated by the scripts (`src/db_sync.py` after every job build); add synonyms with `src/skills_inventory.py keyword`; no loose matches |
 
 `src/new_job.py` scaffolds a new `jobs/<slug>/` folder interactively (company, job title, pasted posting). It **refuses to run** if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding (warning or error) — fix the baseline first, so every new application starts clean. Run `src/check_template.py` on its own anytime to see that same list without starting a new application.
@@ -69,7 +69,7 @@ Each tool defaults to its input's own folder: run against `template/content/defa
 
 **Every job PDF build refreshes the review:** `src/build_resume.py jobs/<slug>/content/content.json` re-runs the review (no network), prints what changed since the previous report with a verdict, and saves `review.md`/`review.json`, `interview.json` and `dashboard.html`. The dashboard is therefore never older than the PDF. (Skipped for the template, for `-o` builds and before requirements exist.)
 
-**While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `src/spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (the offer's `template_sha`); those are safe to refresh with `cp template/content/default.json`, rebuild and publish.
+**While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (the offer's `template_sha`); those are safe to refresh with `cp template/content/default.json`, rebuild and publish.
 
 **Dashboard:** run the local app (`dashboard/README.md`): `.venv/bin/python -m uvicorn dashboard.app:app --host 127.0.0.1`, then http://127.0.0.1:8000. Job pages are no longer written into `jobs/`; `dashboard/` is separate and only reads them. To change a sent job: `src/new_job.py --from jobs/<slug>` creates the next `-vN` folder with its tailoring (published under `/resume/<company>/vN/`).
 

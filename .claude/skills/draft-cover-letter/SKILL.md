@@ -5,7 +5,7 @@ description: Draft or revise the tailored cover letter of a job folder for the r
 
 # Draft cover letter
 
-The first build of a job (`src/build_resume.py`) creates `jobs/<slug>/content/cover.json` from `template/content/default-cover.json` if it is missing, and prints three PDFs: resume, cover letter, resume + cover letter. This skill replaces that default text with a tailored one, **only when the user asks**. What matters most is the quality of the writing: a letter that reads like a person explaining why their work fits this role, not a resume in sentences.
+The first build of a job (`src/build_resume.py`) creates `jobs/<slug>/content/cover.json` from the default letter in `data/resume.db` if it is missing, and prints three PDFs: resume, cover letter, resume + cover letter. This skill replaces that default text with a tailored one, **only when the user asks**. What matters most is the quality of the writing: a letter that reads like a person explaining why their work fits this role, not a resume in sentences.
 
 ## The loop
 

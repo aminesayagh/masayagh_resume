@@ -3,7 +3,7 @@
 
 Usage: python3 src/build_cover.py jobs/<slug>
 
-Reads jobs/<slug>/content/cover.json. If it doesn't exist yet, creates it from template/content/default-cover.json,
+Reads jobs/<slug>/content/cover.json. If it doesn't exist yet, creates it from the default letter in data/resume.db,
 filling {company} and {job_title} from the offer. An empty "date" prints today's date.
 Writes into jobs/<slug>/pdf/ (the offer's pdf_name = <stem>.pdf; French in pdf/fr/):
   <stem>-Cover-Letter.pdf             the cover letter alone (one page)
@@ -25,12 +25,12 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from pypdf import PdfWriter
 
 import build_resume
+import db
 import paths
 import offers
 import check_style
 
 TEMPLATE_DIR = build_resume.TEMPLATE_DIR
-DEFAULT_COVER = TEMPLATE_DIR / "content" / "default-cover.json"
 
 
 FR_MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
@@ -51,15 +51,27 @@ def company_and_title(job: dict) -> tuple[str, str]:
     return (company, title) if title else (job.get("company", ""), job["title"])
 
 
+def default_letter(company: str, title: str, lang: str = "en", con=None) -> dict:
+    """The default letter from data/resume.db: the paragraphs marked default_order, greeting and closing in profile."""
+    con = con or db.connect()
+    fr = lang == "fr"
+    words = {k: (f if fr and f is not None else e) for k, e, f in
+             con.execute("SELECT key, text_en, text_fr FROM profile WHERE key IN ('cover_greeting', 'cover_closing')")}
+    fill = lambda t: t.replace("{company}", company).replace("{job_title}", title)
+    return {"date": "", "company": company, "hiring_contact": "", "job_title": title, "reference": "",
+            "greeting": words["cover_greeting"],
+            "paragraphs": [fill(f if fr and f else e) for e, f in con.execute(
+                "SELECT text_en, text_fr FROM cover_paragraphs WHERE default_order IS NOT NULL ORDER BY default_order")],
+            "closing": words["cover_closing"]}
+
+
 def ensure_cover(folder: Path, job: dict) -> Path:
     path = paths.cover(folder)
     if not path.exists():
-        company, title = company_and_title(job)
-        text = DEFAULT_COVER.read_text(encoding="utf-8")
-        # json.dumps(...)[1:-1] escapes quotes/backslashes so the result stays valid JSON
-        text = text.replace("{company}", json.dumps(company)[1:-1]).replace("{job_title}", json.dumps(title)[1:-1])
-        path.write_text(text, encoding="utf-8")
-        print(f"Created {path} from {DEFAULT_COVER.name}")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(default_letter(*company_and_title(job)), indent=2, ensure_ascii=False) + "\n",
+                        encoding="utf-8")
+        print(f"Created {path} from the default letter in data/resume.db")
     return path
 
 

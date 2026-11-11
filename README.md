@@ -20,7 +20,8 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 
 ## Layout
 
-- `template/` — the master resume: `default.json` (content), `resume.html` (layout), `resume.pdf` (baseline build); and the cover letter: `default-cover.json` (default text), `cover-letter.html` (layout).
+- `template/` — `layout/` (resume and cover-letter HTML, fonts, logos), `content/` (`default.json` / `default-fr.json`: the master resume, **generated** from `data/resume.db`), `build/` (baseline PDF).
+- `data/` — `resume.db` (knowledge base: master resume, line library, skills, offers, default cover letter) and `resume.sql` (its committed text copy).
 - `jobs/<company>-<title>-v<N>/` — one folder per application: the posting, the offer (`data/resume.db`) (requirements), `content.json` (tailored content, starts as a copy of `template/content/default.json`), the PDF (named `<Your-Name>-<Job-Title>-<Company>.pdf`, set by `pdf_name` in the offer (`data/resume.db`)), `cover.json` (cover letter text) with its two PDFs (`…-Cover-Letter.pdf` and `…-Resume-and-Cover-Letter.pdf`), and the generated `review.json`/`review.md`.
 - `src/` — all the tools.
 
@@ -89,7 +90,7 @@ Every job build also produces the cover letter, so a job folder always holds thr
 | `<stem>-Cover-Letter.pdf` | The cover letter, one page |
 | `<stem>-Resume-and-Cover-Letter.pdf` | The resume pages, then the cover letter page |
 
-The letter text lives in `jobs/<slug>/content/cover.json`. The first build creates it from `template/content/default-cover.json`, filling in the company and job title from the offer (`data/resume.db`); an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
+The letter text lives in `jobs/<slug>/content/cover.json`. The first build creates it from the default letter in `data/resume.db` (paragraphs marked `default_order`, greeting and closing in `profile`), filling in the company and job title from the offer; an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
 
 ```bash
 .venv/bin/python src/build_cover.py jobs/company-role-v1
@@ -99,13 +100,21 @@ If the text runs past the page, the build warns and saves both cover PDFs with a
 
 ## Edit content
 
-The master resume content is `template/content/default.json`; each job folder's `content.json` starts as a copy of it. Keep the template unchanged. Add, remove, or reorder entries in the `experience`, `education`, `skills`, and `languages` lists. The layout adds pages as needed. Long experiences continue between complete bullet points, with the heading and description kept together. The build stops with a fit error if content cannot fit.
+**The master resume lives in `data/resume.db`.** `template/content/default.json` (English) and `default-fr.json` (French) are generated from it by `src/master.py`; never edit them by hand (the next generation refuses and tells you, rather than losing your change). Each job's `content/content.json` starts as a copy of the generated master, then is tailored per job.
 
-In `contact`, `website` is the displayed text and `website_link` is the clickable URL in the header, footer, and QR code. `email` sets both the displayed address and its email link. Change these fields in each job's `content.json`. To give the QR a separate destination, add `qr_url` to that file.
+```bash
+.venv/bin/python src/master.py set summary "<English>" "<French>"        # or: role
+.venv/bin/python src/master.py set skill <row> <position> "<label>" ["<French label>"]
+.venv/bin/python src/master.py set line <activity id> "<English>" ["<French>"]   # the master line of an activity
+.venv/bin/python src/master.py set contact <field> "<value>"             # email, phone, website, website_link, ...
+.venv/bin/python src/master.py check                                     # do the files match the db?
+```
+
+In `contact`, `website` is the displayed text and `website_link` is the clickable URL in the header, footer, and QR code.
 
 ## Check spelling
 
-Run this before building. `src/check_spelling.py` reads a content JSON and lists every word the English dictionary does not know, with suggested fixes and the field to edit (for example `experience[2].bullets[1]`). Each result is a **warning**, not an error, because product names and tech terms are often correct even when the dictionary does not know them. Company names, skills, institutions and locations are trusted automatically. Add other words you have confirmed to `src/spelling-allow.txt`.
+Run this before building. `src/check_spelling.py` reads a content JSON and lists every word the English dictionary does not know, with suggested fixes and the field to edit (for example `experience[2].bullets[1]`). Each result is a **warning**, not an error, because product names and tech terms are often correct even when the dictionary does not know them. Company names, skills, institutions and locations are trusted automatically. Add other words you have confirmed to `spelling-allow.txt`.
 
 ```bash
 .venv/bin/pip install -r requirements-review.txt
@@ -197,7 +206,7 @@ The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/S
 | `template/content/default.json` | Master resume content |
 | `template/layout/resume.html`, `template/layout/fonts/`, `template/layout/assets/` | Page layout, print styles, bundled Poppins fonts (OFL license) and SVG logos |
 | `template/build/resume.pdf` | Baseline build |
-| `template/content/default-cover.json`, `template/layout/cover-letter.html` | Default cover letter text and its layout |
+| `template/layout/cover-letter.html` | Cover letter layout (the default text is in `data/resume.db`) |
 | `jobs/<slug>/` | One folder per application: posting, job requirements, tailored content, built PDF, and report |
 | `src/build_resume.py` | Validates content, creates the QR, checks page fit, and exports the PDF; for a job folder, then runs `build_cover.py` |
 | `src/build_cover.py` | Builds a job's cover letter PDF and the combined resume + cover letter PDF from `cover.json` |
@@ -205,7 +214,7 @@ The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/S
 | `src/check_template.py` | Checks whether `template/` is ready (no spelling/style/PDF findings) to start a new application |
 | `src/check_spelling.py`, `check_style.py`, `check_pdf.py`, `check_job.py`, `match_job.py`, `review_ats.py` | ATS reviewer tools |
 | `data/resume.db`, `data/resume.sql` | Knowledge base (experiences, approved lines, skills and keywords, offers); the `.sql` file is the committed copy, `src/db.py restore` rebuilds the db |
-| `src/spelling-allow.txt` | Confirmed spellings |
+| `spelling-allow.txt` | Confirmed spellings |
 | `src/vendor/` | Bundled QR generator and its license |
 | `tests/` | Tests for the reviewer (`.venv/bin/python -m unittest discover -s tests -t .`) |
 | `docs/` | Reviewer plan, job file guide, and the [requirement extraction benchmark](docs/requirement-extraction-benchmark.md) (why extraction stays as it is) |

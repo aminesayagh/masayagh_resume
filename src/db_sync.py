@@ -63,28 +63,6 @@ def add_line(con, experience_id: int, kind: str, text: str, offer_id: int | None
         link_skills(con, "description_skills", "description_id", cur.lastrowid, text)
 
 
-def sync_template(con=None) -> None:
-    """New lines in template/content/default.json (and their French in default-fr.json) join the library."""
-    own = con is None
-    con = con or db.connect()
-    en, fr = load(ROOT / "template/content/default.json"), load(ROOT / "template/content/default-fr.json")
-    ids = {name: x for x, name in con.execute("SELECT e.id, c.name FROM experiences e JOIN companies c ON c.id = e.company_id")}
-    for e, ef in zip(en.get("experience", []), fr.get("experience", []) or [{}] * len(en.get("experience", []))):
-        if (x := ids.get(company_name(e))) is None:
-            print(f"db_sync: '{company_name(e)}' is not in the library yet; add the experience first.")
-            continue
-        add_line(con, x, "description", e.get("description", ""), None, ef.get("description"))
-        for i, b in enumerate(e.get("bullets", [])):
-            add_line(con, x, "bullet", b, None, (ef.get("bullets") or [None] * (i + 1))[i] if ef else None)
-    for key in ("summary", "role"):
-        con.execute("UPDATE profile SET text_en = ?, text_fr = ? WHERE key = ?", (en[key], fr.get(key), key))
-    if own:
-        con.commit()
-        db.dump(con)
-
-
-
-
 def sync_job(folder: Path, con=None) -> int | None:
     own = con is None
     con = con or db.connect()
@@ -113,7 +91,8 @@ def sync_job(folder: Path, con=None) -> int | None:
     for (orphan,) in con.execute("SELECT substr(text_en, 1, 60) FROM descriptions WHERE activity_id IS NULL"):
         print(f"db_sync: line without an activity (attach it when reviewing the library): {orphan}…")
 
-    default = load(ROOT / "template/content/default-cover.json").get("paragraphs", [])
+    default = [t for (t,) in con.execute("SELECT text_en FROM cover_paragraphs WHERE default_order IS NOT NULL "
+                                        "ORDER BY default_order")]  # the default letter, with its placeholders
     filled = [t.replace("{company}", name.strip()).replace("{job_title}", title or name) for t in default]
     letter, letter_fr = load(paths.cover(folder)), load(paths.cover(folder, "fr"))
     paragraphs = letter.get("paragraphs", [])

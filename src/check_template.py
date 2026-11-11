@@ -29,6 +29,8 @@ def check() -> list[dict]:
     """Spelling/style/PDF-readability findings against the template baseline, if
     any. Reuses review_ats.review() with an empty-requirements job so it only
     runs the content checks, not job matching. "info" findings don't block."""
+    import master  # the master resume lives in data/resume.db; default.json / default-fr.json are generated
+    master.write()
     content_path = TEMPLATE_DIR / "content" / "default.json"
     pdf_path = build_resume.build(content_path, TEMPLATE_DIR / "build" / "resume.pdf")
     content = json.loads(content_path.read_text(encoding="utf-8"))
@@ -66,8 +68,6 @@ def stale_jobs() -> list[Path]:
 def main() -> None:
     findings = check()
     if not findings:
-        import db_sync  # new template lines join the knowledge base
-        db_sync.sync_template()
         print("template/ is ready: no spelling, style or PDF-readability findings.")
         for folder in stale_jobs():
             print(f"Untailored job behind the template (safe to refresh): {folder.relative_to(ROOT)}")
