@@ -5,7 +5,7 @@ Usage: python3 src/check_job.py jobs/<slug>/job.json [--draft]
 
 A job file lists what a posting asks for. Every requirement must quote the posting
 verbatim, so each later finding traces back to the employer's own words, and a human
-must mark it reviewed. See docs/job-file-guide.md.
+must mark it reviewed.  Field rules: .claude/skills/ats-review/SKILL.md.
 Exit code: 0 = valid, 1 = errors. --draft reports unreviewed requirements as warnings.
 """
 

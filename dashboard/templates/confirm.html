@@ -1,5 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="card"><h2>{{ label }}?</h2><p>{{ job.company }} — {{ job.title }} <span class="muted">({{ job.slug }})</span></p><p>{{ what }}</p>
-<form method="post" action="/job/{{ job.slug }}/run/{{ action }}"><button>Yes, {{ label|lower }}</button> <a href="/job/{{ job.slug }}">Cancel</a></form></div>
-{% endblock %}

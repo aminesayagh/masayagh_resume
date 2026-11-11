@@ -25,7 +25,7 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 | `template/layout/cover-letter.html` | Cover letter layout; the default letter text is in `data/resume.db` (`cover_paragraphs.default_order`, `profile` cover_greeting/cover_closing) | The user, or you with approval |
 | `jobs/<slug>/content/cover.json` | This job's cover letter text, created from the default letter in `data/resume.db` on the first build | You, only when the user asks (`.claude/skills/draft-cover-letter/SKILL.md`) |
 | `jobs/<slug>/<stem>-Cover-Letter.pdf`, `<stem>-Resume-and-Cover-Letter.pdf` | Cover letter alone, and resume + cover letter in one file; rebuilt with every resume build | `src/build_cover.py` (run it alone after editing `cover.json`) |
-| `jobs/<slug>/review/review.json`, `review.md`, `interview.json`, `dashboard.html` | Generated report, interview prep sheet and one-page overview | The tools only, never edited by hand |
+| `jobs/<slug>/review/review.json`, `review.md`, `interview.json` | Generated report and interview prep sheet | The tools only, never edited by hand |
 | `spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it, via `check_spelling.py --add` |
 | `data/resume.db` (+ `data/resume.sql` in git) | Knowledge base: experiences and every approved line, cover paragraphs, skills with keywords (true synonyms) and years, offers, requirements, results of sent offers | Updated by the scripts (`src/db_sync.py` after every job build); add synonyms with `src/skills_inventory.py keyword`; no loose matches |
 
@@ -67,11 +67,11 @@ Each tool defaults to its input's own folder: run against `template/content/defa
 
 **Not ready = `_` prefix:** a job PDF over 3 pages or with a broken skills layout is saved as `_<pdf_name>` and the ready-named file is removed. `publish_resume.py` refuses it and the dashboard labels it "NOT READY, do not send". Never rename it by hand; fix the content and rebuild.
 
-**Every job PDF build refreshes the review:** `src/build_resume.py jobs/<slug>/content/content.json` re-runs the review (no network), prints what changed since the previous report with a verdict, and saves `review.md`/`review.json`, `interview.json` and `dashboard.html`. The dashboard is therefore never older than the PDF. (Skipped for the template, for `-o` builds and before requirements exist.)
+**Every job PDF build refreshes the review:** `src/build_resume.py jobs/<slug>/content/content.json` re-runs the review (no network), prints what changed since the previous report with a verdict, and saves `review.md`/`review.json` and `interview.json`, which the dashboard reads, so it is never older than the PDF. (Skipped for the template, for `-o` builds and before requirements exist.)
 
 **While tailoring,** use `--preview` after each rebuild instead of ad-hoc scripts: it lists every term's status and the PDF line it matched, then compares with the saved `review.json` and ends with a verdict (`no regression`, or `REGRESSION:` with what got worse). Report that verdict to the user after each change; rerun without `--preview` to save the new baseline once they accept it. `build_resume.py` warns when the PDF goes over 3 pages and prints the start of the last page, so you know what spilled. Add confirmed spellings with `src/check_spelling.py --add WORD`, never by editing `spelling-allow.txt` by hand. After a template change, `src/check_template.py` lists job folders that are still untouched template copies (the offer's `template_sha`); those are safe to refresh with `cp template/content/default.json`, rebuild and publish.
 
-**Dashboard:** run the local app (`dashboard/README.md`): `.venv/bin/python -m uvicorn dashboard.app:app --host 127.0.0.1`, then http://127.0.0.1:8000. Job pages are no longer written into `jobs/`; `dashboard/` is separate and only reads them. To change a sent job: `src/new_job.py --from jobs/<slug>` creates the next `-vN` folder with its tailoring (published under `/resume/<company>/vN/`).
+**Dashboard:** run the local app with `python3 start.py` (builds the Vue front in `dashboard/web/` and serves it with FastAPI), then http://127.0.0.1:8000. It only reads the db and job folders; its open points are in `dashboard/notice.md`. Job pages are no longer written into `jobs/`; `dashboard/` is separate and only reads them. To change a sent job: `src/new_job.py --from jobs/<slug>` creates the next `-vN` folder with its tailoring (published under `/resume/<company>/vN/`).
 
 **Publishing (step 7):** run it after every rebuild of a job's PDF. Details and rules: [`../publish-resume/SKILL.md`](../publish-resume/SKILL.md).
 
@@ -81,7 +81,7 @@ Each tool defaults to its input's own folder: run against `template/content/defa
 
 `src/new_job.py` creates the folder, the offer in `data/resume.db` (posting, empty `requirements`) and a partial report.
 
-**Draft with the `job-requirements` agent** (`.claude/agents/job-requirements.md`, runs on Haiku to save cost). It uses `src/draft_job.py`: `lines` numbers the posting, `apply` builds requirements from line numbers (the script copies quotes, so they're always verbatim), `missed` lists technology-looking words no requirement covers, which the agent must cover or record in `"skipped_terms"` with a reason. Check its result against the rules below before showing the user. Read `docs/job-file-guide.md` for every requirement field. In short:
+**Draft with the `job-requirements` agent** (`.claude/agents/job-requirements.md`, runs on Haiku to save cost). It uses `src/draft_job.py`: `lines` numbers the posting, `apply` builds requirements from line numbers (the script copies quotes, so they're always verbatim), `missed` lists technology-looking words no requirement covers, which the agent must cover or record in `"skipped_terms"` with a reason. Check its result against the rules below before showing the user. In short:
 
 1. The posting is stored with the offer; read it with `src/draft_job.py lines jobs/<slug>`.
 2. Add one requirement per skill or condition. When one line lists several skills, make one requirement per skill; they share the same `quote`.
@@ -160,3 +160,10 @@ When the user asks you to update a job's `content.json` from the review results,
 - Matching is literal plus the skill keywords in `data/resume.db`. There is no semantic or AI matching, so related wording is missed unless it's an alias.
 - LinkedIn often refuses automated link checks, which is reported as "open it in a browser", not as broken.
 - The section split depends on the template headings. If the headings change, `check_pdf.template_headings` picks them up from `template/layout/resume.html`.
+
+## Requirement extraction: decision record (2026-11-11)
+
+Kept: `src/draft_job.py` + the Haiku `job-requirements` agent; skills linked by exact keyword. Benchmark on 6 jobs (191 lines, 226 terms): GLiNER2.5 83% of terms (weakest at telling requirements from company text), Qwen3.5 9B 86% but ~95 s per posting; `draft_job.py missed` catches what drafting misses. Fuzzy skill linking (multilingual-e5 + LLM check) ranked the right skill first 84% of the time but made confident mistakes (`Coaching` → `Harness Eng`) and adds dependencies.
+- **Known gaps:** only 86 of 210 requirement terms link to a skill (exact keyword needed: `ES6` vs `ES6+`, `component library` vs `component libraries`; fix with `skills_inventory.py keyword`); skill types `soft`/`language` unused; no AI skill finer than "artificial intelligence".
+- **Revisit when:** unlinked terms keep piling up (then build the e5 + LLM-verify linker, every link confirmed by the user), or 30–50 jobs have reviewed requirements (then train a classifier as a second opinion on line sections and priorities).
+

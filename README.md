@@ -37,8 +37,8 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 Version 1 workflow after the folder exists:
 
 1. **Draft requirements** with the `job-requirements` agent (`.claude/agents/job-requirements.md`, Haiku). It uses `src/draft_job.py` (`lines`, `apply`, `missed`): quotes are copied from line numbers, terms must be short, the location and degree lines must be covered, and every technology-looking word is covered or skipped with a reason.
-2. **Review** with `src/review_ats.py --job jobs/<slug>`: report, `interview.json` (prep topics) and `dashboard.html` (one page per job), labelled draft until requirements are reviewed. `--preview` prints the match and compares with the last saved report (verdict: no regression / REGRESSION).
-3. **Tailor** `content.json` within the rules in `.claude/skills/ats-review/SKILL.md` (3 pages, 6 skill rows of 4, experience edits proposed and confirmed first), rebuild, publish. It refuses to run if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet). See [`docs/job-file-guide.md`](docs/job-file-guide.md) for drafting the offer's requirements next.
+2. **Review** with `src/review_ats.py --job jobs/<slug>`: report, and `interview.json` (prep topics), labelled draft until requirements are reviewed. `--preview` prints the match and compares with the last saved report (verdict: no regression / REGRESSION).
+3. **Tailor** `content.json` within the rules in `.claude/skills/ats-review/SKILL.md` (3 pages, 6 skill rows of 4, experience edits proposed and confirmed first), rebuild, publish. It refuses to run if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet).
 
 To check whether the baseline is ready without starting a new application:
 
@@ -153,11 +153,11 @@ The JSON report is saved to `pdf-check.json` next to the PDF. The command exits 
 
 ## Describe a job posting
 
-A job file (`jobs/<slug>`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `src/check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. See the [job file guide](docs/job-file-guide.md) and the [fictional example](jobs/fictional-full-stack-v1/the offer).
+A job file (`jobs/<slug>`) lists what a posting asks for. Each requirement has the exact quote from the posting, a `must_have` or `preferred` priority, and the search terms in the posting's own wording. You mark each requirement as reviewed after checking it yourself. `src/check_job.py` validates the file: every quote must appear word for word in the posting, terms must come from the quote, nice-to-have lines cannot be marked `must_have`, and unreviewed requirements fail. The field rules are in `.claude/skills/ats-review/SKILL.md`; `tests/fixtures/fictional-job.json` is a complete example.
 
 ```bash
-.venv/bin/python src/check_job.py jobs/fictional-full-stack-v1/the offer
-.venv/bin/python src/check_job.py jobs/company-role-v1/the offer --draft   # while still reviewing
+.venv/bin/python src/check_job.py tests/fixtures/fictional-job.json      # the example offer
+.venv/bin/python src/check_job.py jobs/company-role-v1 --draft   # while still reviewing
 ```
 
 ## Review a resume for a job (one command)
@@ -165,8 +165,7 @@ A job file (`jobs/<slug>`) lists what a posting asks for. Each requirement has t
 `src/review_ats.py` runs all the checks for one posting and writes a readable report:
 
 ```bash
-.venv/bin/python src/review_ats.py --job jobs/fictional-full-stack-v1/the offer
-.venv/bin/python src/review_ats.py --job jobs/company-role-v1/the offer
+.venv/bin/python src/review_ats.py --job jobs/company-role-v1
 ```
 
 The report, `review.md` next to the job file (with `review.json` beside it), contains these sections in order:
@@ -177,7 +176,7 @@ The report, `review.md` next to the job file (with `review.json` beside it), con
 4. **Must-have requirements, then preferred requirements:** gaps first, each with the posting quote, your PDF quote and page, the reason, and a rule-based suggestion such as "the posting says X; your PDF says Y".
 5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: (met + 0.5 × partial) ÷ requirements, per priority. Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
 
-Without `--cv`/`--content`, the command uses `resume.pdf` and `content.json` next to the job file. To correct a result, add an override to the job file (see the [job file guide](docs/job-file-guide.md#overriding-a-result)).
+Without `--cv`/`--content`, the command uses the job's `pdf/` resume and `content/content.json`. To correct a result, add an override to the offer's requirement (`override_status`, `override_reason`, `override_quote` in `data/resume.db`); the report keeps the automated finding next to it.
 
 ## Match your resume to a job
 
@@ -189,8 +188,7 @@ Without `--cv`/`--content`, the command uses `resume.pdf` and `content.json` nex
 Every `met` or `partial` result quotes the exact PDF line and its page. "At least N years" requirements are computed from your job dates. Matching is deterministic: no model and no network. Alternative spellings that count as the same term (for example Postgres for PostgreSQL) are skill keywords in `data/resume.db`; add one with `src/skills_inventory.py keyword "PostgreSQL" "Postgres"`, true synonyms only.
 
 ```bash
-.venv/bin/python src/match_job.py jobs/fictional-full-stack-v1/the offer
-.venv/bin/python src/match_job.py jobs/company-role-v1/the offer
+.venv/bin/python src/match_job.py jobs/company-role-v1
 ```
 
 The report is saved to `match.json` next to the job file.
@@ -217,6 +215,5 @@ The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/S
 | `spelling-allow.txt` | Confirmed spellings |
 | `src/vendor/` | Bundled QR generator and its license |
 | `tests/` | Tests for the reviewer (`.venv/bin/python -m unittest discover -s tests -t .`) |
-| `docs/` | Reviewer plan, job file guide, and the [requirement extraction benchmark](docs/requirement-extraction-benchmark.md) (why extraction stays as it is) |
 | `.claude/skills/ats-review/`, `.claude/skills/draft-cover-letter/`, `.claude/skills/publish-resume/`, `AGENTS.md` | Instructions for AI assistants |
 
