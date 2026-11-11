@@ -10,13 +10,14 @@ The backend for these is still to be decided. Each one is visible in the UI but 
 | Action | Where |
 |---|---|
 | Mark as sent | Jobs list "…" menu, job page main button |
-| New version | Jobs list "…" menu, job page "…" menu |
-| Reopen | Jobs list "…" menu, job page "…" menu |
 | Propose swap | Job page, "Gaps to work on" |
 | Interview notes (save) | Interview prep tab, every topic card |
 | Save start / end dates | Requirements page, term drawer (hard skills) |
 | Change a term's type | Requirements page, term drawer |
 | "+ add" keyword | Requirements page, term drawer |
+
+**Wired:** New version (jobs list and job page "…" menus) runs `src/new_job.py --from jobs/<slug>` after a
+confirmation, then opens the new job. One run at a time (server lock). **Dropped:** Reopen (not needed).
 
 ## Data the wireframes ask for but the database does not hold
 

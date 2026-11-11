@@ -1,6 +1,10 @@
 <script setup>
 // Jobs list ( / ): summary cards, search + chips + filters, Table | Board. Read only: actions are disabled.
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { newVersion } from '../newVersion.js'
+
+const router = useRouter()
 
 const jobs = ref([])
 const cards = ref({})
@@ -62,7 +66,6 @@ const todoLine = (j) => {
   if (infoCount(j)) parts.push(`${infoCount(j)} info`)
   return parts.join(', ')
 }
-const DISABLED = ['Mark as sent', 'New version', 'Reopen']
 </script>
 
 <template>
@@ -151,12 +154,13 @@ const DISABLED = ['Mark as sent', 'New version', 'Reopen']
       </template>
     </el-table-column>
     <el-table-column width="64" align="center">
-      <template #default>
+      <template #default="{ row }">
         <el-dropdown trigger="click">
           <el-button text size="small" aria-label="Actions">⋯</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="a in DISABLED" :key="a" disabled>{{ a }} (not wired yet)</el-dropdown-item>
+              <el-dropdown-item disabled>Mark as sent (not wired yet)</el-dropdown-item>
+              <el-dropdown-item @click="newVersion(row, router)">New version</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>

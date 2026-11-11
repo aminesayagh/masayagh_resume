@@ -193,6 +193,18 @@ Every `met` or `partial` result quotes the exact PDF line and its page. "At leas
 
 The report is saved to `match.json` next to the job file.
 
+## Job dashboard
+
+A local web app to browse the job folders: every application with its status and coverage, one page per job (requirements, gaps, PDFs, posting, interview prep), and every posting term across jobs.
+
+```bash
+python3 start.py   # then open http://127.0.0.1:8000
+```
+
+[Watch a 30-second tour](dashboard/dashboard-tour.mp4)
+
+It reads `data/resume.db` (read-only) and the job folders. Its only write action is **New version**, which runs `src/new_job.py --from`. Open points are listed in [`dashboard/notice.md`](dashboard/notice.md).
+
 ## For AI assistants
 
 The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/SKILL.md`](.claude/skills/ats-review/SKILL.md). Claude Code loads that file automatically as a skill. Other tools reach it through [`AGENTS.md`](AGENTS.md).
@@ -214,6 +226,7 @@ The ATS reviewer's usage rules for AI tools are in [`.claude/skills/ats-review/S
 | `data/resume.db`, `data/resume.sql` | Knowledge base (experiences, approved lines, skills and keywords, offers); the `.sql` file is the committed copy, `src/db.py restore` rebuilds the db |
 | `spelling-allow.txt` | Confirmed spellings |
 | `src/vendor/` | Bundled QR generator and its license |
+| `dashboard/`, `start.py` | Local job dashboard: FastAPI back (`dashboard/app.py`), Vue + Element Plus front (`dashboard/web/`) |
 | `tests/` | Tests for the reviewer (`.venv/bin/python -m unittest discover -s tests -t .`) |
 | `.claude/skills/ats-review/`, `.claude/skills/draft-cover-letter/`, `.claude/skills/publish-resume/`, `AGENTS.md` | Instructions for AI assistants |
 

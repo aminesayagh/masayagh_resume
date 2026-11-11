@@ -4,6 +4,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import InterviewPrep from './InterviewPrep.vue'
+import { newVersion } from '../newVersion.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -146,8 +147,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
           <el-button aria-label="More actions">⋯</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item disabled>New version (not wired yet)</el-dropdown-item>
-              <el-dropdown-item disabled>Reopen (not wired yet)</el-dropdown-item>
+              <el-dropdown-item @click="newVersion(job, router)">New version</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>

@@ -49,6 +49,21 @@ class BuildNotesTest(unittest.TestCase):
         self.assertIn("Posting is in French: French version needed", texts)
         self.assertTrue(all(n["ask"] for n in notes))  # unknown codes still say what to ask Claude
 
+    def test_build_json_says_why_not_ready(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "acme-dev-v1"
+            (folder / "pdf").mkdir(parents=True)
+            (folder / "pdf" / "_resume.pdf").write_bytes(b"")  # not ready, no build.json yet: the fallback line
+            texts = lambda: [n["text"] for n in app.build_notes(folder, {"requirements": [{}]}, {})]
+            self.assertEqual(texts(), ["Resume marked not ready ('_' file)"])
+            (folder / "review").mkdir()
+            (folder / "review" / "build.json").write_text(json.dumps({
+                "resume": {"built": "2026-11-11T20:15", "ready": False, "warnings": ["skills have 4 rows"]},
+                "cover": {"built": "2026-11-11T20:15", "ready": True, "warnings": ["long paragraph"]}}))
+            notes = app.build_notes(folder, {"requirements": [{}]}, {})
+        self.assertEqual([(n["severity"], n["text"]) for n in notes],
+                         [("warning", "Resume not ready: skills have 4 rows"), ("info", "Cover letter: long paragraph")])
+
     def test_no_requirements(self):
         notes = app.build_notes(Path("/nonexistent"), {}, {})
         self.assertEqual(notes, [{"severity": "warning", "text": "No requirements yet", "ask": "ask Claude to draft them"}])
@@ -116,6 +131,27 @@ class ApiTest(unittest.TestCase):
                 self.assertIsNone(t["experience"])  # soft, language, location: no dates, no level
             self.assertEqual(t["synonym"], any(a["wording"] == "synonym" for a in t["asked"]))
         self.assertLessEqual(d["hard_with_start"], d["hard_entries"])
+
+    def test_new_version_runs_the_script(self):
+        """The script is mocked: the test never creates a job. It checks the command, the parsing and the guards."""
+        from unittest import mock
+        slug = app.offers.all_folders(app.ro())[0].name
+        done = mock.Mock(returncode=0, stdout=f"Created jobs/{slug}-copy from {slug} (not sent; ...)\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=done) as run:
+            body = self.client.post(f"/api/jobs/{slug}/new-version").json()
+        self.assertEqual(run.call_args.args[0][1:], ["src/new_job.py", "--from", f"jobs/{slug}"])
+        self.assertEqual((body["ok"], body["slug"]), (True, f"{slug}-copy"))
+
+        failed = mock.Mock(returncode=1, stdout="", stderr="Traceback ...")
+        with mock.patch.object(app.subprocess, "run", return_value=failed):
+            body = self.client.post(f"/api/jobs/{slug}/new-version").json()
+        self.assertEqual((body["ok"], body["slug"], body["output"]), (False, None, "Traceback ..."))
+
+        with mock.patch.object(app.subprocess, "run") as run:
+            self.assertEqual(self.client.post("/api/jobs/no-such-job/new-version").status_code, 404)
+            with app.WRITE_LOCK:  # one already running
+                self.assertEqual(self.client.post(f"/api/jobs/{slug}/new-version").status_code, 409)
+            run.assert_not_called()
 
     def test_skills_redirects_to_requirements(self):
         r = self.client.get("/skills", follow_redirects=False)

@@ -1,14 +1,18 @@
 """Local job dashboard: a JSON API under /api plus the built Vue app (dashboard/web/dist) on the same port.
 
 Run from the repo root:  python3 start.py   (or .venv/bin/python -m uvicorn dashboard.app:app --port 8000 after a build)
-Read only: data/resume.db is opened with mode=ro, jobs/ is only read, and no pipeline script runs from here.
-Every write action in the UI is shown disabled ("not wired yet"); fixes happen in Claude.
+The app itself only reads: data/resume.db is opened with mode=ro and jobs/ is only read.
+The one write action is "New version", which runs src/new_job.py --from (so the script's rules hold: the source folder,
+sent or not, is never changed). Every other write action in the UI is shown disabled ("not wired yet"); fixes happen
+in Claude.
 """
 
 import json
 import re
 import sqlite3
+import subprocess
 import sys
+import threading
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -24,8 +28,11 @@ import paths  # noqa: E402  (only plain path joins: resume_pdf & co. call stem()
 import skills_inventory  # noqa: E402  (pure helpers only: job_skills/years/label; its load() opens a writable db)
 
 DB = ROOT / "data" / "resume.db"
+PYTHON = ROOT / ".venv" / "bin" / "python"
+WRITE_LOCK = threading.Lock()  # one script at a time: two new versions at once would pick the same -vN
 DIST = Path(__file__).parent / "web" / "dist"
 MAX_PAGES = 3
+BUILD_PARTS = {"resume": "Resume", "cover": "Cover letter", "resume-fr": "French resume", "cover-fr": "French cover letter"}
 
 # What to ask Claude for each finding code of the last build (review.json). Unknown codes fall back to a generic ask.
 ASK = {
@@ -69,9 +76,19 @@ def build_notes(folder: Path, job: dict, review: dict) -> list[dict]:
     elif review.get("unreviewed"):
         notes.append({"severity": "info", "text": f"{review['unreviewed']} requirements not reviewed",
                       "ask": "ask Claude to review them"})
-    if pdf(folder, job).name.startswith("_"):  # only when the '_' twin is what exists
+    # build.json: each built part's warnings, saying WHY a part is not ready. Jobs built before it existed (and sent
+    # jobs, never rebuilt) have no file: fall back to the '_' file alone.
+    build = load_json(paths.build_json(folder))
+    if pdf(folder, job).name.startswith("_") and not (build.get("resume") or {}).get("warnings"):
         notes.append({"severity": "warning", "text": "Resume marked not ready ('_' file)",
                       "ask": "ask Claude to finish and rebuild it"})
+    for part, label in BUILD_PARTS.items():
+        built = build.get(part) or {}
+        ready = built.get("ready", True)
+        for warning in built.get("warnings", []):
+            notes.append({"severity": "info" if ready else "warning",
+                          "text": f"{label}{'' if ready else ' not ready'}: {warning}",
+                          "ask": "ask Claude to fix it" + ("" if ready else ", then rebuild")})
     pages = len((review.get("pdf_check") or {}).get("pages", []))
     if pages > MAX_PAGES:
         notes.append({"severity": "warning", "text": f"Resume is {pages} pages (target {MAX_PAGES})",
@@ -285,6 +302,28 @@ def requirement_terms() -> dict:
 @app.get("/api/requirements")
 def api_requirements():
     return requirement_terms()
+
+
+def new_version(slug: str) -> dict:
+    """Copy the job into its next -vN folder with src/new_job.py --from (keeps its tailoring, drops the sent date)."""
+    with ro() as con:
+        if "/" in slug or slug.startswith(".") or not offers.exists(paths.JOBS / slug, con):
+            raise HTTPException(404, "No such job")
+    if not WRITE_LOCK.acquire(blocking=False):
+        raise HTTPException(409, "Another new version is being created; wait for it to finish")
+    try:
+        result = subprocess.run([str(PYTHON), "src/new_job.py", "--from", f"jobs/{slug}"], cwd=ROOT,
+                                capture_output=True, text=True, timeout=900)
+    finally:
+        WRITE_LOCK.release()
+    created = re.search(r"^Created jobs/(\S+) from ", result.stdout, re.M)
+    return {"ok": result.returncode == 0 and bool(created), "slug": created[1] if created else None,
+            "output": (result.stdout + result.stderr).strip()}
+
+
+@app.post("/api/jobs/{slug}/new-version")
+def api_new_version(slug: str):
+    return new_version(slug)
 
 
 @app.get("/files/{slug}/{name:path}")
