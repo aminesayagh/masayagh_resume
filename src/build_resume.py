@@ -6,6 +6,7 @@ Requires Jinja2 and Google Chrome in WSL.
 """
 
 import argparse
+import datetime
 import json
 import re
 import shutil
@@ -115,6 +116,16 @@ def frozen(folder: Path) -> str | None:
             f"src/new_job.py (it creates the next -vN folder).") if sent else None
 
 
+def record_build(folder: Path, part: str, warnings: list[str], ready: bool) -> None:
+    """Keep a build's warnings in the job's review/build.json, one entry per part, so the dashboard can say why a
+    PDF is not ready. Only that part's entry is replaced."""
+    path = paths.build_json(folder)
+    data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    data[part] = {"built": datetime.datetime.now().isoformat(timespec="minutes"), "ready": ready, "warnings": warnings}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def mark_readiness(data_path: Path, pdf_file: Path, output_path: Path | None, ready: bool) -> Path:
     """A job PDF that is not ready to send (over 3 pages, broken skills layout) is renamed with a leading '_'
     and the ready-named file is removed, so a not-ready resume can't be attached or published by mistake."""
@@ -195,14 +206,19 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
         shutil.move(str(rendered_pdf), pdf_file)
         page_count = match.group(1)
     print(f"Created {pdf_file} ({page_count} pages)")
-    problem = skills_problem(data["skills"])
-    if problem:
-        print(f"WARNING: {problem}.")
+    warnings = []
+    if problem := skills_problem(data["skills"]):
+        warnings.append(f"{problem}.")
     if int(page_count) > MAX_PAGES:
         from pypdf import PdfReader
         spill = " ".join(PdfReader(pdf_file).pages[-1].extract_text().split())[:160]
-        print(f"WARNING: over {MAX_PAGES} pages. Last page starts with: {spill}")
-    pdf_file = mark_readiness(data_path, pdf_file, output_path, int(page_count) <= MAX_PAGES and not problem)
+        warnings.append(f"{page_count} pages, over {MAX_PAGES}. Last page starts with: {spill}")
+    for w in warnings:
+        print(f"WARNING: {w}")
+    ready = int(page_count) <= MAX_PAGES and not problem
+    pdf_file = mark_readiness(data_path, pdf_file, output_path, ready)
+    if output_path is None and (folder := paths.job_folder(data_path)):
+        record_build(folder, "resume", warnings, ready)
     refresh_job_report(data_path, pdf_file, output_path)
     if output_path is None and (folder := paths.job_folder(data_path)):
         import build_cover  # late: imports this module

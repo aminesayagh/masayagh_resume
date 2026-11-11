@@ -71,6 +71,19 @@ class PublishModesTest(unittest.TestCase):
             self.publish.publish(self.job / "job.json")
 
 
+class RecordBuildTest(unittest.TestCase):
+    def test_each_part_keeps_its_own_warnings(self):
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            build_resume.record_build(folder, "resume", ["skills have 4 rows."], False)
+            build_resume.record_build(folder, "cover", [], True)
+            build_resume.record_build(folder, "resume", [], True)  # a rebuild replaces only its own entry
+            data = json.loads((folder / "review" / "build.json").read_text(encoding="utf-8"))
+            self.assertEqual((data["resume"]["warnings"], data["resume"]["ready"]), ([], True))
+            self.assertTrue(data["cover"]["ready"])
+
+
 class AddAllowTest(unittest.TestCase):
     def test_appends_on_new_line_without_duplicates(self):
         with tempfile.TemporaryDirectory() as tmp:

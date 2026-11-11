@@ -145,8 +145,7 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
     cover_pdf = paths.cover_pdf(folder, lang)
     cover_pdf.parent.mkdir(parents=True, exist_ok=True)
     cover_ready = render_pdf(data, letter, cover_pdf)
-    if not cover_ready:
-        print("WARNING: the cover letter text runs past the page and is cut off; shorten cover.json's paragraphs.")
+    warnings = [] if cover_ready else ["the cover letter text runs past the page and is cut off; shorten cover.json's paragraphs."]
     final_cover = settle(cover_pdf, cover_ready)
 
     resume_ready = resume.exists()
@@ -162,11 +161,14 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
     print(f"Created {final_cover.name} and {combined.name}")
     for i, paragraph in enumerate(letter["paragraphs"], 1):  # same repetition rules as the resume
         if twice := check_style.repeats(paragraph):
-            print(f"WARNING: cover letter paragraph {i} repeats {', '.join(repr(w) for w in twice)}; vary the wording.")
+            warnings.append(f"cover letter paragraph {i} repeats {', '.join(repr(w) for w in twice)}; vary the wording.")
     if words := check_style.overused(letter["paragraphs"], min_lines=3):
-        print("Cover letter: same words in 3+ paragraphs: " + ", ".join(f"'{w}' ({n})" for w, n in words.items()))
+        warnings.append("same words in 3+ paragraphs: " + ", ".join(f"'{w}' ({n})" for w, n in words.items()))
     if not resume_ready:
-        print("NOT READY TO SEND: the combined PDF uses a resume that is not ready (see build_resume warnings).")
+        warnings.append("the combined PDF uses a resume that is not ready (see the resume's warnings).")
+    for w in warnings:
+        print(f"WARNING: {w}")
+    build_resume.record_build(folder, "cover" + ("-fr" if lang == "fr" else ""), warnings, cover_ready)
     return final_cover, combined
 
 

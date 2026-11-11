@@ -117,7 +117,10 @@ def build(folder: Path) -> Path | None:
     fr_content = paths.content(folder, "fr")
     fr_content.write_text(json.dumps(french, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     built = build_resume.build(fr_content, fr_pdf)
-    ready = len(PdfReader(built).pages) <= build_resume.MAX_PAGES and not build_resume.skills_problem(french["skills"])
+    pages, problem = len(PdfReader(built).pages), build_resume.skills_problem(french["skills"])
+    ready = pages <= build_resume.MAX_PAGES and not problem
+    build_resume.record_build(folder, "resume-fr", [w for w in (problem and f"{problem}.",
+                              pages > build_resume.MAX_PAGES and f"{pages} pages, over {build_resume.MAX_PAGES}.") if w], ready)
     paths.not_ready(fr_pdf).unlink(missing_ok=True)
     if not ready:
         hide(built)

@@ -26,6 +26,7 @@ Everything for one application lives together in one `jobs/` subfolder, named `<
 | `jobs/<slug>/content/cover.json` | This job's cover letter text, created from the default letter in `data/resume.db` on the first build | You, only when the user asks (`.claude/skills/draft-cover-letter/SKILL.md`) |
 | `jobs/<slug>/<stem>-Cover-Letter.pdf`, `<stem>-Resume-and-Cover-Letter.pdf` | Cover letter alone, and resume + cover letter in one file; rebuilt with every resume build | `src/build_cover.py` (run it alone after editing `cover.json`) |
 | `jobs/<slug>/review/review.json`, `review.md`, `interview.json` | Generated report and interview prep sheet | The tools only, never edited by hand |
+| `jobs/<slug>/review/build.json` | The last build's warnings per part (`resume`, `cover`, `resume-fr`, `cover-fr`): why a PDF is not ready | The build scripts only |
 | `spelling-allow.txt` | Words confirmed correct | Add a word only after the user confirms it, via `check_spelling.py --add` |
 | `data/resume.db` (+ `data/resume.sql` in git) | Knowledge base: experiences and every approved line, cover paragraphs, skills with keywords (true synonyms) and years, offers, requirements, results of sent offers | Updated by the scripts (`src/db_sync.py` after every job build); add synonyms with `src/skills_inventory.py keyword`; no loose matches |
 

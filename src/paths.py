@@ -54,6 +54,11 @@ def review_json(folder: Path) -> Path:
     return folder / "review" / "review.json"
 
 
+def build_json(folder: Path) -> Path:
+    """The last build's warnings per part (resume, cover, resume-fr, cover-fr); review.json is rewritten by every review."""
+    return folder / "review" / "build.json"
+
+
 def interview(folder: Path) -> Path:
     return folder / "review" / "interview.json"
 
