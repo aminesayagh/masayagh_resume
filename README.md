@@ -1,5 +1,7 @@
 # Tailored Resume
 
+[▶ Watch a 30-second tour of the job dashboard](https://cdn.lingowp.com/dashboard-tour.mp4)
+
 Generate a job-specific A4 resume PDF from a JSON content file, and review it against a job posting. The HTML template handles layout, page breaks, fonts, and a portfolio QR code.
 
 [View the default PDF](template/build/resume.pdf)
@@ -201,7 +203,7 @@ A local web app to browse the job folders: every application with its status and
 python3 start.py   # then open http://127.0.0.1:8000
 ```
 
-[Watch a 30-second tour](dashboard/dashboard-tour.mp4)
+[Watch a 30-second tour](https://cdn.lingowp.com/dashboard-tour.mp4)
 
 It reads `data/resume.db` (read-only) and the job folders. Its only write action is **New version**, which runs `src/new_job.py --from`. Open points are listed in [`dashboard/notice.md`](dashboard/notice.md).
 
