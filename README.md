@@ -1,5 +1,7 @@
 # Tailored Resume
 
+<video src="https://cdn.lingowp.com/dashboard-tour.mp4" controls muted width="100%"></video>
+
 [▶ Watch a 30-second tour of the job dashboard](https://cdn.lingowp.com/dashboard-tour.mp4)
 
 Generate a job-specific A4 resume PDF from a JSON content file, and review it against a job posting. The HTML template handles layout, page breaks, fonts, and a portfolio QR code.
