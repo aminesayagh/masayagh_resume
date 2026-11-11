@@ -6,7 +6,7 @@ Usage: python3 src/compose.py jobs/<slug>       (after the requirements are draf
 For each experience (master order) and each of its active activities, the line containing the most of the
 offer's requirement terms is chosen (a skill's keywords count as the term); on a tie, the most recently added
 line wins. Only experience descriptions and bullets change: summary, title and skills stay as they are.
-Writes jobs/<slug>/content/content.json and content/composition.json (which activity each line slot belongs to, so a
+Writes jobs/<slug>/content/content.json (text only) and records in the db which library lines the offer uses (so a
 line approved later joins the right activity) and prints the choice per activity with its alternatives.
 """
 
@@ -52,8 +52,12 @@ def compose(folder: Path) -> dict:
         raise SystemExit("No requirements yet: draft them first, then compose.")
     content = json.loads(paths.content(folder).read_text(encoding="utf-8"))
     con = db.connect()
+    offer = con.execute("SELECT id FROM offers WHERE folder = ?", (f"jobs/{folder.name}",)).fetchone()[0]
+    if con.execute("SELECT composed_at FROM offers WHERE id = ?", (offer,)).fetchone()[0]:  # first composition only
+        raise SystemExit("This job is already composed; its lines may hold edits approved for it. Change only the "
+                         "lines we agree on (the next build records them in their activity).")
     patterns = term_patterns(job, db.aliases(con))
-    composition, report = [], []
+    report = []
     for entry in content["experience"]:
         name = db_sync.company_name(entry)
         exp = con.execute("SELECT e.id FROM experiences e JOIN companies c ON c.id = e.company_id WHERE c.name = ?",
@@ -61,7 +65,7 @@ def compose(folder: Path) -> dict:
         if exp is None:
             report.append(f"{name}: not in the library, left as it is")
             continue
-        slots = {"company": name, "description": None, "bullets": []}
+        chosen = []  # library line ids, in resume order (description first)
         description, bullets = "", []
         for aid, label in con.execute("SELECT id, label FROM activities WHERE experience_id = ? AND active = 1 "
                                       "ORDER BY sort_order", (exp[0],)).fetchall():
@@ -71,16 +75,21 @@ def compose(folder: Path) -> dict:
                 continue
             best, terms = choose(lines, patterns)
             if best["kind"] == "description":
-                description, slots["description"] = best["text_en"], aid
+                description = best["text_en"]
+                chosen.insert(0, best["id"])
             else:
                 bullets.append(best["text_en"])
-                slots["bullets"].append(aid)
+                chosen.append(best["id"])
             report.append(f"{name} · {label}: line {best['id']} of {len(lines)}"
                           + (f" — terms: {', '.join(terms)}" if terms else " — no offer terms (most recent kept)"))
         entry["description"], entry["bullets"] = description, bullets
-        composition.append(slots)
+        con.execute("DELETE FROM offer_lines WHERE offer_id = ? AND experience_id = ?", (offer, exp[0]))
+        con.executemany("INSERT INTO offer_lines VALUES (?, ?, ?, ?)",  # what this offer uses, kept in the db only
+                        [(offer, exp[0], i, line) for i, line in enumerate(chosen)])
     paths.content(folder).write_text(json.dumps(content, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    paths.composition(folder).write_text(json.dumps(composition, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    con.execute("UPDATE offers SET composed_at = date('now') WHERE id = ?", (offer,))
+    con.commit()
+    db.dump(con)
     print("\n".join(report))
     return content
 

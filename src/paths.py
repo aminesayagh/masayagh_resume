@@ -1,7 +1,7 @@
 """Where everything lives inside a job folder. The only module that knows the layout:
 
 jobs/<slug>/            (the offer itself: posting, details, requirements, is in data/resume.db)
-  content/   content.json, content-fr.json, cover.json, cover-fr.json, composition.json, translate-fr.json
+  content/   content.json, content-fr.json, cover.json, cover-fr.json, translate-fr.json
   pdf/       <name>.pdf, <name>-Cover-Letter.pdf, <name>-Resume-and-Cover-Letter.pdf;  pdf/fr/ the -FR files
   review/    review.md, review.json, interview.json, draft-picks.json
   history/   sent-<date>/ (exact copies kept when a sent job is reopened)
@@ -40,10 +40,6 @@ def content(folder: Path, lang: str = "en") -> Path:
 
 def cover(folder: Path, lang: str = "en") -> Path:
     return folder / "content" / ("cover-fr.json" if lang == "fr" else "cover.json")
-
-
-def composition(folder: Path) -> Path:
-    return folder / "content" / "composition.json"
 
 
 def translate_fr(folder: Path) -> Path:

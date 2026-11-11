@@ -174,6 +174,13 @@ CREATE TABLE IF NOT EXISTS offers (
   template_sha TEXT,
   skipped_terms TEXT
 );
+CREATE TABLE IF NOT EXISTS offer_lines (
+  offer_id INTEGER NOT NULL REFERENCES offers(id),
+  experience_id INTEGER NOT NULL REFERENCES experiences(id),
+  position INTEGER NOT NULL,
+  description_id INTEGER NOT NULL REFERENCES descriptions(id),
+  PRIMARY KEY (offer_id, experience_id, position)
+);
 CREATE TABLE IF NOT EXISTS requirements (
   id INTEGER PRIMARY KEY,
   offer_id INTEGER NOT NULL REFERENCES offers(id),
@@ -226,6 +233,7 @@ def connect(path: Path | None = None, empty: bool = False) -> sqlite3.Connection
                                 ("experiences", "detail_fr", "TEXT"), ("projects", "tech_fr", "TEXT"),
                                 ("activities", "master_id", "INTEGER REFERENCES descriptions(id)"),
                                 ("cover_paragraphs", "default_order", "INTEGER"),
+                                ("offers", "composed_at", "TEXT"),
                                 ("offers", "company_slug", "TEXT"), ("offers", "template_sha", "TEXT"),
                                 ("offers", "skipped_terms", "TEXT"), ("requirements", "override_quote", "TEXT")):
         if column not in [c[1] for c in con.execute(f"PRAGMA table_info({table})")]:  # databases made before it

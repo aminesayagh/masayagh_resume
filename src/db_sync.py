@@ -54,13 +54,41 @@ def link_skills(con, table: str, key: str, row_id: int, text: str) -> None:
 
 def add_line(con, experience_id: int, kind: str, text: str, offer_id: int | None, text_fr: str | None = None,
              activity_id: int | None = None) -> None:
-    """A new line joins the library; activity_id says which activity it rewords (from the job's composition.json)."""
+    """A new line joins the library; activity_id says which activity it rewords (worked out by sync_lines)."""
     if not text.strip():
         return
     cur = con.execute("INSERT OR IGNORE INTO descriptions (experience_id, activity_id, kind, text_en, text_fr, "
                       "first_offer_id) VALUES (?, ?, ?, ?, ?, ?)", (experience_id, activity_id, kind, text, text_fr, offer_id))
     if cur.rowcount:
         link_skills(con, "description_skills", "description_id", cur.lastrowid, text)
+
+
+def line_id(con, experience_id: int, text: str) -> int | None:
+    """Lines are found by exact text: a resume never repeats a line."""
+    row = con.execute("SELECT id FROM descriptions WHERE experience_id = ? AND text_en = ?", (experience_id, text)).fetchone()
+    return row and row[0]
+
+
+def sync_lines(con, offer_id: int, experience_id: int, lines: list[tuple[str, str]]) -> None:
+    """Record the lines this offer uses now. A line the library doesn't know joins the activity of the line it
+    replaced: the one used at the previous build that is gone now (by position when several changed at once).
+    If that can't be told, it is saved without an activity and reported, never guessed."""
+    previous = dict(con.execute("SELECT position, description_id FROM offer_lines WHERE offer_id = ? AND experience_id = ?",
+                                (offer_id, experience_id)).fetchall())
+    known = {pos: line_id(con, experience_id, text) for pos, (_, text) in enumerate(lines)}
+    gone = {pos: d for pos, d in previous.items() if d not in known.values()}
+    new = [pos for pos, d in known.items() if d is None]
+    for pos in new:
+        kind, text = lines[pos]
+        replaced = (list(gone.values()) if len(gone) == 1 and len(new) == 1 else [gone[pos]] if pos in gone else [])
+        activity = con.execute("SELECT activity_id FROM descriptions WHERE id = ?", (replaced[0],)).fetchone()[0] \
+            if len(replaced) == 1 else None
+        add_line(con, experience_id, kind, text, offer_id, activity_id=activity)
+        known[pos] = line_id(con, experience_id, text)
+        if activity is None:
+            print(f"db_sync: new line saved without an activity (attach it when reviewing the library): {text[:60]}…")
+    con.execute("DELETE FROM offer_lines WHERE offer_id = ? AND experience_id = ?", (offer_id, experience_id))
+    con.executemany("INSERT INTO offer_lines VALUES (?, ?, ?, ?)", [(offer_id, experience_id, p, d) for p, d in known.items()])
 
 
 def sync_job(folder: Path, con=None) -> int | None:
@@ -78,18 +106,12 @@ def sync_job(folder: Path, con=None) -> int | None:
         experiences[name_] = x
         if detail and detail.startswith("-"):
             experiences[detail.strip("- ").split(",")[0]] = x
-    slots = {c["company"]: c for c in load(paths.composition(folder)) or []}
-    for e in content.get("experience", []):  # lines approved for this job join the library, in their activity
+    for e in content.get("experience", []):  # the JSON is read as text only; the db works out the rest
         if (x := experiences.get(company_name(e))) is None:
             print(f"db_sync: no experience '{company_name(e)}' in the library; its lines were not recorded.")
             continue
-        slot = slots.get(company_name(e), {})
-        add_line(con, x, "description", e.get("description", ""), oid, activity_id=slot.get("description"))
-        for i, b in enumerate(e.get("bullets", [])):
-            bullets = slot.get("bullets", [])
-            add_line(con, x, "bullet", b, oid, activity_id=bullets[i] if i < len(bullets) else None)
-    for (orphan,) in con.execute("SELECT substr(text_en, 1, 60) FROM descriptions WHERE activity_id IS NULL"):
-        print(f"db_sync: line without an activity (attach it when reviewing the library): {orphan}…")
+        sync_lines(con, oid, x, ([("description", e["description"])] if e.get("description") else [])
+                   + [("bullet", b) for b in e.get("bullets", [])])
 
     default = [t for (t,) in con.execute("SELECT text_en FROM cover_paragraphs WHERE default_order IS NOT NULL "
                                         "ORDER BY default_order")]  # the default letter, with its placeholders

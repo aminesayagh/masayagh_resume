@@ -194,3 +194,48 @@ class MasterTest(unittest.TestCase):
         import json
         self.assertEqual(json.loads(self.master.FILES["en"].read_text(encoding="utf-8"))["role"], "Platform Engineer")
         self.assertEqual(json.loads(self.master.FILES["fr"].read_text(encoding="utf-8"))["role"], "Ingénieur plateforme")
+
+
+class ComposeOnceTest(unittest.TestCase):
+    """compose.py writes the lines and their activities into content.json, and never recomposes a job."""
+
+    def test_first_composition_only(self):
+        import json
+        import shutil
+        import compose
+        import db
+        import offers
+        import paths
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            saved = (db.DB, db.DUMP)
+            shutil.copyfile(db.connect() and db.DB, root / "copy.db")  # a copy, never the real db
+            db.DB, db.DUMP = root / "copy.db", root / "copy.sql"
+            try:
+                folder = root / "acme-dev-v1"
+                paths.content(folder).parent.mkdir(parents=True)
+                shutil.copyfile(Path(__file__).resolve().parents[1] / "template/content/default.json", paths.content(folder))
+                offers.save(folder, {"title": "Acme — Dev", "posting_text": "Large Language Models and APIs.",
+                                     "requirements": [{"id": "R01", "section": "requirement", "priority": "must_have",
+                                                       "quote": "Large Language Models and APIs.", "description": "LLMs",
+                                                       "terms": ["Large Language Models"], "reviewed": True}]})
+                import db_sync
+                compose.compose(folder)
+                content = json.loads(paths.content(folder).read_text(encoding="utf-8"))
+                hypeo = next(e for e in content["experience"] if e["company"].startswith("Phoenix"))
+                self.assertNotIn("activities", hypeo)  # the JSON holds text only
+                self.assertIn("Large Language Models", " ".join(hypeo["bullets"]))  # the variant with the offer's term
+                with self.assertRaises(SystemExit):
+                    compose.compose(folder)  # already composed: refused
+                # an agreed edit: the AI-agent bullet gets new wording; the db works out its activity
+                con = db.connect()
+                i = next(i for i, b in enumerate(hypeo["bullets"]) if "Large Language Models" in b)
+                old_activity = con.execute("SELECT activity_id FROM descriptions WHERE text_en = ?", (hypeo["bullets"][i],)).fetchone()[0]
+                hypeo["bullets"][i] = hypeo["bullets"][i].replace("Integrated", "Shipped")
+                paths.content(folder).write_text(json.dumps(content), encoding="utf-8")
+                db_sync.sync_job(folder)
+                new_activity = db.connect().execute("SELECT activity_id FROM descriptions WHERE text_en = ?",
+                                                    (hypeo["bullets"][i],)).fetchone()[0]
+                self.assertEqual(new_activity, old_activity)
+            finally:
+                db.DB, db.DUMP = saved
