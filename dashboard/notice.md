@@ -24,6 +24,9 @@ results; the job is then frozen. Sent jobs show "Sent on <date>" instead.
 - Start / end dates (hard skills only): `set "<skill>" <start> [<end>]`; the dashboard checks the format and order first.
 - "+ add" keyword (en or fr): `keyword "<skill>" "<keyword>" <lang>`; only once the term has a type, and refused when
   the keyword already counts as another skill.
+- Merge (2026-11-12): "Merge into another skill" runs `move "<keyword>" "<skill>"`: the keyword joins the chosen skill
+  (and takes its type); the old skill is dropped once it has no keyword left (its resume-line and cover-paragraph links
+  go to the target; its dates are not carried over). Open jobs asking for it get their review recomputed; sent ones don't.
 - Since the offer / composition schema (2026-11-12), a requirement points to a keyword, which belongs to one skill, so a
   type or keyword added later shows on every job.
 

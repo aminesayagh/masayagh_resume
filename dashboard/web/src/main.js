@@ -12,7 +12,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: JobsList },
-    { path: '/job/:slug/:tab(interview)?', component: JobPage }, // one record: switching tabs keeps the page
+    { path: '/job/:slug/:tab(interview|skills)?', component: JobPage }, // one record: switching tabs keeps the page
     { path: '/requirements', component: Requirements }, // /skills redirects here (server side)
   ],
 })

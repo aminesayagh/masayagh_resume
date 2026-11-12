@@ -174,8 +174,18 @@ def check_metadata(reader: PdfReader, pdf: Path, content: dict | None, add) -> N
         add("warning", "meta_title", "The PDF has no title; some ATS and email clients show 'Untitled'.")
     elif name and norm(name) not in norm(title):
         add("warning", "meta_title", f"PDF title '{title}' does not contain your name.")
-    if not (meta.get("/Author") or "").strip():
-        add("info", "meta_author", "The PDF has no author field; set it to your name.")
+    author = (meta.get("/Author") or "").strip()
+    if not author:
+        add("warning", "meta_author", "The PDF has no author; ATS and email clients show it as the document's owner.")
+    elif name and norm(name) not in norm(author):
+        add("warning", "meta_author", f"PDF author '{author}' is not your name.")
+    for key, code, why in (("/Subject", "meta_subject", "it says which job this document is for"),
+                           ("/Keywords", "meta_keywords", "it lists the resume's own skills")):
+        if not (meta.get(key) or "").strip():
+            add("warning", code, f"The PDF has no {key[1:].lower()}; {why}.")
+    if re.search(r"chrome|mozilla|skia", f"{meta.get('/Creator', '')} {meta.get('/Producer', '')}", re.I):
+        add("warning", "meta_creator", "The PDF's creator is a browser string (it shows the tool and system used); "
+            "set it to your name.")
     if name and not any(part.casefold() in pdf.stem.casefold() for part in name.split() if len(part) > 2):
         add("warning", "file_name", f"File name '{pdf.name}' does not contain your name; recruiters see it on upload. "
             f"Rename it, e.g. '{'-'.join(name.split())}-Resume.pdf'.")

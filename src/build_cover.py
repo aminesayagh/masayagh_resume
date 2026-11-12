@@ -26,6 +26,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 from pypdf import PdfWriter
 
 import build_resume
+import check_pdf
 import db
 import paths
 import offers
@@ -155,6 +156,8 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path] | None:
     cover_pdf.parent.mkdir(parents=True, exist_ok=True)
     cover_ready = render_pdf(data, letter, cover_pdf)
     warnings = [] if cover_ready else ["the cover letter text runs past the page and is cut off; shorten cover.json's paragraphs."]
+    sub = build_resume.subject(data, job)
+    build_resume.set_metadata(cover_pdf, data, f"{data['name']} - Cover Letter - {letter['job_title']}", sub)
     final_cover = settle(cover_pdf, cover_ready)
 
     resume_ready = resume.exists()
@@ -166,6 +169,8 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path] | None:
         writer.append(str(part))
     with combined.open("wb") as out:
         writer.write(out)
+    both = "CV et lettre de motivation" if lang == "fr" else "Resume and Cover Letter"
+    build_resume.set_metadata(combined, data, f"{data['name']} - {letter['job_title']} - {both}", sub)
     combined = settle(combined, resume_ready and cover_ready)
     print(f"Created {final_cover.name} and {combined.name}")
     for i, paragraph in enumerate(letter["paragraphs"], 1):  # same repetition rules as the resume
@@ -173,6 +178,9 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path] | None:
             warnings.append(f"cover letter paragraph {i} repeats {', '.join(repr(w) for w in twice)}; vary the wording.")
     if words := check_style.overused(letter["paragraphs"], min_lines=3):
         warnings.append("same words in 3+ paragraphs: " + ", ".join(f"'{w}' ({n})" for w, n in words.items()))
+    for pdf in (final_cover, combined):  # the review reads only the resume; these are what the employer receives
+        check_pdf.check_metadata(check_pdf.PdfReader(pdf), pdf, data,
+                                 lambda sev, code, msg, pdf=pdf: warnings.append(f"{pdf.name}: {msg}") if sev != "info" else None)
     if not resume_ready:
         warnings.append("the combined PDF uses a resume that is not ready (see the resume's warnings).")
     for w in warnings:

@@ -102,7 +102,7 @@ def summary(folder: Path, con: sqlite3.Connection) -> dict:
         "status": "sent" if job.get("sent") else "in progress", "sent": job.get("sent"),
         "location": job.get("location", ""),
         "has_requirements": bool(job.get("requirements")),
-        "must_have": cov.get("must_have"), "preferred": cov.get("preferred"),
+        "overall": cov.get("overall"), "must_have": cov.get("must_have"), "preferred": cov.get("preferred"),
         "warnings": sum(n["severity"] in ("error", "warning") for n in notes),
         "notes": notes,
         "terms": sorted({t for r in job.get("requirements", []) for t in r.get("terms", [])}, key=str.casefold),
@@ -153,10 +153,30 @@ def files_of(folder: Path, job: dict) -> dict:
     return out
 
 
+def sentences(posting: str) -> list[str]:
+    """The posting cut into lines and sentences, bullets stripped."""
+    parts = (x.strip(" \t-*•·–—") for line in posting.splitlines() for x in re.split(r"(?<=[.!?;])\s+", line))
+    return [x for x in parts if x]
+
+
+def posting_quote(parts: list[str], terms: list[str]) -> str:
+    """The first posting sentence using one of the terms: as written (whole words, case ignored, singular or plural),
+    else with all its words in any order ("bachelor's degree" in "Bachelor's or Master's degree"). The db keeps only the
+    keyword, not where the posting asked for it, so the quote is found again here; '' when no sentence uses it."""
+    word = lambda w: rf"(?<!\w){re.escape(re.sub(r'(?<=\w\w)s$', '', w))}s?(?!\w)"
+    terms = [t.strip().replace("’", "'") for t in terms if t and t.strip()]
+    for test in ([re.compile(word(t), re.I) for t in terms],  # pass 1: the term as written, for every term
+                 [re.compile("".join(f"(?=.*{word(w)})" for w in t.split()), re.I) for t in terms]):  # pass 2: its words
+        for pattern in test:
+            if hit := next((x for x in parts if pattern.search(x.replace("’", "'"))), None):
+                return hit
+    return ""
+
+
 def coverage(results: list[dict], ratio: dict) -> dict:
     out = {}
-    for priority in ("must_have", "preferred"):
-        rows = [r for r in results if r["priority"] == priority]
+    for priority in ("overall", "must_have", "preferred"):  # overall: every requirement (review.json v3; None before)
+        rows = [r for r in results if priority in ("overall", r["priority"])]
         out[priority] = {"ratio": ratio.get(priority), "total": len(rows),
                          **{s: sum(r["status"] == s for r in rows) for s in ("met", "partial", "missing", "uncertain")}}
     return out
@@ -172,14 +192,18 @@ def detail(slug: str) -> dict:
         offer = con.execute("SELECT created_at, resume_url FROM offers WHERE id = ?", (comp["offer_id"],)).fetchone() \
             if comp["offer_id"] else None
         # versions = the compositions of the same offer, oldest first (no version number in the db: created_at orders them)
+        types = dict(con.execute("SELECT k.keyword, s.type FROM skill_keywords k JOIN skills s ON s.id = k.skill_id"))
         versions = [f.removeprefix("jobs/") for (f,) in con.execute(
             "SELECT folder FROM compositions WHERE offer_id = ? ORDER BY created_at, id", (comp["offer_id"],))] \
             if offer else [slug]
     review = load_json(paths.review_json(folder))
+    parts = sentences(job.get("posting_text", ""))
     overrides = {o["id"]: o for o in job.get("overrides", [])}
     requirements = [{
         "id": r["id"], "description": r["description"], "priority": r["priority"], "status": r["status"],
-        "evidence": r.get("quote"), "posting_quote": r.get("posting_quote"), "section": r.get("section"),
+        # the skill type of its first typed term (None = not typed yet)
+        "type": r.get("type") or next((types[k] for t in r.get("terms", []) if types.get(k := t["term"].lower())), None),
+        "evidence": r.get("quote"), "posting_quote": r.get("posting_quote") or posting_quote(parts, [t["term"] for t in r.get("terms", [])]), "section": r.get("section"),
         "hint": r.get("suggestion") or r.get("rationale"), "override": overrides.get(r["id"]),
         "terms": [{"term": t["term"], "status": t["status"], "keyword": t.get("keyword")} for t in r.get("terms", [])],
     } for r in review.get("results", [])]
@@ -229,7 +253,9 @@ def api_interview(slug: str):
     return {
         "exists": bool(prep), "generated": prep.get("generated"), "how_to_prepare": prep.get("how_to_prepare", {}),
         "summary": prep.get("summary", {}), "skills": skills,
-        "topics": prep.get("topics", []),
+        "topics": [{**t, "posting_says": t.get("posting_says") or posting_quote(
+            sentences(job.get("posting_text", "")), [re.sub(r"\s*\(.*\)$", "", t.get("requirement", "")), *t.get("terms_not_met", [])])}
+            for t in prep.get("topics", [])],
     }
 
 
@@ -384,7 +410,23 @@ def api_skill_type(body: TypeChange):
     """Give a term (or its skill) a type; a term with no entry gets one, with that type and no dates."""
     if body.type not in SKILL_TYPES:
         raise HTTPException(422, f"Unknown type; use one of: {', '.join(SKILL_TYPES)}")
-    return script_result(run_script("src/skills_inventory.py", "type", body.term.strip(), body.type))
+    out = script_result(run_script("src/skills_inventory.py", "type", body.term.strip(), body.type))
+    if out["ok"]:  # the type weighs in the coverage: recompute the reviews it changes
+        out["reviewed"] = rereview(body.term.strip())
+    return out
+
+
+def rereview(term: str) -> list[str]:
+    """Run src/review_ats.py again for the jobs whose requirements use that term's skill. Not for sent jobs: their
+    folder keeps what was sent, review included."""
+    with ro() as con:
+        folders = [f for (f,) in con.execute(
+            "SELECT DISTINCT c.folder FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id "
+            "JOIN compositions c ON c.offer_id = r.offer_id WHERE c.sent_at IS NULL AND k.skill_id IN "
+            f"(SELECT skill_id FROM skill_keywords WHERE keyword = lower(?) UNION "
+            f"SELECT id FROM skills WHERE lower({EN.format('name')}) = lower(?))", (term, term))]
+    return [f.removeprefix("jobs/") for f in folders
+            if run_script("src/review_ats.py", "--job", f, "--no-network").returncode == 0]
 
 
 @app.post("/api/skills/dates")
@@ -412,6 +454,42 @@ def api_skill_keyword(body: Keyword):
     if taken:
         raise HTTPException(409, f"'{keyword}' already counts as {taken[0]}")
     return script_result(run_script("src/skills_inventory.py", "keyword", skill["name_en"], keyword, body.lang))
+
+
+@app.get("/api/skills")
+def api_skills():
+    """Every skill with its type and keywords: the drawer's "move into another skill" search."""
+    with ro() as con:
+        skills = {sid: {"name": name, "type": typ, "keywords": []} for sid, name, typ in con.execute(
+            f"SELECT id, {EN.format('name')}, type FROM skills ORDER BY {EN.format('name')}")}
+        for sid, kw, lang in con.execute("SELECT skill_id, keyword, lang FROM skill_keywords ORDER BY lang, keyword"):
+            skills[sid]["keywords"].append({"keyword": kw, "lang": lang})
+    return {"skills": list(skills.values())}
+
+
+class Move(BaseModel):
+    keyword: str = Field(max_length=80, pattern=TEXT)
+    skill: str = Field(max_length=100, pattern=TEXT)
+
+
+@app.post("/api/skills/move")
+def api_skill_move(body: Move):
+    """Merge: the keyword now counts as that skill; its old skill is dropped once it has no keyword left. The reviews
+    of the open jobs asking for it are recomputed (the type, and so the weighted coverage, may change)."""
+    keyword = body.keyword.strip().lower()
+    target = skill_named(body.skill)
+    if target is None:
+        raise HTTPException(404, "No such skill")
+    with ro() as con:
+        owners = {sid for (sid,) in con.execute("SELECT skill_id FROM skill_keywords WHERE keyword = ?", (keyword,))}
+    if not owners:
+        raise HTTPException(404, f"No keyword '{keyword}'")
+    if owners == {target["id"]}:
+        raise HTTPException(409, f"'{keyword}' already counts as {target['name_en']}")
+    out = script_result(run_script("src/skills_inventory.py", "move", keyword, target["name_en"]))
+    if out["ok"]:
+        out["reviewed"] = rereview(keyword)
+    return out
 
 
 @app.get("/files/{slug}/{name:path}")

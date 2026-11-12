@@ -69,6 +69,19 @@ class BuildNotesTest(unittest.TestCase):
         self.assertEqual(notes, [{"severity": "warning", "text": "No requirements yet"}])
 
 
+class PostingQuoteTest(unittest.TestCase):
+    def test_first_sentence_with_the_term(self):
+        parts = app.sentences("About us. We code.\n- Strong coding abilities, sound judgment. Java 17+\n")
+        self.assertEqual(parts, ["About us.", "We code.", "Strong coding abilities, sound judgment.", "Java 17+"])
+        self.assertEqual(app.posting_quote(parts, ["coding ability"]), "")  # not the same words
+        self.assertEqual(app.posting_quote(parts, ["nope", "Coding abilities"]), "Strong coding abilities, sound judgment.")
+        self.assertEqual(app.posting_quote(parts, ["java"]), "Java 17+")
+        self.assertEqual(app.posting_quote(parts, ["jav"]), "")  # whole words only
+        parts = app.sentences("- Bachelor’s or Master’s degree in CS.\n- Skills: code review, design review.")
+        self.assertEqual(app.posting_quote(parts, ["bachelor's degree"]), "Bachelor’s or Master’s degree in CS.")
+        self.assertEqual(app.posting_quote(parts, ["code reviews"]), "Skills: code review, design review.")
+
+
 SLUG = "cgi-senior-ai-engineer-java-spring-boot-h-f-v1"  # a real job folder (review.json, interview.json)
 
 
@@ -203,8 +216,12 @@ class ApiTest(unittest.TestCase):
         hard = {"name_en": "Git", "type": "technical"}
         with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
             post = self.client.post
-            self.assertEqual(post("/api/skills/type", json={"term": "communication", "type": "soft"}).json()["ok"], True)
-            self.assertEqual(run.call_args.args[0][1:], ["src/skills_inventory.py", "type", "communication", "soft"])
+            body = post("/api/skills/type", json={"term": "communication", "type": "soft"}).json()
+            # the type, then the review of the unsent version only (the sent one keeps its review)
+            self.assertEqual([c.args[0][1:] for c in run.call_args_list],
+                             [["src/skills_inventory.py", "type", "communication", "soft"],
+                              ["src/review_ats.py", "--job", f"jobs/{SLUG[:-1]}2", "--no-network"]])
+            self.assertEqual((body["ok"], body["reviewed"]), (True, [f"{SLUG[:-1]}2"]))
             self.assertEqual(post("/api/skills/type", json={"term": "x", "type": "nonsense"}).status_code, 422)
             self.assertEqual(post("/api/skills/type", json={"term": "a\nb", "type": "soft"}).status_code, 422)
 
@@ -227,6 +244,24 @@ class ApiTest(unittest.TestCase):
                 with mock.patch.object(app, "skill_named", return_value=hard):
                     r = post("/api/skills/keyword", json={"skill": "Git", "keyword": taken[1].upper(), "lang": taken[2]})
                 self.assertEqual(r.status_code, 409)
+            self.assertEqual(run.call_count, calls)  # refused requests ran nothing
+
+    def test_move_keyword_runs_the_script(self):
+        """The script is mocked: nothing is written."""
+        from unittest import mock
+        names = [x["name"] for x in self.client.get("/api/skills").json()["skills"]]
+        self.assertEqual(names, ["communication", "java", "spring boot"])
+        ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            body = self.client.post("/api/skills/move", json={"keyword": "Spring Boot", "skill": "java"}).json()
+            self.assertEqual([c.args[0][1:] for c in run.call_args_list][0],
+                             ["src/skills_inventory.py", "move", "spring boot", "java"])
+            self.assertEqual(body["reviewed"], [f"{SLUG[:-1]}2"])  # the open version only
+            calls = run.call_count
+            post = lambda **b: self.client.post("/api/skills/move", json=b).status_code
+            self.assertEqual(post(keyword="java", skill="java"), 409)  # already there
+            self.assertEqual(post(keyword="nope", skill="java"), 404)
+            self.assertEqual(post(keyword="java", skill="nope"), 404)
             self.assertEqual(run.call_count, calls)  # refused requests ran nothing
 
     def test_mark_sent_runs_the_script(self):

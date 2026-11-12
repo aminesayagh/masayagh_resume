@@ -8,8 +8,8 @@ load(folder) returns the job dict the pipeline works with:
   title ("Company — Title"), posting_text, pdf_name, company (slug), url, location, french_version, sent,
   template_sha, skipped_terms, created_at, offer_id, requirements [{id: R01, section, priority, quote, description,
   terms, targets, reviewed[, kind, min_years]}]
-Requirements are rebuilt from the db on every load (one per keyword; R01... are positions): the posting quote is not
-stored, so quote = description = the keyword. save(folder, data) writes a job dict back.
+Requirements are rebuilt from the db on every load (one per keyword, its min_years included; R01... are positions): the posting quote is not
+stored, so quote is empty and description is the keyword. save(folder, data) writes a job dict back.
 
 Usage: python3 src/offers.py sent jobs/<slug> [YYYY-MM-DD]   # mark a job as sent (default today); it is then frozen
 """
@@ -83,14 +83,13 @@ def load(folder: Path, con=None) -> dict:
     rows = con.execute("SELECT r.priority, r.min_years, k.keyword, s.type FROM requirements r "
                        "JOIN skill_keywords k ON k.id = r.keyword_id JOIN skills s ON s.id = k.skill_id "
                        "WHERE r.offer_id = ? ORDER BY r.priority DESC, r.id", (offer["id"],)).fetchall()
-    for r in rows:  # one requirement per keyword; one with min_years also gets a years check
-        base = {"section": "location" if r["type"] == "location" else "requirement",
-                "priority": "must_have" if r["priority"] >= 50 else "preferred",
-                "quote": r["keyword"], "description": r["keyword"], "reviewed": True}
-        job["requirements"].append({**base, "terms": [r["keyword"]], "targets": TARGETS.get(r["type"], ["skills", "experience"])})
-        if r["min_years"]:
-            job["requirements"].append({**base, "description": f"{r['min_years']:g}+ years of {r['keyword']}", "terms": [],
-                                        "kind": "years_experience", "min_years": r["min_years"]})
+    for r in rows:  # one requirement per keyword; the years it asks for are part of it, never a second requirement
+        job["requirements"].append({
+            "section": "location" if r["type"] == "location" else "requirement",
+            "priority": "must_have" if r["priority"] >= 50 else "preferred", "quote": "", "reviewed": True,
+            "description": r["keyword"] + (f" ({r['min_years']:g}+ years)" if r["min_years"] else ""),
+            "terms": [r["keyword"]], "targets": TARGETS.get(r["type"], ["skills", "experience"]), "type": r["type"],
+            **({"min_years": r["min_years"]} if r["min_years"] else {})})
     for i, req in enumerate(job["requirements"], 1):
         req["id"] = f"R{i:02d}"
     return {k: v for k, v in job.items() if v not in (None, {}) or k == "requirements"}
@@ -144,6 +143,11 @@ def from_parsed(parsed: dict) -> list[dict]:
                         "section": "location" if s["type"] == "location" else "requirement",
                         "priority": "must_have" if (s.get("priority") or 0) >= 50 else "preferred",
                         **({"kind": "years_experience", "min_years": s["min_years"]} if s.get("min_years") else {})})
+    where = parsed_location(parsed) or ""
+    city = (where.rpartition(",")[0] or where).strip()  # the offer-level location is the reliable one
+    if city and not any(r["type"] == "location" for r in out):
+        out.append({"terms": [city], "type": "location", "quote": parsed.get("location") or "", "section": "location",
+                    "priority": "must_have"})
     return out
 
 

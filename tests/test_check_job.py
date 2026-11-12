@@ -27,7 +27,7 @@ class CheckJobTest(unittest.TestCase):
 
     def test_quote_must_be_verbatim(self):
         self.assertIn("quote_not_found", errors(with_req(quote="Build beautiful React apps.")))
-        self.assertIn("quote_missing", errors(with_req(quote="")))
+        self.assertEqual(errors(with_req(quote="")), set())  # optional: requirements from the db store no quote
         # whitespace and line breaks do not matter
         self.assertNotIn("quote_not_found", errors(with_req(quote="Design  and integrate\nAPIs backed by PostgreSQL.",
                                                            terms=["PostgreSQL"])))

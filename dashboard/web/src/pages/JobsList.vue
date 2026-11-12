@@ -126,8 +126,8 @@ const todoLine = (j) => {
         <el-tag :type="row.status === 'sent' ? 'success' : 'primary'" round>{{ row.status }}</el-tag>
       </template>
     </el-table-column>
-    <el-table-column v-for="p in ['must_have', 'preferred']" :key="p"
-      :label="p === 'must_have' ? 'Must-have' : 'Preferred'" width="150" sortable :sort-by="(row) => row[p] ?? -1">
+    <el-table-column v-for="p in ['overall', 'must_have', 'preferred']" :key="p"
+      :label="{ overall: 'Overall', must_have: 'Must-have', preferred: 'Preferred' }[p]" width="150" sortable :sort-by="(row) => row[p] ?? -1">
       <template #default="{ row }">
         <span v-if="!row.has_requirements" class="muted">no requirements yet</span>
         <span v-else-if="row[p] == null" class="muted">—</span>
@@ -164,7 +164,7 @@ const todoLine = (j) => {
 
 
   <p class="muted">{{ jobs.length }} jobs · showing {{ shown.length }} · newest first.
-    Coverage = met + ½ partial per priority; it is a tailoring aid, not an ATS score.</p>
+    Partial counts ½. Overall: a preferred skill counts ¼ of a must-have. A tailoring aid, not an ATS score.</p>
 </template>
 
 <style scoped>

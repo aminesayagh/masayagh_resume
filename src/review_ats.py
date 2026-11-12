@@ -38,8 +38,15 @@ import match_job
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
-COVERAGE_VERSION = 1
-COVERAGE_FORMULA = "(met + 0.5 × partial) ÷ requirements, per priority; uncertain and missing count 0"
+COVERAGE_VERSION = 3
+COVERAGE_FORMULA = ("Σ weight × (1 met, 0.5 partial, 0 otherwise) ÷ Σ weight, per priority; "
+                    "weight by skill type (TYPE_WEIGHTS); overall also weights must-have 1, preferred 0.25")
+PRIORITY_WEIGHTS = {"must_have": 1.0, "preferred": 0.25}  # overall: a preferred skill counts a quarter of a must-have
+# ponytail: hardcoded on purpose (the user's choice); move to config.json if they ever want to tune them per job
+TYPE_WEIGHTS = {"technical": 1.0, "ai": 1.0, "design": 1.0,       # hard skills: what the resume must prove
+                "education": 0.5, "language": 0.5,                 # usually a fact on the resume, rarely tailored
+                "soft": 0.25, "location": 0.25,                    # hard to prove in text / a fact, not a skill
+                None: 0.5}                                         # not typed yet
 DISCLAIMER = ("This is a tailoring aid, not an ATS score: no single number represents how employers' systems rank "
               "resumes. 'Missing' means no supporting text was found in this PDF, not that you lack the skill.")
 
@@ -85,12 +92,19 @@ def suggestion(r: dict) -> str | None:
     return " ".join(hints) or None
 
 
-def coverage(results: list[dict], priority: str) -> float | None:
-    rs = [r for r in results if r["priority"] == priority]
+def coverage(results: list[dict], priority: str | None = None) -> float | None:
+    """Weighted by skill type: a soft skill counts less than a hard one. Equal types give (met + 0.5 × partial) ÷ n.
+    priority None = overall: every requirement, a preferred one weighted PRIORITY_WEIGHTS lower."""
+    rs = [r for r in results if priority in (None, r["priority"])]
     if not rs:
         return None
-    return round((sum(r["status"] == "met" for r in rs) + 0.5 * sum(r["status"] == "partial" for r in rs)) / len(rs), 2)
+    weight = lambda r: TYPE_WEIGHTS.get(r.get("type"), TYPE_WEIGHTS[None]) * PRIORITY_WEIGHTS[r["priority"]]
+    score = lambda r: 1 if r["status"] == "met" else 0.5 if r["status"] == "partial" else 0
+    return round(sum(weight(r) * score(r) for r in rs) / sum(weight(r) for r in rs), 2)
 
+
+_r = lambda p, s: {"priority": p, "status": s, "type": "technical"}
+assert coverage([_r("must_have", "met"), _r("preferred", "missing")]) == 0.8  # 1 ÷ (1 + 0.25)
 
 SENIORITY = {"senior", "sr", "junior", "jr", "lead", "principal", "staff", "mid", "level", "i", "ii", "iii"}
 SAME_ROLE = {"developer": "engineer", "dev": "engineer", "programmer": "engineer"}  # ponytail: extend when a real title needs it
@@ -126,6 +140,7 @@ def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
     reqs = {r["id"]: r for r in job["requirements"]}
     for r in match["results"]:
         r["kind_years"] = reqs[r["id"]].get("kind") == "years_experience"
+        r["type"] = reqs[r["id"]].get("type")  # the skill's type, for the weighted coverage
     apply_overrides(match["results"], job.get("overrides", []), pages)
     for r in match["results"]:
         r["suggestion"] = suggestion(r) if r["status"] != "met" or any(t["keyword"] == "alias" for t in r["terms"]) else None
@@ -141,7 +156,8 @@ def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
         "match_version": match["version"], "results": results, "counts": counts,
         "overridden": sum("override" in r for r in results),
         "evidence_coverage": {"version": COVERAGE_VERSION, "formula": COVERAGE_FORMULA,
-                              "must_have": coverage(results, "must_have"), "preferred": coverage(results, "preferred")},
+                              "must_have": coverage(results, "must_have"), "preferred": coverage(results, "preferred"),
+                              "overall": coverage(results)},
     }
 
 
@@ -217,7 +233,8 @@ def markdown(rep: dict, inputs: dict) -> str:
           *[f"| {label} | " + " | ".join(str(sum(r['status'] == s for r in g)) for s in ("met", "partial", "missing", "uncertain")) + " |"
             for label, g in (("Must-have", must), ("Preferred", pref))], "",
           f"{rep['overridden']} result(s) set by your overrides.", "",
-          f"**Evidence coverage** (v{cov['version']}): must-have {pct(cov['must_have'])}, preferred {pct(cov['preferred'])}. "
+          f"**Evidence coverage** (v{cov['version']}): overall {pct(cov.get('overall'))}, must-have {pct(cov['must_have'])}, "
+          f"preferred {pct(cov['preferred'])}. "
           f"Formula: {cov['formula']}. It measures how much of this posting your PDF text backs up. It is not a hiring "
           "probability or an ATS score, and it is kept separate from PDF readability on purpose.", ""]
     return "\n".join(L)
@@ -238,7 +255,7 @@ def print_preview(rep: dict) -> None:
     if rep.get("job_title") and not rep["job_title"]["match"]:
         print(f"\n[warning] {rep['job_title']['message']}")
     print(f"\nPreview, nothing written. Spelling warnings: {spelling}. PDF errors/warnings: {pdf}.")
-    print(f"Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} "
+    print(f"Evidence coverage v{cov['version']}: overall {cov.get('overall')}, must-have {cov['must_have']}, preferred {cov['preferred']} "
           f"= {cov['formula']} (not an ATS score)")
 
 
@@ -276,6 +293,7 @@ def summary(rep: dict) -> dict:
     """The numbers compared between a saved report and a preview."""
     return {"terms": {(r["id"], t["term"]): t["status"] for r in rep["results"] for t in r.get("terms", [])},
             "must_have": rep["evidence_coverage"]["must_have"], "preferred": rep["evidence_coverage"]["preferred"],
+            "overall": rep["evidence_coverage"].get("overall"),
             "pages": len(rep["pdf_check"]["pages"]), "spelling": len(rep["spelling"]["findings"]),
             "pdf": sum(f["severity"] != "info" for f in rep["pdf_check"]["findings"]),
             "style": sum(f["severity"] == "warning" for f in (rep.get("style") or {}).get("findings", [])),
@@ -292,11 +310,11 @@ def compare(old: dict, new: dict) -> tuple[list[str], list[str]]:
             changes.append(line)
             if RANK[status] < RANK[before]:
                 regressions.append(line)
-    for k in ("must_have", "preferred"):
-        if (old[k] or 0) != (new[k] or 0):
-            changes.append(f"{k} coverage {old[k]} → {new[k]}")
-            if (new[k] or 0) < (old[k] or 0):
-                regressions.append(f"{k} coverage {old[k]} → {new[k]}")
+    for k in ("overall", "must_have", "preferred"):
+        if (old.get(k) or 0) != (new.get(k) or 0):
+            changes.append(f"{k} coverage {old.get(k)} → {new.get(k)}")
+            if (new.get(k) or 0) < (old.get(k) or 0):
+                regressions.append(f"{k} coverage {old.get(k)} → {new.get(k)}")
     for k in ("pages", "spelling", "style", "pdf", "title_mismatch"):
         if old.get(k, 0) != new.get(k, 0):
             changes.append(f"{k} {old.get(k, 0)} → {new.get(k, 0)}")
@@ -336,7 +354,8 @@ def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bo
         print(f"  [warning] {rep['job_title']['message']}")
     print(f"  Requirements: {c['met']} met, {c['partial']} partial, {c['missing']} missing, {c['uncertain']} uncertain "
           f"({rep['overridden']} overridden)")
-    print(f"  Evidence coverage v{cov['version']}: must-have {cov['must_have']}, preferred {cov['preferred']} (not an ATS score)")
+    print(f"  Evidence coverage v{cov['version']}: overall {cov.get('overall')}, must-have {cov['must_have']}, "
+          f"preferred {cov['preferred']} (not an ATS score)")
     print(f"  Report: {rel(md_path)} (+ .json); interview prep: {rel(interview_path)}")
     print(f"  Dashboard: http://127.0.0.1:8000/job/{job_path.parent.name} (run the dashboard app)")
     return rep
@@ -356,7 +375,8 @@ def main() -> None:
     args.job = paths.job(paths.folder_arg(args.job))
     job = offers.load(args.job.parent)
     # Unreviewed requirements are allowed; the report is then labelled draft everywhere.
-    problems = [f for f in check_job.validate(job, draft=True) if f["severity"] == "error"]
+    problems = [f for f in check_job.validate(job, draft=True) if f["severity"] == "error"
+                and f["code"] != "requirements"]  # a posting that asks for nothing still gets PDF, spelling and style
     if problems:
         print(f"The job file is not valid; fix it first (python3 src/check_job.py {args.job}):")
         for f in problems:

@@ -189,7 +189,7 @@ Applicant tracking systems (ATS) read your resume by extracting the PDF's text. 
 - **Readability:** image-only pages, missing fields, headings and dates broken across lines, non-standard section names, jobs without a title, and job headers repeated on a continuation page.
 - **Contact and links:** email and phone format (including a country code), LinkedIn/GitHub/website addresses that exist only as icons and not as text, and links that do not open. Add `--no-network` to skip opening the links.
 - **Dates:** single dates instead of ranges, reversed or future dates, overlapping jobs, and your years of experience counted two ways (overlaps once, and every job added up, as some parsers do).
-- **File:** PDF title and author metadata, and a file name without your name in it.
+- **File:** PDF metadata (title with your name; author your name; subject naming the job; keywords; a creator that is not a browser string), and a file name without your name in it. The builds set all of it on the resume, the cover letter and the combined PDF, and `build_cover.py` checks the letter and combined PDF too.
 
 ```bash
 .venv/bin/python src/check_pdf.py                       # template/build/resume.pdf + template/content/default.json
@@ -222,7 +222,7 @@ The report, `review.md` next to the job file (with `review.json` beside it), con
 2. **PDF readability:** the `src/check_pdf.py` findings.
 3. **Content checks:** spelling and style warnings.
 4. **Must-have requirements, then preferred requirements:** gaps first, each with the posting quote, your PDF quote and page, the reason, and a rule-based suggestion such as "the posting says X; your PDF says Y".
-5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: (met + 0.5 × partial) ÷ requirements, per priority. Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
+5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: Σ weight × (1 met, 0.5 partial) ÷ Σ weight, per priority, weighted by skill type (hard skills 1, education and language 0.5, soft and location 0.25; `TYPE_WEIGHTS` in `src/review_ats.py`). An **overall** figure covers every requirement, a preferred one weighted ¼ of a must-have (`PRIORITY_WEIGHTS`). Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
 
 Without `--cv`/`--content`, the command uses the job's `pdf/` resume and `content/content.json`. To correct a result, add an override to the offer's requirement (`override_status`, `override_reason`, `override_quote` in `data/resume.db`); the report keeps the automated finding next to it.
 

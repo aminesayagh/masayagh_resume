@@ -126,6 +126,25 @@ def record_build(folder: Path, part: str, warnings: list[str], ready: bool) -> N
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def subject(data: dict, job: dict | None) -> str:
+    """'Application for <Title> at <Company>' for a job, else the resume's role."""
+    company, _, title = (job or {}).get("title", "").partition(" — ")
+    if not title:
+        return f"{data['name']} - {data['role']}"
+    return f"Candidature : {title} chez {company}" if data.get("lang") == "fr" else f"Application for {title} at {company}"
+
+
+def set_metadata(pdf: Path, data: dict, title: str, subject_: str) -> None:
+    """Chrome writes only the HTML <title>, and a merge writes nothing: set every field ATS and email clients show.
+    Keywords are the resume's own skills, never extra posting terms. Creator replaces Chrome's browser string."""
+    from pypdf import PdfWriter
+    writer = PdfWriter(clone_from=pdf)  # reads the whole file first, so writing back to it is safe
+    writer.add_metadata({"/Title": title, "/Author": data["name"], "/Subject": subject_, "/Creator": data["name"],
+                         "/Producer": data["name"], "/Keywords": ", ".join(s for row in data["skills"] for s in row)})
+    with pdf.open("wb") as out:
+        writer.write(out)
+
+
 def mark_readiness(data_path: Path, pdf_file: Path, output_path: Path | None, ready: bool) -> Path:
     """A job PDF that is not ready to send (over 3 pages, broken skills layout) is renamed with a leading '_'
     and the ready-named file is removed, so a not-ready resume can't be attached or published by mistake."""
@@ -204,6 +223,10 @@ def build(data_path: Path, output_path: Path | None = None) -> Path:
         if not rendered_pdf.is_file() or rendered_pdf.stat().st_size == 0:
             raise RuntimeError("Chrome did not create the PDF")
         shutil.move(str(rendered_pdf), pdf_file)
+        folder = paths.job_folder(data_path)
+        import offers  # late: offers imports build_fr, which imports this module
+        job = offers.load(folder) if folder and offers.exists(folder) else None
+        set_metadata(pdf_file, data, f"{data['name']} - {data['role']}", subject(data, job))
         page_count = match.group(1)
     print(f"Created {pdf_file} ({page_count} pages)")
     warnings = []

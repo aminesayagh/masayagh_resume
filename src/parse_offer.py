@@ -45,7 +45,7 @@ TYPES = {
 class Skill(BaseModel):
     name: str
     type: Literal["technical", "design", "ai", "soft", "language", "location", "education", "none"]
-    required: bool           # False when the posting marks it as a plus / nice to have
+    required: bool           # True only when asked of the candidate; False for "a plus" and for responsibilities
     min_years: int | None    # years of experience asked for this skill, if stated
 
 
@@ -72,7 +72,7 @@ Return:
 - phrases: for every phrase that asks something of the candidate, its number and the skills it names. A skill name is a short term (1-4 words) copied from the phrase: a technology, method, trait, spoken language, degree, or work location/arrangement. Leave out phrases that ask nothing.
 - each skill's type, judged in the context of its phrase:
 {types}
-- each skill's required: false when the posting presents it as optional ("a plus", "nice to have", "ideally", "bonus", "apprécié", "un plus", "idéalement"); true otherwise, including skills named in responsibilities
+- each skill's required: true only when the posting asks it of the candidate (requirements / profile sections, "must", "at least", "required", "you have", "vous avez", "exigé"); false when it is presented as optional ("a plus", "nice to have", "ideally", "bonus", "apprécié", "un plus", "idéalement"); false for skills that only appear in what the job does (responsibilities, "what you'll do", "vos missions")
 - each skill's min_years: the minimum years of experience the phrase asks for that skill ("5+ years of backend experience in Python" -> 5 for both "backend experience" and "Python"; "3 à 5 ans" -> 3), else null. A duration is never a skill by itself.
 
 Phrases:

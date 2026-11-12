@@ -240,6 +240,23 @@ class SkillTypesTest(unittest.TestCase):
         self.assertEqual(rows, {"communication": ("soft", None, None), "git": ("education", None, None)})
         self.assertTrue(self.db.DUMP.exists())  # resume.sql (here test.sql) refreshed after each change
 
+    def test_move_merges_a_keyword_and_drops_an_empty_skill(self):
+        con = self.db.connect()
+        for word in ("postgresql", "postgres", "sql"):
+            self.db.keyword_id(con, word, kind="technical")
+        sid = lambda w: con.execute("SELECT skill_id FROM skill_keywords WHERE keyword = ?", (w,)).fetchone()[0]
+        con.execute("INSERT INTO skill_keywords (skill_id, keyword, lang) VALUES (?, 'sgbd', 'fr')", (sid("sql"),))
+        con.commit()
+        self.run_cli("move", "Postgres", "postgresql")  # postgres had only itself: its skill is dropped
+        self.run_cli("move", "sql", "postgresql")  # sql keeps 'sgbd': renamed after it, not dropped
+        with self.assertRaises(SystemExit):
+            self.run_cli("move", "sql", "postgresql")  # already there
+        con = self.db.connect()
+        names = {r[0]: r[1] for r in con.execute("SELECT json_extract(s.name, '$.en'), group_concat(k.keyword) FROM skills s "
+                                                 "JOIN skill_keywords k ON k.skill_id = s.id GROUP BY s.id")}
+        self.assertEqual({n: set(k.split(",")) for n, k in names.items()},
+                         {"postgresql": {"postgresql", "postgres", "sql"}, "sgbd": {"sgbd"}})
+
 
 
 class MarkSentTest(unittest.TestCase):
@@ -370,13 +387,16 @@ class ParsedImportTest(unittest.TestCase):
             self.assertEqual(rows["api"][2], known)                  # 'APIs' reused 'api'
             self.assertIn("event-driven", rows)                      # 'Event driven' reused 'event-driven'
             self.assertEqual(rows["german"][:2], (0, None))
-            self.assertEqual(len(rows), 4)                           # 'none' skipped
+            self.assertEqual(rows["berlin"][:2], (100, None))        # no location skill parsed: the offer's city is added
+            self.assertEqual(len(rows), 5)                           # 'none' skipped
             new = {n for (n,) in con.execute("SELECT json_extract(name, '$.en') FROM skills WHERE confirmed = 0")}
-            self.assertEqual(new, {"python", "german"} - {n for (n,) in con.execute(
+            self.assertEqual(new, {"python", "german", "berlin"} - {n for (n,) in con.execute(
                 "SELECT json_extract(name, '$.en') FROM skills WHERE confirmed = 1")})  # only new words wait for review
             job = offers.load(folder)
             self.assertEqual(job["location"], "Berlin, Germany")
-            self.assertTrue(any(r.get("kind") == "years_experience" and r["min_years"] == 5 for r in job["requirements"]))
+            python = [r for r in job["requirements"] if r["terms"] == ["python"]]
+            self.assertEqual(len(python), 1)  # one requirement per keyword, its years included (not a second row)
+            self.assertEqual((python[0]["min_years"], python[0]["description"]), (5, "python (5+ years)"))
 
 
 if __name__ == "__main__":

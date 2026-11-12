@@ -8,6 +8,8 @@ Usage:
   python3 src/skills_inventory.py type "communication" soft   # set a skill's type; creates the skill if it is new
   python3 src/skills_inventory.py job jobs/<slug>       # the job's skills with years, as on its dashboard
   python3 src/skills_inventory.py keyword "PostgreSQL" "Postgres" [en|fr]   # a true synonym (matching uses it)
+  python3 src/skills_inventory.py move "postgres" "PostgreSQL"   # merge: the keyword now counts as that skill; its old
+                                                                 # skill is dropped once it has no keyword left
 
 Each skill: {"name", "type", "match": [its other English keywords], "start": "YYYY-MM" | null, "end": null} (skills +
 skill_keywords; the name is one of its keywords). Types: technical, design, ai (hard skills: the only ones with
@@ -122,8 +124,38 @@ def job_skills(job: dict, content: dict, inv: dict | None = None) -> list[dict]:
     return sorted(out, key=lambda s: (not s["in_job"], s["name"].casefold()))
 
 
+def move(word: str, target: str) -> str:
+    """Merge: the keyword (every language) moves under the target skill. A skill left with no keyword is dropped, its
+    resume lines and cover paragraphs linked to the target instead; one that keeps keywords is renamed after one of
+    them if the moved keyword was its name (a skill's name is one of its keywords)."""
+    word, con = word.strip().lower(), db.connect()
+    dest = find(load(), target) or sys.exit(f"Unknown skill '{target}'")
+    olds = {sid for (sid,) in con.execute("SELECT skill_id FROM skill_keywords WHERE keyword = ?", (word,))}
+    if not olds:
+        sys.exit(f"No keyword '{word}'")
+    if olds == {dest["id"]}:
+        sys.exit(f"{word} already counts as {dest['name']}")
+    con.execute("UPDATE skill_keywords SET skill_id = ? WHERE keyword = ?", (dest["id"], word))
+    dropped = []
+    for old in olds - {dest["id"]}:
+        name = con.execute(f"SELECT {db.EN.format('name')} FROM skills WHERE id = ?", (old,)).fetchone()[0]
+        left = con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? ORDER BY lang <> 'en', id", (old,)).fetchone()
+        if left:
+            if name.casefold() == word:
+                con.execute("UPDATE skills SET name = ? WHERE id = ?", (db.i18n(left[0]), old))
+            continue
+        for table, col in (("description_skills", "description_id"), ("cover_paragraph_skills", "paragraph_id")):
+            con.execute(f"INSERT OR IGNORE INTO {table} ({col}, skill_id) SELECT {col}, ? FROM {table} WHERE skill_id = ?",
+                        (dest["id"], old))
+        con.execute("DELETE FROM skills WHERE id = ?", (old,))  # ponytail: its dates go with it (posting skills have none)
+        dropped.append(name)
+    con.commit()
+    db.dump(con)
+    return f"{word} now counts as {dest['name']}" + (f"; dropped {', '.join(dropped)} (no keyword left)" if dropped else "")
+
+
 def main() -> None:
-    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword", "type"}:
+    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword", "type", "move"}:
         sys.exit(__doc__)
     inv = load()
     if sys.argv[1] == "keyword":
@@ -136,6 +168,9 @@ def main() -> None:
         con.commit()
         db.dump(con)
         print(f"{sys.argv[3]} ({lang}) now counts as {sys.argv[2]}")
+        return
+    if sys.argv[1] == "move":
+        print(move(sys.argv[2], sys.argv[3]))
         return
     if sys.argv[1] == "type":
         name, kind = sys.argv[2], sys.argv[3]

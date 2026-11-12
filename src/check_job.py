@@ -23,7 +23,8 @@ PRIORITIES = {"must_have", "preferred"}
 KINDS = {"evidence", "years_experience"}
 STATUSES = {"met", "partial", "missing", "uncertain"}
 OVERRIDE_FIELDS = {"id", "status", "reason", "pdf_quote"}
-FIELDS = {"id", "section", "priority", "quote", "description", "terms", "kind", "min_years", "reviewed", "note", "targets"}
+FIELDS = {"id", "section", "priority", "quote", "description", "terms", "kind", "min_years", "reviewed", "note", "targets",
+          "type"}  # type: the skill's type (technical, soft, ...), weights the coverage
 TARGETS = {"summary", "skills", "experience"}  # where on the resume the terms should appear
 # Wording that signals a wish, not a gate. A must_have quoting it is an inferred hard gate.
 SOFT_WORDING = re.compile(r"\b(nice to have|a plus|bonus|ideally|preferred|preferably|desirable)\b", re.I)
@@ -81,10 +82,8 @@ def validate(job: dict, root: Path = ROOT, draft: bool = False) -> list[dict]:
         if not r.get("description"):
             add("error", "description", "missing a short 'description'.", rid)
 
-        quote = r.get("quote") or ""
-        if not quote.strip():
-            add("error", "quote_missing", "no source quote; every requirement must quote the posting.", rid)
-        elif text is not None and norm(quote) not in posting:
+        quote = r.get("quote") or ""  # optional: requirements from data/resume.db store no quote, only keywords
+        if quote.strip() and text is not None and norm(quote) not in posting:
             add("error", "quote_not_found", f"quote not found verbatim in the posting: '{quote}'.", rid)
 
         if r.get("priority") == "must_have":
@@ -98,7 +97,7 @@ def validate(job: dict, root: Path = ROOT, draft: bool = False) -> list[dict]:
         if not isinstance(terms, list) or not all(isinstance(t, str) and t.strip() for t in terms):
             add("error", "terms", "'terms' must be a list of non-empty strings.", rid)
         else:
-            for t in terms:
+            for t in terms if quote.strip() else []:
                 if norm(t) not in norm(quote):
                     add("error", "term_not_in_quote", f"term '{t}' is not in the quote; use the posting's exact wording.", rid)
 

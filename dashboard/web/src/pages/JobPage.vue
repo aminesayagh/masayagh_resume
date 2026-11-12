@@ -1,8 +1,9 @@
 <script setup>
 // Job page ( /job/<slug> ): header, links, last build, coverage, gaps, requirements, files, timeline, drawers.
 // Write actions run src/ scripts on the server (Mark as sent, New version); the rest are shown disabled ("not wired yet").
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import TermDrawer from '../components/TermDrawer.vue'
 import InterviewPrep from './InterviewPrep.vue'
 import { newVersion } from '../newVersion.js'
 import { markSent } from '../markSent.js'
@@ -17,9 +18,11 @@ const docsOpen = ref(false)
 const docTab = ref('resume')
 const reqChip = ref('all')
 
-async function load() {
-  job.value = null
-  prep.value = null
+async function load(refresh = false) {  // refresh: keep the page (and an open drawer) while the new data loads
+  if (!refresh) {
+    job.value = null
+    prep.value = null
+  }
   error.value = ''
   try {
     const base = `/api/jobs/${encodeURIComponent(route.params.slug)}`
@@ -27,20 +30,16 @@ async function load() {
     if (!res.ok) throw new Error(res.status === 404 ? 'No such job' : `${res.status} ${res.statusText}`)
     job.value = await res.json()
     prep.value = resPrep.ok ? await resPrep.json() : { exists: false, topics: [] }
-    if (route.query.term) {  // arriving from the Requirements page: show the filtered table
-      await nextTick()
-      document.getElementById('all-requirements')?.scrollIntoView({ behavior: 'smooth' })
-    }
   } catch (e) {
     error.value = e.message
   }
 }
-watch(() => route.params.slug, load, { immediate: true })
+watch(() => route.params.slug, () => load(), { immediate: true })
 
-// Tabs are URLs: /job/<slug> (Overview) and /job/<slug>/interview.
+// Tabs are URLs: /job/<slug> (Overview), /job/<slug>/skills and /job/<slug>/interview.
 const tab = computed({
-  get: () => (route.path.endsWith('/interview') ? 'interview' : 'overview'),
-  set: (v) => router.replace({ path: `/job/${route.params.slug}${v === 'interview' ? '/interview' : ''}`, query: route.query }),
+  get: () => route.params.tab || 'overview',
+  set: (v) => router.replace({ path: `/job/${route.params.slug}${v === 'overview' ? '' : `/${v}`}`, query: route.query }),
 })
 
 const pct = (v) => Math.round(v * 100)
@@ -59,14 +58,39 @@ const CHIPS = {
   met: ['Met', (r) => r.status === 'met'],
   partial: ['Partial', (r) => r.status === 'partial'],
   missing: ['Missing', (r) => r.status === 'missing'],
+  uncertain: ['Uncertain', (r) => r.status === 'uncertain'],
   must: ['Must', (r) => r.priority === 'must_have'],
   preferred: ['Preferred', (r) => r.priority === 'preferred'],
 }
 // ?term=<t> (from the Requirements page): only the requirements using that term
 const termFilter = computed(() => route.query.term?.toString().toLowerCase() || '')
 const hasTerm = (r) => !termFilter.value || r.terms.some((t) => t.term.toLowerCase() === termFilter.value)
-const reqs = computed(() => job.value.requirements.filter((r) => CHIPS[reqChip.value][1](r) && hasTerm(r)))
-const chipCount = (key) => job.value.requirements.filter((r) => CHIPS[key][1](r) && hasTerm(r)).length
+// Skills tab: search (requirement, terms, evidence) and type, on top of the chips and ?term=
+const TYPE_LABEL = { technical: 'technical', design: 'design', ai: 'AI', soft: 'soft skill', language: 'language',
+  location: 'location', education: 'education' }
+const typeLabel = (r) => TYPE_LABEL[r.type] ?? 'not typed'
+// Term drawer (same as the Requirements page): edit a requirement's skill without leaving the job
+const drawerTerm = ref(null)
+const termOpen = ref(false)
+const editTerm = (term) => { drawerTerm.value = term.toLowerCase(); termOpen.value = true }
+watch(() => route.fullPath, () => { termOpen.value = false })
+// Skills tab: one card per status (all requirements, whatever the filters); a click filters the table
+const STATES = {
+  met: ['Met', 'on the resume'], partial: ['Partial', 'some of the terms'],
+  missing: ['Missing', 'not on the resume'], uncertain: ['Uncertain', 'to check by hand'],
+}
+const stateCount = (s, must = false) => job.value.requirements
+  .filter((r) => r.status === s && (!must || r.priority === 'must_have')).length
+const reqQ = ref('')
+const reqType = ref('')
+const reqTypes = computed(() => [...new Set(job.value.requirements.map(typeLabel))].sort())
+const matches = (r) => {
+  const text = [r.description, r.evidence, ...r.terms.map((t) => t.term)].join(' ').toLowerCase()
+  return hasTerm(r) && (!reqType.value || typeLabel(r) === reqType.value)
+    && reqQ.value.toLowerCase().split(/\s+/).filter(Boolean).every((w) => text.includes(w))
+}
+const reqs = computed(() => job.value.requirements.filter((r) => CHIPS[reqChip.value][1](r) && matches(r)))
+const chipCount = (key) => job.value.requirements.filter((r) => CHIPS[key][1](r) && matches(r)).length
 
 // Posting text cut into plain / term segments; a term takes its best status across requirements.
 const termStatus = computed(() => {
@@ -179,8 +203,8 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
         <el-card shadow="never" class="block">
           <template #header>Evidence coverage</template>
           <div v-if="!job.has_requirements" class="muted">No requirements yet.</div>
-          <div v-for="p in ['must_have', 'preferred']" v-else :key="p" class="cov">
-            <span class="cov-label">{{ p === 'must_have' ? 'Must-have' : 'Preferred' }}</span>
+          <div v-for="p in ['overall', 'must_have', 'preferred']" v-else :key="p" class="cov">
+            <span class="cov-label">{{ { overall: 'Overall', must_have: 'Must-have', preferred: 'Preferred' }[p] }}</span>
             <template v-if="job.coverage[p].ratio != null">
               <el-progress :percentage="pct(job.coverage[p].ratio)" :color="barColor(job.coverage[p].ratio)"
                 :stroke-width="10" class="cov-bar" />
@@ -189,7 +213,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
             </template>
             <span v-else class="muted">—</span>
           </div>
-          <div class="muted small">Met + ½ partial per priority. A tailoring aid, not an ATS score.</div>
+          <div class="muted small">Partial counts ½. Overall: a preferred skill counts ¼ of a must-have. A tailoring aid, not an ATS score.</div>
         </el-card>
 
         <el-card v-if="job.gaps.length" shadow="never" class="block">
@@ -208,49 +232,6 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
                 <el-tooltip content="Not wired yet: how it works is decided later">
                   <span><el-button size="small" plain disabled class="dashed">Propose swap</el-button></span>
                 </el-tooltip>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-
-        <el-card id="all-requirements" shadow="never" class="block">
-          <template #header>All requirements</template>
-          <div class="chips">
-            <el-check-tag v-for="(c, key) in CHIPS" :key="key" :checked="reqChip === key" @change="reqChip = key">
-              {{ c[0] }} {{ chipCount(key) }}
-            </el-check-tag>
-            <el-tag v-if="termFilter" closable type="primary" @close="router.replace({ query: {} })">
-              term: {{ route.query.term }}
-            </el-tag>
-          </div>
-          <el-table :data="reqs" row-key="id" size="small" empty-text="No requirement here">
-            <el-table-column type="expand">
-              <template #default="{ row }">
-                <div class="expand">
-                  <p><b>Posting:</b> {{ row.posting_quote || '—' }}</p>
-                  <p><b>Terms:</b>
-                    <span v-if="!row.terms.length" class="muted">—</span>
-                    <el-tag v-for="t in row.terms" :key="t.term" size="small" :type="STATUS_TAG[t.status]" class="term">
-                      {{ t.term }}<span v-if="t.keyword === 'alias'"> · synonym</span>
-                    </el-tag>
-                  </p>
-                  <p><b>Override:</b>
-                    <span v-if="row.override">{{ row.override.status }} — {{ row.override.reason }}</span>
-                    <span v-else class="muted">none</span>
-                  </p>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column prop="description" label="Requirement" min-width="220" />
-            <el-table-column label="Priority" width="95" sortable :sort-by="priorityRank">
-              <template #default="{ row }">{{ PRIORITY[row.priority] }}</template>
-            </el-table-column>
-            <el-table-column label="Status" width="100" sortable :sort-by="statusRank">
-              <template #default="{ row }"><el-tag size="small" :type="STATUS_TAG[row.status]">{{ row.status }}</el-tag></template>
-            </el-table-column>
-            <el-table-column label="Evidence (resume quote)" min-width="260">
-              <template #default="{ row }">
-                <span v-if="row.evidence">‘{{ row.evidence }}’</span><span v-else class="muted">—</span>
               </template>
             </el-table-column>
           </el-table>
@@ -300,10 +281,89 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
       </el-col>
     </el-row>
     </el-tab-pane>
+    <el-tab-pane :label="`Skills (${job.requirements.length})`" name="skills">
+        <el-row :gutter="16" class="state-cards">
+          <el-col v-for="(c, key) in STATES" :key="key" :span="6">
+            <el-card shadow="hover" :class="['state', `state-${key}`, { on: reqChip === key }]"
+              @click="reqChip = reqChip === key ? 'all' : key">
+              <div class="state-label">{{ c[0] }}</div>
+              <div class="state-value">{{ stateCount(key) }}</div>
+              <div class="muted small">{{ stateCount(key, true) }} must-have · {{ c[1] }}</div>
+            </el-card>
+          </el-col>
+        </el-row>
+        <el-card shadow="never" class="block">
+          <div class="chips">
+            <el-input v-model="reqQ" placeholder="Search requirement, term, evidence" clearable style="width: 260px" />
+            <el-select v-model="reqType" placeholder="Type" clearable style="width: 150px">
+              <el-option v-for="t in reqTypes" :key="t" :label="t" :value="t" />
+            </el-select>
+            <el-check-tag v-for="(c, key) in CHIPS" :key="key" :checked="reqChip === key" @change="reqChip = key">
+              {{ c[0] }} {{ chipCount(key) }}
+            </el-check-tag>
+            <el-tag v-if="termFilter" closable type="primary" @close="router.replace({ query: {} })">
+              term: {{ route.query.term }}
+            </el-tag>
+          </div>
+          <el-table :data="reqs" row-key="id" size="small" empty-text="No requirement here">
+            <el-table-column type="expand">
+              <template #default="{ row }">
+                <div class="expand">
+                  <p><b>Posting:</b> {{ row.posting_quote || '—' }}</p>
+                  <p><b>Terms:</b>
+                    <span v-if="!row.terms.length" class="muted">—</span>
+                    <el-tag v-for="t in row.terms" :key="t.term" size="small" :type="STATUS_TAG[t.status]" class="term">
+                      {{ t.term }}<span v-if="t.keyword === 'alias'"> · synonym</span>
+                    </el-tag>
+                  </p>
+                  <p><b>Override:</b>
+                    <span v-if="row.override">{{ row.override.status }} — {{ row.override.reason }}</span>
+                    <span v-else class="muted">none</span>
+                  </p>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="description" label="Requirement" min-width="220" sortable
+              :sort-by="(r) => r.description.toLowerCase()" />
+            <el-table-column label="Type" width="120" sortable :sort-by="typeLabel">
+              <template #default="{ row }">
+                <span :class="{ muted: !row.type }">{{ typeLabel(row) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Priority" width="95" sortable :sort-by="priorityRank">
+              <template #default="{ row }">{{ PRIORITY[row.priority] }}</template>
+            </el-table-column>
+            <el-table-column label="Status" width="100" sortable :sort-by="statusRank">
+              <template #default="{ row }"><el-tag size="small" :type="STATUS_TAG[row.status]">{{ row.status }}</el-tag></template>
+            </el-table-column>
+            <el-table-column label="Evidence (resume quote)" min-width="260">
+              <template #default="{ row }">
+                <span v-if="row.evidence">‘{{ row.evidence }}’</span><span v-else class="muted">—</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="56" align="center">
+              <template #default="{ row }">
+                <el-dropdown v-if="row.terms.length" trigger="click">
+                  <el-button text size="small" aria-label="Actions">⋯</el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item v-for="t in row.terms" :key="t.term" @click="editTerm(t.term)">
+                        Edit skill{{ row.terms.length > 1 ? `: ${t.term.toLowerCase()}` : '' }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-card>
+    </el-tab-pane>
     <el-tab-pane :label="`Interview prep (${prep?.topics.length ?? 0})`" name="interview">
       <InterviewPrep v-if="prep" :prep="prep" :job="job" @open-doc="openDoc" @open-posting="postingOpen = true" />
     </el-tab-pane>
     </el-tabs>
+
+    <TermDrawer v-model="termOpen" :term="drawerTerm" @changed="load(true)" />
 
     <el-drawer v-model="postingOpen" :title="`Job posting · ${job.company}`" size="45%">
       <div class="drawer-actions">
@@ -355,7 +415,16 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
 .cov { display: flex; gap: 12px; align-items: center; margin: 8px 0; font-size: 14px; }
 .cov-label { width: 80px; }
 .cov-bar { width: 220px; }
-.chips { display: flex; gap: 8px; margin-bottom: 8px; }
+.state-cards { margin-bottom: 16px; }
+.state { cursor: pointer; border-top: 3px solid var(--state); }
+.state.on { outline: 2px solid var(--state); }
+.state-met { --state: #67c23a; }
+.state-partial { --state: #e6a23c; }
+.state-missing { --state: #f56c6c; }
+.state-uncertain { --state: #909399; }
+.state-label { font-size: 13px; color: #606266; }
+.state-value { font-size: 28px; font-weight: 600; margin: 4px 0; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
 .expand { padding: 4px 48px; font-size: 13px; }
 .term { margin: 2px 4px 2px 0; }
 .dashed { border-style: dashed; }
