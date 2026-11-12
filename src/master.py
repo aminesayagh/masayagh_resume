@@ -6,32 +6,34 @@ Usage:
   python3 src/master.py check     # exit 1 if a file differs from what the db generates
   python3 src/master.py set summary|role "<English>" ["<French>"]
   python3 src/master.py set skill <row> <position> "<English label>" ["<French label>"]
-  python3 src/master.py set line <activity id> "<English>" ["<French>"]   # becomes that activity's master line
-  python3 src/master.py set contact <email|phone|phone_link|location_en|location_fr|website|website_link|github|linkedin> "<value>"
-  python3 src/master.py import    # one-time: load both files into the db (contact, skills layout, languages,
-                                  # experience display, master line per activity, projects), then verify
+  python3 src/master.py set line <activity id> "<English>" ["<French>"]   # a new line: the newest one is shown
+  python3 src/master.py set contact <email|phone|website|github|linkedin> "<value>"
+  python3 src/master.py import    # load both files into an empty db (python3 src/db.py reset does it)
 
+Each active activity shows its newest approved line (no master pick is stored); experiences are ordered by their
+contract dates, newest first. phone_link and website_link are derived from phone and website.
 Edit the master through the db (src/master.py helpers or SQL), never the generated files: the next write
 would refuse (and tell you) rather than lose the edit.
 """
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
 import db
-import db_sync
+from db import i18n, tr
 
 ROOT = db.ROOT
 FILES = {"en": ROOT / "template" / "content" / "default.json", "fr": ROOT / "template" / "content" / "default-fr.json"}
 STAMP = ROOT / "template" / "content" / ".generated.json"  # sha256 of what was last written, to spot hand edits
+MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+MONTHS_FR = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."]
 
 
 def sha(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
-MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-MONTHS_FR = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."]
 
 
 def label(value: str | None, lang: str) -> str:
@@ -44,46 +46,91 @@ def label(value: str | None, lang: str) -> str:
     return f"{(MONTHS_FR if lang == 'fr' else MONTHS_EN)[int(month) - 1]} {year}"
 
 
+def unlabel(text: str) -> str | None:
+    """The inverse of label() for English dates: 'Sep 2026' -> '2026-09', '2016' -> '2016', 'Present' -> None."""
+    if text == "Present":
+        return None
+    month, _, year = text.rpartition(" ")
+    return f"{year}-{MONTHS_EN.index(month) + 1:02d}" if month else year
+
+
+def phone_link(phone: str) -> str:
+    return "tel:+" + re.sub(r"\D", "", phone)
+
+
+def website_link(website: str) -> str:
+    return website if website.startswith("http") else f"https://www.{website.removeprefix('www.')}"
+
+
+def place(con, location_id: int | None, lang: str) -> str:
+    row = con.execute("SELECT city, country FROM locations WHERE id = ?", (location_id,)).fetchone()
+    return f"{tr(row['city'], lang)}, {tr(row['country'], lang)}" if row else ""
+
+
+def location_id(con, text: str | None, text_fr: str | None = None) -> int | None:
+    """'Casablanca, Morocco' (+ French) -> a locations row, reused when the same city and country exist."""
+    if not text or "," not in text:
+        return None
+    city, _, country = (p.strip() for p in text.rpartition(","))
+    city_fr, _, country_fr = (p.strip() for p in (text_fr or text).rpartition(","))
+    row = con.execute(f"SELECT id FROM locations WHERE lower({db.EN.format('city')}) = lower(?) "
+                      f"AND lower({db.EN.format('country')}) = lower(?)", (city, country)).fetchone()
+    return row[0] if row else con.execute("INSERT INTO locations (city, country) VALUES (?, ?)",
+                                         (i18n(city, city_fr), i18n(country, country_fr))).lastrowid
+
+
+def experiences(con) -> list:
+    """Experiences with their company and contract, newest contract first."""
+    return con.execute("SELECT e.id, e.role, e.location, c.name AS company, k.start_at, k.end_at FROM experiences e "
+                       "JOIN contracts k ON k.id = e.contract_id JOIN companies c ON c.id = k.company_id "
+                       "ORDER BY k.start_at DESC, e.id").fetchall()
+
+
+def master_lines(con, experience_id: int) -> list:
+    """The line each active activity shows on the master: its newest approved line."""
+    out = []
+    for (aid,) in con.execute("SELECT id FROM activities WHERE experience_id = ? AND active = 1 ORDER BY sort_order",
+                              (experience_id,)):
+        line = con.execute("SELECT kind, text FROM descriptions WHERE activity_id = ? AND status = 'approved' "
+                           "ORDER BY created_at DESC, id DESC LIMIT 1", (aid,)).fetchone()
+        if line:
+            out.append(line)
+    return out
+
+
 def generate(lang: str = "en", con=None) -> dict:
     con = con or db.connect()
-    fr = lang == "fr"
-    pick = lambda en, fr_: (fr_ if fr and fr_ else en)
     c = con.execute("SELECT * FROM contact WHERE id = 1").fetchone()
-    profile = {k: (pick(en, f)) for k, en, f in con.execute("SELECT key, text_en, text_fr FROM profile")}
-    out = {"lang": "fr"} if fr else {}
+    profile = {k: tr(t, lang) for k, t in con.execute("SELECT key, text FROM profile")}
+    out = {"lang": "fr"} if lang == "fr" else {}
     out.update({
-        "name": c["name"], "role": profile["role"],
-        "contact": {"phone": c["phone"], "phone_link": c["phone_link"], "email": c["email"],
-                    "location": pick(c["location_en"], c["location_fr"]), "website": c["website"],
-                    "website_link": c["website_link"], "github": c["github"], "linkedin": c["linkedin"]},
-        "summary": profile["summary"], "skills": [], "experience": []})
+        "name": c["name"], "role": profile.get("role", ""),
+        "contact": {"phone": c["phone"], "phone_link": phone_link(c["phone"]), "email": c["email"],
+                    "location": place(con, c["location_id"], lang), "website": c["website"],
+                    "website_link": website_link(c["website"]), "github": c["github"], "linkedin": c["linkedin"]},
+        "summary": profile.get("summary", ""), "skills": [], "experience": []})
     for (row,) in con.execute("SELECT DISTINCT row FROM skill_layout ORDER BY row"):
-        out["skills"].append([pick(en, f) for en, f in con.execute(
-            "SELECT label_en, label_fr FROM skill_layout WHERE row = ? ORDER BY position", (row,))])
-    for e in con.execute("SELECT e.*, c.name AS company FROM experiences e JOIN companies c ON c.id = e.company_id "
-                         "WHERE e.sort_order < 100 ORDER BY e.sort_order").fetchall():
-        detail = pick(e["detail"] or "", e["detail_fr"])
-        company = pick(e["company"], e["company_fr"])
+        out["skills"].append([tr(t, lang) for (t,) in con.execute(
+            "SELECT label FROM skill_layout WHERE row = ? ORDER BY position", (row,))])
+    for e in experiences(con):
+        detail = tr(e["location"], lang)
         description, bullets = "", []
-        for d in con.execute("SELECT d.kind, d.text_en, d.text_fr FROM activities a JOIN descriptions d ON d.id = a.master_id "
-                             "WHERE a.experience_id = ? AND a.active = 1 ORDER BY a.sort_order", (e["id"],)):
-            text = pick(d["text_en"], d["text_fr"])
-            if d["kind"] == "description":
-                description = text
+        for line in master_lines(con, e["id"]):
+            if line["kind"] == "description":
+                description = tr(line["text"], lang)
             else:
-                bullets.append(text)
+                bullets.append(tr(line["text"], lang))
         out["experience"].append({
             "dates": f"{label(e['start_at'], lang)} - {label(e['end_at'], lang)}",
-            "company": company + ("," if detail and not detail.startswith("-") else ""),
-            "detail": detail, "role": pick(e["role"], e["role_fr"]), "description": description, "bullets": bullets})
-    out["projects"] = [{"dates": pick(p["duration"], p["duration_fr"]), "name": p["name"], "tech": pick(p["tech"], p["tech_fr"]),
-                        "link": p["link"]} for p in con.execute("SELECT * FROM projects ORDER BY id")]
-    out["education"] = [{"dates": f"{e['start_at']} - {e['end_at']}", "degree": pick(e["degree_en"], e["degree_fr"]),
-                         "institution": pick(e["institution_en"], e["institution_fr"])}
-                        for e in con.execute("SELECT * FROM education ORDER BY id")]
+            "company": tr(e["company"], lang) + ("," if detail else ""),
+            "detail": detail, "role": tr(e["role"], lang), "description": description, "bullets": bullets})
+    out["projects"] = [{"dates": tr(p["duration"], lang), "name": p["name"], "tech": tr(p["tech"], lang), "link": p["link"]}
+                       for p in con.execute("SELECT * FROM projects ORDER BY id")]
+    out["education"] = [{"dates": f"{e['start_at']} - {e['end_at']}", "degree": tr(e["degree"], lang),
+                         "institution": tr(e["institution"], lang)} for e in con.execute("SELECT * FROM education ORDER BY id")]
     out["certifications"] = [{"name": x["name"], "issuer": x["issuer"], "link": x["link"]}
                              for x in con.execute("SELECT * FROM certifications ORDER BY id")]
-    out["languages"] = [{"language": pick(x["name_en"], x["name_fr"]), "level": pick(x["level_en"], x["level_fr"])}
+    out["languages"] = [{"language": tr(x["name"], lang), "level": tr(x["level"], lang)}
                         for x in con.execute("SELECT * FROM languages ORDER BY sort_order")]
     return out
 
@@ -98,8 +145,8 @@ def hand_edited() -> list[Path]:
     return [p for lang, p in FILES.items() if p.exists() and stamp.get(lang) not in (None, sha(p.read_text(encoding="utf-8")))]
 
 
-def write(con=None) -> list[Path]:
-    if edited := hand_edited():
+def write(con=None, force: bool = False) -> list[Path]:
+    if not force and (edited := hand_edited()):
         raise SystemExit(f"{', '.join(p.name for p in edited)} changed by hand since it was generated. The master resume "
                          "lives in data/resume.db: move the change there, then rerun (the file was left as it is).")
     con = con or db.connect()
@@ -115,26 +162,20 @@ def set_value(args: list[str], con=None) -> None:
     """Change the master in the db, then regenerate the files."""
     con = con or db.connect()
     what = args[0]
+    fr = lambda i: args[i] if len(args) > i else None
     if what in ("summary", "role"):
-        con.execute("UPDATE profile SET text_en = ?, text_fr = coalesce(?, text_fr) WHERE key = ?",
-                    (args[1], args[2] if len(args) > 2 else None, what))
+        old = con.execute("SELECT text FROM profile WHERE key = ?", (what,)).fetchone()
+        con.execute("INSERT INTO profile (key, text) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET text = excluded.text",
+                    (what, i18n(args[1], fr(2) or (tr(old[0], "fr") if old and db.has(old[0], "fr") else None))))
     elif what == "skill":
-        row, position = int(args[1]), int(args[2])
-        con.execute("INSERT INTO skill_layout VALUES (?, ?, ?, ?) ON CONFLICT (row, position) DO UPDATE SET "
-                    "label_en = excluded.label_en, label_fr = excluded.label_fr",
-                    (row, position, args[3], args[4] if len(args) > 4 else None))
+        con.execute("INSERT INTO skill_layout VALUES (?, ?, ?) ON CONFLICT (row, position) DO UPDATE SET label = excluded.label",
+                    (int(args[1]), int(args[2]), i18n(args[3], fr(4))))
     elif what == "line":
-        activity = con.execute("SELECT experience_id, master_id FROM activities WHERE id = ?", (int(args[1]),)).fetchone()
-        kind = con.execute("SELECT kind FROM descriptions WHERE id = ?", (activity["master_id"],)).fetchone()
-        kind = kind["kind"] if kind else "bullet"
-        con.execute("INSERT OR IGNORE INTO descriptions (experience_id, activity_id, kind, text_en, text_fr) VALUES (?, ?, ?, ?, ?)",
-                    (activity["experience_id"], int(args[1]), kind, args[2], args[3] if len(args) > 3 else None))
-        line = con.execute("SELECT id FROM descriptions WHERE experience_id = ? AND text_en = ?",
-                           (activity["experience_id"], args[2])).fetchone()
-        db_sync.link_skills(con, "description_skills", "description_id", line["id"], args[2])
-        con.execute("UPDATE activities SET master_id = ? WHERE id = ?", (line["id"], int(args[1])))
-    elif what == "contact" and args[1] in {"email", "phone", "phone_link", "location_en", "location_fr", "website",
-                                           "website_link", "github", "linkedin"}:
+        import db_sync  # late: db_sync imports offers, which imports this module's db
+        aid = int(args[1])
+        kind = con.execute("SELECT kind FROM descriptions WHERE activity_id = ? LIMIT 1", (aid,)).fetchone()
+        db_sync.add_line(con, aid, kind[0] if kind else "bullet", args[2], fr(3))
+    elif what == "contact" and args[1] in {"email", "phone", "website", "github", "linkedin"}:
         con.execute(f"UPDATE contact SET {args[1]} = ? WHERE id = 1", (args[2],))
     else:
         raise SystemExit(__doc__)
@@ -144,63 +185,69 @@ def set_value(args: list[str], con=None) -> None:
     print(f"Master updated ({what}); default.json and default-fr.json regenerated.")
 
 
-def import_files() -> None:
-    """One-time: the current default.json / default-fr.json into the db, then prove the db regenerates them exactly."""
-    con = db.connect()
+def import_files(con=None) -> None:
+    """Load default.json and default-fr.json into an empty db, then regenerate them and report any difference."""
+    con = con or db.connect()
+    if con.execute("SELECT 1 FROM experiences LIMIT 1").fetchone():
+        raise SystemExit("The db already holds a master resume; reset it first (python3 src/db.py reset).")
     en, fr = (json.loads(p.read_text(encoding="utf-8")) for p in FILES.values())
     c = en["contact"]
-    con.execute("DELETE FROM contact")
-    con.execute("INSERT INTO contact (id, name, email, phone, phone_link, location_en, location_fr, website, website_link, "
-                "github, linkedin) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (en["name"], c["email"], c["phone"], c["phone_link"], c["location"], fr["contact"]["location"],
-                 c["website"], c["website_link"], c.get("github"), c.get("linkedin")))
-    for key in ("summary", "role"):
-        con.execute("UPDATE profile SET text_en = ?, text_fr = ? WHERE key = ?", (en[key], fr[key], key))
-    con.execute("DELETE FROM skill_layout")
+    con.execute("INSERT INTO contact (id, name, email, phone, website, github, linkedin, location_id) "
+                "VALUES (1, ?, ?, ?, ?, ?, ?, ?)", (en["name"], c["email"], c["phone"], c["website"], c.get("github"),
+                                                    c.get("linkedin"), location_id(con, c["location"], fr["contact"]["location"])))
+    for key in ("role", "summary"):
+        con.execute("INSERT INTO profile (key, text) VALUES (?, ?)", (key, i18n(en[key], fr[key])))
     for r, (row, row_fr) in enumerate(zip(en["skills"], fr["skills"]), 1):
         for i, (label_en, label_fr) in enumerate(zip(row, row_fr), 1):
-            con.execute("INSERT INTO skill_layout VALUES (?, ?, ?, ?)", (r, i, label_en, label_fr if label_fr != label_en else None))
-    con.execute("DELETE FROM languages")
+            con.execute("INSERT INTO skill_layout VALUES (?, ?, ?)", (r, i, i18n(label_en, label_fr)))
+            for word in re.split(r"\s+/\s+", label_en):  # a layout item names one or more skills
+                db.keyword_id(con, re.sub(r"\s*\([^)]*\)", "", word))
     for i, (x, xf) in enumerate(zip(en["languages"], fr["languages"]), 1):
-        con.execute("INSERT INTO languages (sort_order, name_en, name_fr, level_en, level_fr) VALUES (?, ?, ?, ?, ?)",
-                    (i, x["language"], xf["language"], x["level"], xf["level"]))
-    ids = {n: x for x, n in con.execute("SELECT e.id, c.name FROM experiences e JOIN companies c ON c.id = e.company_id")}
-    con.execute("UPDATE experiences SET sort_order = sort_order + 100")  # experiences not in the master stay hidden
-    con.execute("UPDATE activities SET master_id = NULL")
-    for order, (e, ef) in enumerate(zip(en["experience"], fr["experience"])):
-        x = ids[db_sync.company_name(e)]
-        company_fr = ef["company"].strip().rstrip(",").strip()
-        con.execute("UPDATE experiences SET sort_order = ?, role = ?, role_fr = ?, detail = ?, detail_fr = ?, company_fr = ? "
-                    "WHERE id = ?", (order, e["role"], ef["role"] if ef["role"] != e["role"] else None, e["detail"] or None,
-                                     ef["detail"] if ef["detail"] != e["detail"] else None,
-                                     company_fr if company_fr != db_sync.company_name(e) else None, x))
+        con.execute("INSERT INTO languages (sort_order, name, level) VALUES (?, ?, ?)",
+                    (i, i18n(x["language"], xf["language"]), i18n(x["level"], xf["level"])))
+    for e, ef in zip(en["experience"], fr["experience"]):
+        name = e["company"].strip().rstrip(",").strip()
+        company = con.execute("INSERT INTO companies (name) VALUES (?)",
+                              (i18n(name, ef["company"].strip().rstrip(",").strip()),)).lastrowid
+        start, _, end = e["dates"].partition(" - ")
+        contract = con.execute("INSERT INTO contracts (company_id, type, start_at, end_at) VALUES (?, ?, ?, ?)",
+                               (company, "freelance" if name.casefold() == "freelance" else "job",
+                                unlabel(start), unlabel(end))).lastrowid
+        # ponytail: a detail that isn't a place ("- Hypeo, MENA") has no column since detail was dropped
+        location = e["detail"] if e["detail"] and not e["detail"].startswith("-") else None
+        x = con.execute("INSERT INTO experiences (contract_id, role, location) VALUES (?, ?, ?)",
+                        (contract, i18n(e["role"], ef["role"]), location and i18n(location, ef["detail"]))).lastrowid
         lines = ([("description", e["description"], ef["description"])] if e["description"] else []) + \
                 [("bullet", b, bf) for b, bf in zip(e["bullets"], ef["bullets"])]
         for slot, (kind, text_en, text_fr) in enumerate(lines, 1):
-            d = con.execute("SELECT id, activity_id FROM descriptions WHERE experience_id = ? AND text_en = ?",
-                            (x, text_en)).fetchone()
-            if d is None:
-                raise SystemExit(f"master line not in the library: {text_en[:70]}")
-            con.execute("UPDATE descriptions SET text_fr = ? WHERE id = ?", (text_fr, d["id"]))
-            con.execute("UPDATE activities SET master_id = ?, sort_order = ?, active = 1 WHERE id = ?",
-                        (d["id"], slot, d["activity_id"]))
+            aid = con.execute("INSERT INTO activities (experience_id, label, sort_order) VALUES (?, ?, ?)",
+                              (x, " ".join(text_en.split()[:5]), slot)).lastrowid
+            import db_sync  # late: db_sync imports offers
+            db_sync.add_line(con, aid, kind, text_en, text_fr)
     for p, pf in zip(en["projects"], fr["projects"]):
-        con.execute("UPDATE projects SET tech_fr = ?, duration_fr = ? WHERE name = ?",
-                    (pf["tech"] if pf["tech"] != p["tech"] else None, pf["dates"], p["name"]))
-    for lang, path in FILES.items():
-        if generate(lang, con) != json.loads(path.read_text(encoding="utf-8")):
-            got, want = generate(lang, con), json.loads(path.read_text(encoding="utf-8"))
-            diff = [k for k in want if got.get(k) != want[k]]
-            con.rollback()
-            raise SystemExit(f"{path.name}: the db doesn't regenerate it exactly (differs in {diff}); nothing saved.")
+        con.execute("INSERT INTO projects (name, tech, link, duration) VALUES (?, ?, ?, ?)",
+                    (p["name"], i18n(p["tech"], pf["tech"]), p["link"], i18n(p["dates"], pf["dates"])))
+    for e, ef in zip(en["education"], fr["education"]):
+        start, _, end = e["dates"].partition(" - ")
+        con.execute("INSERT INTO education (degree, institution, start_at, end_at) VALUES (?, ?, ?, ?)",
+                    (i18n(e["degree"], ef["degree"]), i18n(e["institution"], ef["institution"]), start, end))
+    for x in en["certifications"]:
+        con.execute("INSERT INTO certifications (name, issuer, link) VALUES (?, ?, ?)", (x["name"], x["issuer"], x["link"]))
     con.commit()
     db.dump(con)
-    STAMP.write_text(json.dumps({lang: sha(path.read_text(encoding="utf-8")) for lang, path in FILES.items()},
-                                indent=2) + "\n", encoding="utf-8")
-    print("Imported; the db regenerates default.json and default-fr.json exactly.")
+    for lang, path in FILES.items():
+        want = json.loads(path.read_text(encoding="utf-8"))
+        got = generate(lang, con)
+        if got != want:
+            print(f"{path.name}: regenerated with differences in {[k for k in want if got.get(k) != want[k]]}")
+    write(con, force=True)
+    print("Imported default.json and default-fr.json into the db; both files regenerated from it.")
 
 
 assert label("2026-09", "en") == "Sep 2026" and label("2026-09", "fr") == "Sept. 2026" and label(None, "fr") == "Présent"
+assert unlabel("Sep 2026") == "2026-09" and unlabel("2016") == "2016" and unlabel("Present") is None
+assert phone_link("(+212) 616-13 71 24") == "tel:+212616137124"
+assert website_link("masayagh.com/hire") == "https://www.masayagh.com/hire"
 
 if __name__ == "__main__":
     command = sys.argv[1:] or ["write"]

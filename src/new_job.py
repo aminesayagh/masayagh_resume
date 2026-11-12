@@ -75,10 +75,10 @@ def new_version(source: Path) -> Path:
     job = offers.load(source)
     job.pop("sent", None)
     job.pop("template_sha", None)  # tailored content, not a template copy
-    job["previous_version"] = source.name
+    has_requirements = bool(job.pop("requirements", None))  # they stay on the offer, shared via job["offer_id"]
     offers.save(folder, job)
     print(f"Created {folder.relative_to(ROOT)} from {source.name} (not sent; edit, then run src/tailor.py).")
-    if job.get("requirements"):
+    if has_requirements:
         import compose  # late: compose imports build_resume, like this module
         compose.compose(folder)
     else:

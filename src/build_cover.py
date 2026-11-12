@@ -3,8 +3,9 @@
 
 Usage: python3 src/build_cover.py jobs/<slug>
 
-Reads jobs/<slug>/content/cover.json. If it doesn't exist yet, creates it from the default letter in data/resume.db,
-filling {company} and {job_title} from the offer. An empty "date" prints today's date.
+Reads jobs/<slug>/content/cover.json. If it doesn't exist yet, creates it from the default letter in data/resume.db
+(the newest approved paragraph of each part), filling {company} and {job_title} from the offer; with no paragraphs
+in the db yet, the letter is skipped until it is drafted (draft-cover-letter skill). An empty "date" prints today's date.
 Writes into jobs/<slug>/pdf/ (the offer's pdf_name = <stem>.pdf; French in pdf/fr/):
   <stem>-Cover-Letter.pdf             the cover letter alone (one page)
   <stem>-Resume-and-Cover-Letter.pdf  the resume pages, then the cover letter page
@@ -51,26 +52,31 @@ def company_and_title(job: dict) -> tuple[str, str]:
     return (company, title) if title else (job.get("company", ""), job["title"])
 
 
-def default_letter(company: str, title: str, lang: str = "en", con=None) -> dict:
-    """The default letter from data/resume.db: the paragraphs marked default_order, greeting and closing in profile."""
+def default_letter(company: str, title: str, lang: str = "en", con=None) -> dict | None:
+    """The default letter from data/resume.db (None when it holds no paragraphs yet): the newest approved paragraph
+    of each part; greeting and closing from profile (cover_greeting, cover_closing), else plain ones."""
     con = con or db.connect()
-    fr = lang == "fr"
-    words = {k: (f if fr and f is not None else e) for k, e, f in
-             con.execute("SELECT key, text_en, text_fr FROM profile WHERE key IN ('cover_greeting', 'cover_closing')")}
+    import db_sync  # late: db_sync imports offers
+    paragraphs = db_sync.default_paragraphs(con, lang)
+    if not paragraphs:
+        return None
+    words = {k: db.tr(t, lang) for k, t in con.execute("SELECT key, text FROM profile WHERE key IN ('cover_greeting', 'cover_closing')")}
     fill = lambda t: t.replace("{company}", company).replace("{job_title}", title)
     return {"date": "", "company": company, "hiring_contact": "", "job_title": title, "reference": "",
-            "greeting": words["cover_greeting"],
-            "paragraphs": [fill(f if fr and f else e) for e, f in con.execute(
-                "SELECT text_en, text_fr FROM cover_paragraphs WHERE default_order IS NOT NULL ORDER BY default_order")],
-            "closing": words["cover_closing"]}
+            "greeting": words.get("cover_greeting") or ("Madame, Monsieur," if lang == "fr" else "Dear Hiring Manager,"),
+            "paragraphs": [fill(p) for p in paragraphs],
+            "closing": words.get("cover_closing") or ("Cordialement," if lang == "fr" else "Sincerely,")}
 
 
-def ensure_cover(folder: Path, job: dict) -> Path:
+def ensure_cover(folder: Path, job: dict) -> Path | None:
     path = paths.cover(folder)
     if not path.exists():
+        letter = default_letter(*company_and_title(job))
+        if letter is None:
+            print("No cover letter yet and no default paragraphs in data/resume.db: draft it (draft-cover-letter skill).")
+            return None
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(default_letter(*company_and_title(job)), indent=2, ensure_ascii=False) + "\n",
-                        encoding="utf-8")
+        path.write_text(json.dumps(letter, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(f"Created {path} from the default letter in data/resume.db")
     return path
 
@@ -127,7 +133,7 @@ def settle(path: Path, ready: bool) -> Path:
     return draft
 
 
-def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
+def build(folder: Path, lang: str = "en") -> tuple[Path, Path] | None:
     """lang="fr": the local French version, from cover-fr.json and content-fr.json, files suffixed -FR."""
     folder = folder.resolve()
     if reason := build_resume.frozen(folder):
@@ -138,7 +144,10 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path]:
         letter = load_letter(paths.cover(folder, "fr"), lang="fr")
         data = json.loads(paths.content(folder, "fr").read_text(encoding="utf-8"))
     else:
-        letter = load_letter(ensure_cover(folder, job))
+        cover = ensure_cover(folder, job)
+        if cover is None:
+            return None
+        letter = load_letter(cover)
         data = json.loads(paths.content(folder).read_text(encoding="utf-8"))
     stem = resume.stem
 

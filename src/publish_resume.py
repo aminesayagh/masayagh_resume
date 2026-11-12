@@ -97,8 +97,8 @@ def publish(job_path: Path) -> str | None:
 
     urls = [config.public_url(company, name, settings)]
     con = db.connect()  # the links the employer gets, kept with the offer
-    con.execute("UPDATE offers SET resume_url = ?, cover_letter_url = ?, published_at = date('now') WHERE folder = ?",
-                (urls[0], urls[1] if len(urls) > 1 else None, f"jobs/{job_path.parent.name}"))
+    con.execute("UPDATE offers SET resume_url = ? WHERE id = (SELECT offer_id FROM compositions WHERE folder = ?)",
+                (urls[0], f"jobs/{job_path.parent.name}"))
     con.commit()
     db.dump(con)
     for u in urls:

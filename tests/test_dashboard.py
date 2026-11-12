@@ -69,8 +69,43 @@ class BuildNotesTest(unittest.TestCase):
         self.assertEqual(notes, [{"severity": "warning", "text": "No requirements yet"}])
 
 
-@unittest.skipUnless(app.DB.exists(), "no data/resume.db")
+SLUG = "cgi-senior-ai-engineer-java-spring-boot-h-f-v1"  # a real job folder (review.json, interview.json)
+
+
+def fixture_db(path: Path) -> None:
+    """One offer with two compositions: the real CGI folder, then a later version without files.
+    Written with src/db.py into a temporary file: the real data/resume.db is never touched."""
+    import db
+    con = db.connect(path, empty=True)
+    cid = con.execute("INSERT INTO companies (name) VALUES (?)", (db.i18n("CGI"),)).lastrowid
+    oid = con.execute("INSERT INTO offers (company_id, title, posting, language, created_at, resume_url) "
+                      "VALUES (?, 'Senior AI Engineer', 'Java et Spring Boot', 'fr', '2026-11-09', 'https://x/r.pdf')",
+                      (cid,)).lastrowid
+    con.execute("INSERT INTO compositions (offer_id, folder, pdf_name, created_at, sent_at) "
+                "VALUES (?, ?, 'resume.pdf', '2026-11-10 09:00', '2026-11-11')", (oid, f"jobs/{SLUG}"))
+    con.execute("INSERT INTO compositions (offer_id, folder, pdf_name, created_at) "
+                "VALUES (?, ?, 'resume.pdf', '2026-11-12 09:00')", (oid, f"jobs/{SLUG[:-1]}2"))
+    for term, kind, priority in (("java", "technical", 100), ("spring boot", None, 100), ("communication", "soft", 0)):
+        con.execute("INSERT INTO requirements (offer_id, keyword_id, priority) VALUES (?, ?, ?)",
+                    (oid, db.keyword_id(con, term, kind=kind), priority))
+    con.commit()
+    con.close()
+
+
 class ApiTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from unittest import mock
+        cls.tmp = tempfile.TemporaryDirectory()
+        fixture_db(Path(cls.tmp.name) / "resume.db")
+        cls.patch = mock.patch.object(app, "DB", Path(cls.tmp.name) / "resume.db")
+        cls.patch.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.patch.stop()
+        cls.tmp.cleanup()
+
     def setUp(self):
         from fastapi.testclient import TestClient
         self.client = TestClient(app.app)
@@ -78,7 +113,7 @@ class ApiTest(unittest.TestCase):
     def test_jobs_are_real_and_status_is_binary(self):
         body = self.client.get("/api/jobs").json()
         with app.ro() as con:
-            self.assertEqual(len(body["jobs"]), con.execute("SELECT count(*) FROM offers").fetchone()[0])
+            self.assertEqual(len(body["jobs"]), con.execute("SELECT count(*) FROM compositions").fetchone()[0])
         self.assertTrue({j["status"] for j in body["jobs"]} <= {"in progress", "sent"})
         self.assertNotIn("ats score", json.dumps(body).lower())
 
@@ -103,9 +138,11 @@ class ApiTest(unittest.TestCase):
             self.assertTrue(all(s["years"] for s in prep["skills"]))  # "start date needed" when there is none
 
     def test_job_detail_matches_its_review(self):
-        slug = next(j["slug"] for j in self.client.get("/api/jobs").json()["jobs"] if j["has_requirements"])
-        d = self.client.get(f"/api/jobs/{slug}").json()
-        review = app.load_json(app.paths.review_json(app.paths.JOBS / slug))
+        d = self.client.get(f"/api/jobs/{SLUG}").json()
+        review = app.load_json(app.paths.review_json(app.paths.JOBS / SLUG))
+        self.assertEqual(d["versions"], [SLUG, f"{SLUG[:-1]}2"])  # the offer's compositions, oldest first
+        self.assertEqual([t["event"] for t in d["timeline"] if t["date"]], ["posting saved", "version created", "sent"])
+        self.assertEqual((d["status"], d["resume_url"]), ("sent", "https://x/r.pdf"))
         self.assertEqual(len(d["requirements"]), len(review["results"]))
         must = d["coverage"]["must_have"]
         self.assertEqual(must["met"] + must["partial"] + must["missing"] + must["uncertain"], must["total"])
@@ -117,8 +154,12 @@ class ApiTest(unittest.TestCase):
     def test_requirement_terms_follow_the_db(self):
         d = self.client.get("/api/requirements").json()
         with app.ro() as con:
-            distinct = {t.casefold() for (t,) in con.execute("SELECT term FROM requirement_terms")}
-            untyped = {t.casefold() for (t,) in con.execute("SELECT term FROM requirement_terms WHERE skill_id IS NULL")}
+            distinct = {t for (t,) in con.execute("SELECT k.keyword FROM requirements r "
+                                                  "JOIN skill_keywords k ON k.id = r.keyword_id")}
+            untyped = {t for (t,) in con.execute("SELECT k.keyword FROM requirements r JOIN skill_keywords k "
+                                                 "ON k.id = r.keyword_id JOIN skills s ON s.id = k.skill_id "
+                                                 "WHERE s.type IS NULL")}
+        self.assertEqual(distinct, {"java", "spring boot", "communication"})
         self.assertEqual({t["term"].casefold() for t in d["terms"]}, distinct)
         self.assertEqual(len(d["terms"]), len(distinct))  # one row per term, whatever each posting's case
         self.assertTrue(all(t["term"] == t["term"].lower() for t in d["terms"]))  # shown lowercase, like the skills
@@ -180,7 +221,7 @@ class ApiTest(unittest.TestCase):
             calls = run.call_count
 
             with app.ro() as con:  # a keyword already used by a skill is refused
-                taken = con.execute("SELECT s.name_en, k.keyword, k.lang FROM skill_keywords k "
+                taken = con.execute(f"SELECT {app.EN.format('s.name')}, k.keyword, k.lang FROM skill_keywords k "
                                     "JOIN skills s ON s.id = k.skill_id LIMIT 1").fetchone()
             if taken:
                 with mock.patch.object(app, "skill_named", return_value=hard):

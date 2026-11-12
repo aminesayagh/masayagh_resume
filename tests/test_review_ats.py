@@ -15,7 +15,12 @@ PDF = ROOT / "template" / "build" / "resume.pdf"
 
 
 def run(job):
-    return review_ats.review(job, PDF, CONTENT, network=False)
+    saved = review_ats.db.aliases
+    review_ats.db.aliases = lambda con=None: {"APIs": ["API"]}  # the fixture's one synonym; tests never read the real db
+    try:
+        return review_ats.review(job, PDF, CONTENT, network=False)
+    finally:
+        review_ats.db.aliases = saved
 
 
 class ReviewTest(unittest.TestCase):

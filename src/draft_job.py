@@ -63,7 +63,7 @@ def apply(job: dict, picks: list[dict]) -> list[dict]:
     for i, pick in enumerate(picks, 1):
         if set(pick) - PICK_FIELDS or pick.get("line") not in lines:
             raise ValueError(f"pick {i}: unknown field or line number: {pick}")
-        if pick.get("kind") != "years_experience" and not pick.get("terms"):
+        if not pick.get("terms"):  # a requirement is a keyword; "5+ years of Java" names Java too
             raise ValueError(f"pick {i} (line {pick['line']}) has no terms; name what a recruiter would search for")
         for term in pick.get("terms", []):
             if problem := term_problems(term):

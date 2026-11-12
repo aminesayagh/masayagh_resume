@@ -9,9 +9,9 @@ Usage:
   python3 src/skills_inventory.py job jobs/<slug>       # the job's skills with years, as on its dashboard
   python3 src/skills_inventory.py keyword "PostgreSQL" "Postgres" [en|fr]   # a true synonym (matching uses it)
 
-Each skill: {"name", "type", "match": [English keywords], "start": "YYYY-MM" | null, "end": null} (skills +
-skill_keywords). Types: technical, design, ai (hard skills: the only ones with dates), soft, language, location,
-education.
+Each skill: {"name", "type", "match": [its other English keywords], "start": "YYYY-MM" | null, "end": null} (skills +
+skill_keywords; the name is one of its keywords). Types: technical, design, ai (hard skills: the only ones with
+dates), soft, language, location, education; empty = not typed yet.
 A resume skill item like "React / Next.js" or "Accessibility (WCAG)" counts as several skills.
 """
 
@@ -43,9 +43,10 @@ def atoms(item: str) -> list[tuple[str, list[str]]]:
 def load() -> dict:
     con = db.connect()
     skills = []
-    for sid, name, kind, start, end in con.execute("SELECT id, name_en, type, start_at, end_at FROM skills "
-                                                   "ORDER BY lower(name_en)"):
-        match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en'", (sid,))]
+    for sid, name, kind, start, end in con.execute(f"SELECT id, {db.EN.format('name')}, type, start_at, end_at FROM skills "
+                                                   f"ORDER BY {db.EN.format('name')}"):
+        match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en' "
+                                           "AND keyword <> ?", (sid, name))]
         skills.append({"id": sid, "name": name, "type": kind, "match": match, "start": start, "end": end})
     return {"skills": skills}
 
@@ -54,7 +55,8 @@ def save(inv: dict) -> None:
     con = db.connect()
     for s in inv["skills"]:
         if "id" not in s:
-            s["id"] = con.execute("INSERT INTO skills (type, name_en) VALUES ('technical', ?)", (s["name"].lower(),)).lastrowid
+            s["id"] = con.execute("SELECT skill_id FROM skill_keywords WHERE id = ?",
+                                  (db.keyword_id(con, s["name"]),)).fetchone()[0]
         con.execute("UPDATE skills SET start_at = ?, end_at = ? WHERE id = ?", (s.get("start"), s.get("end"), s["id"]))
         for m in s.get("match", []):
             con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, 'en')", (s["id"], m.lower()))
@@ -130,7 +132,7 @@ def main() -> None:
         save({"skills": [skill]} if "id" not in skill else {"skills": []})
         con = db.connect()
         con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, ?)",
-                    (find(load(), sys.argv[2])["id"], sys.argv[3].lower(), lang))
+                    (find(load(), sys.argv[2])["id"], sys.argv[3].lower(), lang))  # an existing keyword stays where it is
         con.commit()
         db.dump(con)
         print(f"{sys.argv[3]} ({lang}) now counts as {sys.argv[2]}")
@@ -141,7 +143,7 @@ def main() -> None:
             sys.exit(f"Unknown type '{kind}'; use one of: {', '.join(db.SKILL_TYPES)}")
         skill, con = find(inv, name), db.connect()
         if skill is None:
-            con.execute("INSERT INTO skills (type, name_en) VALUES (?, ?)", (kind, name.lower()))
+            db.keyword_id(con, name, kind=kind)
         elif kind in db.HARD_TYPES:
             con.execute("UPDATE skills SET type = ? WHERE id = ?", (kind, skill["id"]))
         else:  # only hard skills have dates

@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import offers  # noqa: E402  (load/all_folders take a connection: we pass a read-only one)
 import paths  # noqa: E402  (only plain path joins: resume_pdf & co. call stem(), which opens a writable db)
 import skills_inventory  # noqa: E402  (pure helpers only: job_skills/years/label; its load() opens a writable db)
+from db import EN  # noqa: E402  (a JSON column's English text in SQL: json_extract(col, '$.en'))
 
 DB = ROOT / "data" / "resume.db"
 PYTHON = ROOT / ".venv" / "bin" / "python"
@@ -167,10 +168,13 @@ def detail(slug: str) -> dict:
         if "/" in slug or slug.startswith(".") or not offers.exists(folder, con):
             raise HTTPException(404, "No such job")
         job, head = offers.load(folder, con), summary(folder, con)
-        row = con.execute("SELECT created_at, composed_at, published_at, sent_at, resume_url, cover_letter_url "
-                          "FROM offers WHERE folder = ?", (f"jobs/{slug}",)).fetchone()
-        base = re.sub(r"-v\d+$", "", slug)
-        versions = [f.name for f in offers.all_folders(con) if re.sub(r"-v\d+$", "", f.name) == base]
+        comp = offers.composition(folder, con)
+        offer = con.execute("SELECT created_at, resume_url FROM offers WHERE id = ?", (comp["offer_id"],)).fetchone() \
+            if comp["offer_id"] else None
+        # versions = the compositions of the same offer, oldest first (no version number in the db: created_at orders them)
+        versions = [f.removeprefix("jobs/") for (f,) in con.execute(
+            "SELECT folder FROM compositions WHERE offer_id = ? ORDER BY created_at, id", (comp["offer_id"],))] \
+            if offer else [slug]
     review = load_json(paths.review_json(folder))
     overrides = {o["id"]: o for o in job.get("overrides", [])}
     requirements = [{
@@ -182,12 +186,12 @@ def detail(slug: str) -> dict:
     rank = {"missing": 0, "partial": 1, "uncertain": 2}
     gaps = sorted((r for r in requirements if r["status"] in rank),
                   key=lambda r: (r["priority"] != "must_have", rank[r["status"]]))
-    timeline = [{"date": row[k], "event": e} for k, e in (
-        ("created_at", "created, posting saved"), ("composed_at", "resume composed"),
-        ("published_at", "published"), ("sent_at", "sent"))]
+    timeline = [{"date": offer and offer["created_at"], "event": "posting saved"},
+                {"date": comp["created_at"], "event": "version created"},
+                {"date": comp["sent_at"], "event": "sent"}]
     return {
-        **head, "url": job.get("url"), "resume_url": row["resume_url"], "cover_letter_url": row["cover_letter_url"],
-        "created": row["created_at"], "versions": versions, "posting": job.get("posting_text", ""),
+        **head, "url": job.get("url"), "resume_url": offer and offer["resume_url"],
+        "created": comp["created_at"][:10], "versions": versions, "posting": job.get("posting_text", ""),
         "build": {"date": review.get("generated"), "pages": len((review.get("pdf_check") or {}).get("pages", [])) or None},
         "coverage": coverage(requirements, review.get("evidence_coverage") or {}),
         "requirements": requirements, "gaps": gaps, "files": files_of(folder, job),
@@ -203,9 +207,11 @@ def api_job(slug: str):
 def inventory(con: sqlite3.Connection) -> dict:
     """skills_inventory.load(), read only (the original opens the db through db.connect)."""
     skills = []
-    for sid, name, start, end in con.execute("SELECT id, name_en, start_at, end_at FROM skills ORDER BY lower(name_en)"):
-        match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en'", (sid,))]
-        skills.append({"id": sid, "name": name, "match": match, "start": start, "end": end})
+    for sid, name, kind, start, end in con.execute(f"SELECT id, {EN.format('name')}, type, start_at, end_at FROM skills "
+                                                   f"ORDER BY {EN.format('name')}"):
+        match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en' "
+                                           "AND keyword <> ?", (sid, name))]
+        skills.append({"id": sid, "name": name, "type": kind, "match": match, "start": start, "end": end})
     return {"skills": skills}
 
 
@@ -233,25 +239,23 @@ RANK = {"met": 3, "partial": 2, "uncertain": 1, "missing": 0}
 
 
 def requirement_terms() -> dict:
-    """Every posting term across jobs (case-insensitive), typed by its skills-table entry, with per job its best status
-    and wording from review.json (exact, or synonym when only a keyword matched).
-    A term's entry is found by name, then by keyword, at read time (the rule offers.save uses), not through the stored
-    requirement_terms.skill_id: sent offers are never saved again, so a type or keyword added later still shows."""
+    """Every requirement keyword across jobs, typed by its skill, with per job (composition of the offer asking for it)
+    its best status and wording from review.json (exact, or synonym when only a keyword matched).
+    A requirement points to a keyword, which belongs to one skill: a type or keyword added later shows everywhere."""
     with ro() as con:
-        rows = con.execute("SELECT rt.term, o.folder FROM requirement_terms rt JOIN requirements r ON r.id = rt.requirement_id "
-                           "JOIN offers o ON o.id = r.offer_id").fetchall()
+        rows = con.execute("SELECT k.keyword, k.skill_id, c.folder FROM requirements r "
+                           "JOIN skill_keywords k ON k.id = r.keyword_id "
+                           "JOIN compositions c ON c.offer_id = r.offer_id").fetchall()
         skills = {sid: {"id": sid, "name": name, "type": typ, "start": start, "end": end, "keywords": []}
-                  for sid, name, typ, start, end in con.execute("SELECT id, name_en, type, start_at, end_at FROM skills")}
+                  for sid, name, typ, start, end in con.execute(
+                      f"SELECT id, {EN.format('name')}, type, start_at, end_at FROM skills")}
         for sid, kw, lang in con.execute("SELECT skill_id, keyword, lang FROM skill_keywords ORDER BY lang, keyword"):
             skills[sid]["keywords"].append({"keyword": kw, "lang": lang})
         hard = con.execute(f"SELECT count(*), count(start_at) FROM skills WHERE type IN {HARD}").fetchone()
         jobs = {f.name: summary(f, con) for f in offers.all_folders(con)}
-    by_name = {s["name"].casefold(): s for s in skills.values()}
-    by_keyword = {k["keyword"].casefold(): s for s in skills.values() for k in s["keywords"]}
-
     terms = {}
-    for term, folder in rows:
-        skill = by_name.get(term.casefold()) or by_keyword.get(term.casefold()) or {}
+    for term, sid, folder in rows:
+        skill = skills.get(sid, {})
         t = terms.setdefault(term.casefold(), {"term": term.lower(),  # one spelling, lowercase like the skills
                                                "skill": skill.get("name"), "type": skill.get("type"),
                                                "start": skill.get("start"), "end": skill.get("end"),
@@ -367,7 +371,8 @@ class Keyword(BaseModel):
 
 def skill_named(name: str) -> sqlite3.Row | None:
     with ro() as con:
-        return con.execute("SELECT id, name_en, type FROM skills WHERE lower(name_en) = lower(?)", (name,)).fetchone()
+        return con.execute(f"SELECT id, {EN.format('name')} AS name_en, type FROM skills "
+                           f"WHERE lower({EN.format('name')}) = lower(?)", (name,)).fetchone()
 
 
 def script_result(result: subprocess.CompletedProcess) -> dict:
@@ -402,10 +407,8 @@ def api_skill_keyword(body: Keyword):
         raise HTTPException(404, "No such skill: give the term a type first")
     keyword = body.keyword.strip()
     with ro() as con:
-        taken = con.execute("SELECT s.name_en FROM skill_keywords k JOIN skills s ON s.id = k.skill_id "
-                            "WHERE lower(k.keyword) = lower(?) AND k.lang = ? UNION "
-                            "SELECT name_en FROM skills WHERE lower(name_en) = lower(?)",
-                            (keyword, body.lang, keyword)).fetchone()
+        taken = con.execute(f"SELECT {EN.format('s.name')} FROM skill_keywords k JOIN skills s ON s.id = k.skill_id "
+                            f"WHERE k.keyword = lower(?) AND k.lang = ?", (keyword, body.lang)).fetchone()
     if taken:
         raise HTTPException(409, f"'{keyword}' already counts as {taken[0]}")
     return script_result(run_script("src/skills_inventory.py", "keyword", skill["name_en"], keyword, body.lang))

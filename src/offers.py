@@ -1,137 +1,157 @@
-"""Job offers live in data/resume.db only: posting, details and requirements. This is the one way in and out.
+"""Offers and compositions live in data/resume.db only. This is the one way in and out.
 
-load(folder) returns the same dict a job.json used to hold, so the rest of the pipeline is unchanged:
-  title ("Company — Title"), posting_text, pdf_name, company (slug), url, location, location_match,
-  french_version, sent, previous_version, template_sha, skipped_terms, requirements [{id: R01..., ...}], overrides.
-save(folder, data) writes it back. Requirement ids (R01...) are positions, recomputed on every load.
+An offer is the job posting (company, title, link, posting text, location) with its requirements: the keywords
+it asks for, each with a priority (100 must-have, 0 preferred) and an optional min_years. A composition is one
+composed resume in a job folder (jobs/<slug>-vN), usually for an offer; several compositions can share an offer.
+
+load(folder) returns the job dict the pipeline works with:
+  title ("Company — Title"), posting_text, pdf_name, company (slug), url, location, french_version, sent,
+  template_sha, skipped_terms, created_at, offer_id, requirements [{id: R01, section, priority, quote, description,
+  terms, targets, reviewed[, kind, min_years]}]
+Requirements are rebuilt from the db on every load (one per keyword; R01... are positions): the posting quote is not
+stored, so quote = description = the keyword. save(folder, data) writes a job dict back.
 
 Usage: python3 src/offers.py sent jobs/<slug> [YYYY-MM-DD]   # mark a job as sent (default today); it is then frozen
 """
 
 import json
+import re
 import sys
+import unicodedata
 from datetime import date
 from pathlib import Path
 
 import db
 import paths
+from db import i18n, tr
+
+TARGETS = {"technical": ["skills", "experience"], "design": ["skills", "experience"], "ai": ["skills", "experience"],
+           "soft": ["experience"], "language": ["summary"], "location": ["summary"], "education": ["summary"]}
+DEGREE = re.compile(r"\b(bachelor|master|degree|diploma|bac\s*\+|licence|ingénieur|engineering school)", re.I)
 
 
 def _folder_key(folder: Path) -> str:
     return f"jobs/{Path(folder).name}"
 
 
+def slugify(text: str) -> str:
+    ascii_ = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", ascii_.lower()).strip("-")
+
+
+def english_mentioned(posting: str) -> bool:
+    return bool(re.search(r"\b(anglais|english)\b", posting, re.I))
+
+
+def posting_language(posting: str) -> str:
+    from build_fr import ENGLISH_WORDS, FRENCH_WORDS  # late: build_fr imports build_resume, which imports this module
+    return "fr" if len(FRENCH_WORDS.findall(posting)) > 2 * len(ENGLISH_WORDS.findall(posting)) else "en"
+
+
+def composition(folder: Path, con) -> "db.sqlite3.Row | None":
+    return con.execute("SELECT * FROM compositions WHERE folder = ?", (_folder_key(folder),)).fetchone()
+
+
 def exists(folder: Path, con=None) -> bool:
     con = con or db.connect()
-    return con.execute("SELECT 1 FROM offers WHERE folder = ?", (_folder_key(folder),)).fetchone() is not None
+    return composition(folder, con) is not None
+
+
+def company_id(con, name: str) -> int:
+    row = con.execute(f"SELECT id FROM companies WHERE lower({db.EN.format('name')}) = lower(?)", (name.strip(),)).fetchone()
+    return row[0] if row else con.execute("INSERT INTO companies (name) VALUES (?)", (i18n(name.strip()),)).lastrowid
 
 
 def load(folder: Path, con=None) -> dict:
     con = con or db.connect()
-    row = con.execute("SELECT o.*, c.name AS company_name, p.folder AS previous_folder FROM offers o "
-                      "JOIN companies c ON c.id = o.company_id LEFT JOIN offers p ON p.id = o.previous_offer_id "
-                      "WHERE o.folder = ?", (_folder_key(folder),)).fetchone()
-    if row is None:
-        raise FileNotFoundError(f"No offer for {Path(folder).name} in data/resume.db")
-    job = {"title": f"{row['company_name']} — {row['title']}", "posting_text": row["posting"],
-           "pdf_name": row["pdf_name"], "company": row["company_slug"], "url": row["link"],
-           "location": row["location"], "location_match": row["location_match"],
-           "french_version": bool(row["french_version"]), "sent": row["sent_at"],
-           "previous_version": row["previous_folder"].removeprefix("jobs/") if row["previous_folder"] else None,
-           "template_sha": row["template_sha"], "skipped_terms": json.loads(row["skipped_terms"] or "{}"),
-           "requirements": [], "overrides": []}
-    for i, r in enumerate(con.execute("SELECT * FROM requirements WHERE offer_id = ? ORDER BY id", (row["id"],)), 1):
-        rid = f"R{i:02d}"
-        req = {"id": rid, "section": r["section"], "priority": r["priority"], "quote": r["quote"],
-               "description": r["description"], "terms": [t for (t,) in con.execute(
-                   "SELECT term FROM requirement_terms WHERE requirement_id = ? ORDER BY rowid", (r["id"],))],
-               "reviewed": bool(r["reviewed"])}
-        if r["kind"] != "evidence":
-            req["kind"], req["min_years"] = r["kind"], r["min_years"]
-        if r["targets"]:
-            req["targets"] = r["targets"].split(",")
-        if r["note"]:
-            req["note"] = r["note"]
-        job["requirements"].append(req)
-        if r["override_status"]:
-            job["overrides"].append({"id": rid, "status": r["override_status"], "reason": r["override_reason"],
-                                     "pdf_quote": r["override_quote"]})
-    return {k: v for k, v in job.items() if v not in (None, {}, []) or k in ("requirements", "title", "posting_text")}
+    comp = composition(folder, con)
+    if comp is None:
+        raise FileNotFoundError(f"No composition for {Path(folder).name} in data/resume.db")
+    job = {"pdf_name": comp["pdf_name"], "sent": comp["sent_at"], "template_sha": comp["template_sha"],
+           "created_at": comp["created_at"], "requirements": []}
+    offer = con.execute("SELECT o.*, c.name AS company_name FROM offers o JOIN companies c ON c.id = o.company_id "
+                        "WHERE o.id = ?", (comp["offer_id"],)).fetchone() if comp["offer_id"] else None
+    if offer is None:
+        job["title"] = Path(folder).name
+        return {k: v for k, v in job.items() if v is not None}
+    company = tr(offer["company_name"])
+    loc = con.execute("SELECT city, country FROM locations WHERE id = ?", (offer["location_id"],)).fetchone()
+    job.update({"title": f"{company} — {offer['title']}", "posting_text": offer["posting"], "company": slugify(company),
+                "url": offer["link"], "location": f"{tr(loc['city'])}, {tr(loc['country'])}" if loc else None,
+                "french_version": offer["language"] == "fr" and not offer["english_mentioned"],
+                "skipped_terms": json.loads(offer["skipped_terms"] or "{}"), "offer_id": offer["id"]})
+    rows = con.execute("SELECT r.priority, r.min_years, k.keyword, s.type FROM requirements r "
+                       "JOIN skill_keywords k ON k.id = r.keyword_id JOIN skills s ON s.id = k.skill_id "
+                       "WHERE r.offer_id = ? ORDER BY r.priority DESC, r.id", (offer["id"],)).fetchall()
+    for r in rows:  # one requirement per keyword; one with min_years also gets a years check
+        base = {"section": "location" if r["type"] == "location" else "requirement",
+                "priority": "must_have" if r["priority"] >= 50 else "preferred",
+                "quote": r["keyword"], "description": r["keyword"], "reviewed": True}
+        job["requirements"].append({**base, "terms": [r["keyword"]], "targets": TARGETS.get(r["type"], ["skills", "experience"])})
+        if r["min_years"]:
+            job["requirements"].append({**base, "description": f"{r['min_years']:g}+ years of {r['keyword']}", "terms": [],
+                                        "kind": "years_experience", "min_years": r["min_years"]})
+    for i, req in enumerate(job["requirements"], 1):
+        req["id"] = f"R{i:02d}"
+    return {k: v for k, v in job.items() if v not in (None, {}) or k == "requirements"}
 
 
 def save(folder: Path, job: dict, con=None) -> int:
-    """Create or update the offer. Requirements are replaced, except on an offer that was already sent."""
+    """Create or update the folder's composition and its offer (job["offer_id"] reuses an existing offer, as a new
+    version does). The offer's requirements are replaced, except while this composition is sent."""
     own = con is None
     con = con or db.connect()
+    comp = composition(folder, con)
     name, _, title = job["title"].partition(" — ")
-    company = con.execute("SELECT id FROM companies WHERE name = ?", (name.strip(),)).fetchone()
-    company_id = company[0] if company else con.execute(
-        "INSERT INTO companies (name, kind) VALUES (?, 'prospect')", (name.strip(),)).lastrowid
-    posting = job.get("posting_text") or ""
-    from build_fr import ENGLISH_WORDS, FRENCH_WORDS  # language of the posting itself
-    language = "fr" if len(FRENCH_WORDS.findall(posting)) > 2 * len(ENGLISH_WORDS.findall(posting)) else "en"
-    unreviewed = any(not r.get("reviewed") for r in job.get("requirements", []))
-    status = "sent" if job.get("sent") else ("draft" if unreviewed or not job.get("requirements") else "ready")
-    previous = con.execute("SELECT id FROM offers WHERE folder = ?",
-                           (f"jobs/{job['previous_version']}",)).fetchone() if job.get("previous_version") else None
-    fields = {"company_id": company_id, "title": title or name, "link": job.get("url"), "pdf_name": job.get("pdf_name", "resume.pdf"),
-              "company_slug": job.get("company"), "language": language, "french_version": int(bool(job.get("french_version"))),
-              "location": job.get("location"), "location_match": job.get("location_match"), "posting": posting,
-              "status": status, "sent_at": job.get("sent"), "previous_offer_id": previous and previous[0],
-              "template_sha": job.get("template_sha"), "skipped_terms": json.dumps(job.get("skipped_terms") or {}, ensure_ascii=False)}
-    row = con.execute("SELECT id, status FROM offers WHERE folder = ?", (_folder_key(folder),)).fetchone()
-    if row:
-        oid, was_sent = row[0], row[1] == "sent"
-        con.execute(f"UPDATE offers SET {', '.join(f'{k} = ?' for k in fields)} WHERE id = ?", (*fields.values(), oid))
+    oid = job.get("offer_id") or (comp and comp["offer_id"])
+    if title:  # "Company — Title": a composition for an offer
+        posting = job.get("posting_text") or ""
+        import master  # late: master imports db_sync, which imports this module
+        fields = {"company_id": company_id(con, name), "title": title, "link": job.get("url"), "posting": posting,
+                  "language": posting_language(posting), "english_mentioned": int(english_mentioned(posting)),
+                  "location_id": master.location_id(con, job.get("location")),
+                  "skipped_terms": json.dumps(job.get("skipped_terms") or {}, ensure_ascii=False)}
+        if oid:
+            con.execute(f"UPDATE offers SET {', '.join(f'{k} = ?' for k in fields)} WHERE id = ?", (*fields.values(), oid))
+        else:
+            oid = con.execute(f"INSERT INTO offers ({', '.join(fields)}) VALUES ({', '.join('?' * len(fields))})",
+                              tuple(fields.values())).lastrowid
+    was_sent = bool(comp and comp["sent_at"])
+    values = (oid, job.get("pdf_name", "resume.pdf"), job.get("sent"), job.get("template_sha"))
+    if comp:
+        con.execute("UPDATE compositions SET offer_id = ?, pdf_name = ?, sent_at = ?, template_sha = ?, "
+                    "updated_at = datetime('now') WHERE id = ?", (*values, comp["id"]))
     else:
-        was_sent = False
-        fields.update(folder=_folder_key(folder), created_at=job.get("created_at") or date.today().isoformat())
-        oid = con.execute(f"INSERT INTO offers ({', '.join(fields)}) VALUES ({', '.join('?' * len(fields))})",
-                          tuple(fields.values())).lastrowid
-    if not was_sent:
-        old = [r for (r,) in con.execute("SELECT id FROM requirements WHERE offer_id = ?", (oid,))]
-        con.executemany("DELETE FROM requirement_terms WHERE requirement_id = ?", [(r,) for r in old])
-        con.execute("DELETE FROM offer_results WHERE offer_id = ?", (oid,))
-        con.execute("DELETE FROM requirements WHERE offer_id = ?", (oid,))
-        overrides = {o["id"]: o for o in job.get("overrides", [])}
-        for r in job.get("requirements", []):
-            o = overrides.get(r["id"], {})
-            rid = con.execute(
-                "INSERT INTO requirements (offer_id, section, priority, quote, description, kind, min_years, targets, "
-                "reviewed, note, override_status, override_reason, override_quote) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (oid, r["section"], r["priority"], r["quote"], r.get("description", ""), r.get("kind", "evidence"),
-                 r.get("min_years"), ",".join(r.get("targets", [])) or None, int(bool(r.get("reviewed"))), r.get("note"),
-                 o.get("status"), o.get("reason"), o.get("pdf_quote"))).lastrowid
-            for t in r.get("terms", []):
-                skill = con.execute("SELECT s.id FROM skills s LEFT JOIN skill_keywords k ON k.skill_id = s.id "
-                                    "WHERE lower(s.name_en) = lower(?) OR lower(k.keyword) = lower(?) LIMIT 1", (t, t)).fetchone()
-                con.execute("INSERT OR IGNORE INTO requirement_terms (requirement_id, term, skill_id) VALUES (?, ?, ?)",
-                            (rid, t, skill and skill[0]))
-    if job.get("sent") and not was_sent:
-        snapshot(con, oid, folder, job["sent"])
+        con.execute("INSERT INTO compositions (offer_id, pdf_name, sent_at, template_sha, folder) VALUES (?, ?, ?, ?, ?)",
+                    (*values, _folder_key(folder)))
+    if oid and not was_sent and "requirements" in job:
+        save_requirements(con, oid, job["requirements"])
     if own:
         con.commit()
         db.dump(con)
-    return oid
+    return oid or 0
 
 
-def snapshot(con, offer_id: int, folder: Path, sent: str) -> None:
-    """What the employer received, measured: the review's per-term results at the moment the offer is sent."""
-    review = json.loads(paths.review_json(folder).read_text(encoding="utf-8")) if paths.review_json(folder).exists() else {}
-    ids = [r for (r,) in con.execute("SELECT id FROM requirements WHERE offer_id = ? ORDER BY id", (offer_id,))]
-    con.execute("DELETE FROM offer_results WHERE offer_id = ?", (offer_id,))
-    for res in review.get("results", []):
-        i = int(res["id"][1:]) - 1
-        for t in res.get("terms", []) if 0 <= i < len(ids) else []:
-            con.execute("INSERT INTO offer_results (offer_id, requirement_id, term, status, found_in, snapshot_at) "
-                        "VALUES (?, ?, ?, ?, ?, ?)", (offer_id, ids[i], t["term"],
-                                                      t["status"] if t["status"] in ("met", "partial") else "missing",
-                                                      t.get("section"), sent))
+def save_requirements(con, offer_id: int, requirements: list[dict]) -> None:
+    """Old-style requirement dicts (terms, priority, section, min_years) -> one row per keyword, highest priority
+    and largest min_years kept when a keyword appears twice. A years requirement attaches to its terms."""
+    rows: dict[int, dict] = {}
+    for r in requirements:
+        kind = "location" if r.get("section") == "location" else "education" if DEGREE.search(r.get("quote", "")) else None
+        for term in r.get("terms", []):
+            kid = db.keyword_id(con, term, kind=kind)
+            row = rows.setdefault(kid, {"priority": 0, "min_years": None})
+            row["priority"] = max(row["priority"], db.MUST_HAVE if r.get("priority") == "must_have" else 0)
+            if r.get("kind") == "years_experience":
+                row["min_years"] = max(row["min_years"] or 0, r["min_years"])
+    con.execute("DELETE FROM requirements WHERE offer_id = ?", (offer_id,))
+    con.executemany("INSERT INTO requirements (offer_id, keyword_id, priority, min_years) VALUES (?, ?, ?, ?)",
+                    [(offer_id, kid, r["priority"], r["min_years"]) for kid, r in rows.items()])
 
 
 def all_folders(con=None) -> list[Path]:
     con = con or db.connect()
-    return [paths.ROOT / f for (f,) in con.execute("SELECT folder FROM offers ORDER BY created_at DESC, id DESC")]
+    return [paths.ROOT / f for (f,) in con.execute("SELECT folder FROM compositions ORDER BY created_at DESC, id DESC")]
 
 
 def read(arg: Path) -> dict:
@@ -152,17 +172,18 @@ def write(arg: Path, job: dict) -> None:
 
 
 def mark_sent(folder: Path, when: str | None = None) -> str:
-    """Record the day the job was sent: from then on it is frozen (no rebuild, edit or republish). Saving the offer as
-    sent also snapshots the review's results (offer_results), so the db keeps what the employer received."""
-    job = load(folder)
-    if job.get("sent"):
-        sys.exit(f"{Path(folder).name} was already sent on {job['sent']}")
+    """Record the day the job was sent: from then on it is frozen (no rebuild, edit or republish)."""
+    con = db.connect()
+    comp = composition(folder, con)
+    if comp["sent_at"]:
+        sys.exit(f"{Path(folder).name} was already sent on {comp['sent_at']}")
     day = date.fromisoformat(when) if when else date.today()
     if day > date.today():
         sys.exit(f"{day} is in the future")
-    job["sent"] = day.isoformat()
-    save(folder, job)
-    return job["sent"]
+    con.execute("UPDATE compositions SET sent_at = ?, updated_at = datetime('now') WHERE id = ?", (day.isoformat(), comp["id"]))
+    con.commit()
+    db.dump(con)
+    return day.isoformat()
 
 
 def main() -> None:
@@ -170,13 +191,15 @@ def main() -> None:
         sys.exit(__doc__)
     folder = paths.folder_arg(Path(sys.argv[2]))
     if not exists(folder):
-        sys.exit(f"No offer for {folder.name} in data/resume.db")
+        sys.exit(f"No composition for {folder.name} in data/resume.db")
     try:
         day = mark_sent(folder, sys.argv[3] if len(sys.argv) == 4 else None)
     except ValueError:
         sys.exit(f"Not a date: {sys.argv[3]} (use YYYY-MM-DD)")
     print(f"Marked {folder.name} as sent on {day}")
 
+
+assert slugify("Y Strategie") == "y-strategie" and slugify("Théodo") == "theodo"
 
 if __name__ == "__main__":
     main()

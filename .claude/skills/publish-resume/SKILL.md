@@ -21,7 +21,7 @@ This step only **sends the latest version to the portfolio** (repo or folder); t
 | `folder` | Copies the PDF to `publish.folder`, at `publish.path`. |
 | `git` | Commits it in a clone only the pipeline uses (`publish.clone`, default `<repo>-publish`), at `publish.path`, then pulls and pushes `publish.branch`. |
 
-`config.example.json` documents every field. The public link is `publish.url` (with `{site}`, `{company}`, `{file}` = the resume's file name); it is printed and stored on the offer in `data/resume.db` (`resume_url`, `published_at`; `cover_letter_url` stays empty, the letter is inside the same PDF).
+`config.example.json` documents every field. The public link is `publish.url` (with `{site}`, `{company}`, `{file}` = the resume's file name); it is printed and stored on the offer in `data/resume.db` (`offers.resume_url`: one link per offer; the cover letter is inside the same PDF).
 
 ## Always true, in every mode
 - **One PDF per application**, at the resume's link: the resume with its cover letter in the same file (`…-Resume-and-Cover-Letter.pdf`) when the letter is ready, otherwise the resume alone. The cover letter is never sent as a separate file.

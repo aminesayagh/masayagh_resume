@@ -16,3 +16,4 @@ Fullstack
 Odoo
 agentic
 onboard
+Hypeo

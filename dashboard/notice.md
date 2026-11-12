@@ -10,7 +10,7 @@ The backend for these is still to be decided. Each one is visible in the UI but 
 | Action | Where |
 |---|---|
 | Propose swap | Job page, "Gaps to work on" |
-| Interview notes (save) | Interview prep tab, every topic card |
+| Interview notes (save) | Interview prep tab, every topic card. The `interview_notes` table exists (one note per `requirements.id`), but it needs a `src/` command to write it, and interview.json topics (R01…) do not carry a `requirements.id` yet |
 
 **Wired:** New version (jobs list and job page "…" menus) runs `src/new_job.py --from jobs/<slug>` after a
 confirmation, then opens the new job. One run at a time (server lock). **Dropped:** Reopen (not needed).
@@ -24,23 +24,27 @@ results; the job is then frozen. Sent jobs show "Sent on <date>" instead.
 - Start / end dates (hard skills only): `set "<skill>" <start> [<end>]`; the dashboard checks the format and order first.
 - "+ add" keyword (en or fr): `keyword "<skill>" "<keyword>" <lang>`; only once the term has a type, and refused when
   the keyword already counts as another skill.
-- The page now links a term to its skills-table entry by name, then keyword, at read time, so a type or keyword added
-  later shows up even on sent offers (whose stored `requirement_terms.skill_id` is never updated).
+- Since the offer / composition schema (2026-11-12), a requirement points to a keyword, which belongs to one skill, so a
+  type or keyword added later shows on every job.
 
 ## Data the wireframes ask for but the database does not hold
 
 - **Education type added (2026-11-12),** but existing degree terms such as "Computer Science" are still typed
   `technical`: change them to education in the term drawer.
 - **No start dates.** 0 of 85 hard-skill entries have `start_at`, so every "your years" reads "start date needed".
-- **`composed_at` and `published_at` are empty on every offer.** The job page timeline shows only "created" and "sent".
-- **`cover_letter_url` is empty on every offer.** "Published cover letter →" never shows (only the resume URL exists).
+- **Timeline:** the schema keeps only the offer's `created_at` ("posting saved"), the composition's `created_at`
+  ("version created") and `sent_at`. `composed_at`, `published_at` and `cover_letter_url` were dropped (the cover
+  letter is inside the published PDF), so "Published cover letter →" never shows.
 - **No follow-up data.** The wireframe's "Follow up 18 Nov" / "Waiting reply" needs reply / interview / rejected
   dates that no table holds. Not built.
 - **No "preview if swaps accepted".** Nothing computes coverage after proposed swaps, so it is left out of the job page.
 - **No page thumbnails.** The Files card shows page counts; the documents drawer has the full PDF preview.
 - **"Print a one-page cheat sheet"** (Interview prep wireframe) was not in the spec: not built.
 
-## Data quality seen in the real jobs
+## Data quality seen in the real jobs (before 2026-11-12)
+
+The offers and compositions were dropped on 2026-11-12 (only the master resume was re-imported), so the points below
+apply to the 8 old job folders only, which have no rows in the db any more.
 
 - All 8 offers have `sent_at = 2026-11-11`, so "In progress", "With warnings" and the average coverage card are
   empty. Check whether every one was really sent that day.

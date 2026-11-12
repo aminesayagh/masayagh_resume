@@ -40,7 +40,7 @@ Use, in this order of authority: the user's latest explicit corrections in the c
 
 ## Language
 
-`cover.json` is always English: it is the letter that gets published and sent. When the offer (`data/resume.db`) has `"french_version": true`, also write `cover-fr.json`: the same letter in French (same facts and structure, professional register, consistent vouvoiement, `Madame, Monsieur,` unless a recipient is named, a concise formule de politesse ending the last paragraph and `closing` set to `""`). Build it with `src/build_fr.py jobs/<slug>`; it stays local.
+`cover.json` is always English: it is the letter that gets published and sent. When the job needs a French version (posting in French that doesn't mention English: `offers.language` = fr and `english_mentioned` = 0), also write `cover-fr.json`: the same letter in French (same facts and structure, professional register, consistent vouvoiement, `Madame, Monsieur,` unless a recipient is named, a concise formule de politesse ending the last paragraph and `closing` set to `""`). Build it with `src/build_fr.py jobs/<slug>`; it stays local.
 
 ## Plan before drafting
 

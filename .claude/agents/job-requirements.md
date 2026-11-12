@@ -34,7 +34,7 @@ Run every command from the repository root with `.venv/bin/python`.
   - `summary`: role, seniority or domain words (who the person is, not what they use).
 - `description`: a short plain summary.
 - `note`: optional, your reasoning when unsure.
-- "At least N years" / "N+ years": `{"line": 9, "kind": "years_experience", "min_years": 5, "priority": "must_have", "section": "requirement", "description": "5+ years of front-end development"}` with no terms.
+- "At least N years" / "N+ years": `{"line": 9, "kind": "years_experience", "min_years": 5, "terms": ["front-end"], "priority": "must_have", "section": "requirement", "description": "5+ years of front-end development"}`. It names the skill the years are about: a requirement is a keyword.
 
 ## Always include
 - A `location` pick for the job's location (often the `Location:` line at the top): `{"line": 2, "terms": ["Casablanca"], "priority": "must_have", "section": "location", "targets": ["summary"], "description": "Role based in Casablanca"}`. The location is never a skipped term.

@@ -60,8 +60,9 @@ def translation_memory() -> dict:
     if MEMORY.exists():
         memory.update(json.loads(MEMORY.read_text(encoding="utf-8")))
     con = db.connect()  # French of library lines and skills
-    memory.update({en: fr for en, fr in con.execute("SELECT text_en, text_fr FROM descriptions WHERE text_fr IS NOT NULL")})
-    memory.update({en: fr for en, fr in con.execute("SELECT name_en, name_fr FROM skills WHERE name_fr IS NOT NULL")})
+    for table, column in (("descriptions", "text"), ("skills", "name"), ("skill_layout", "label"), ("cover_paragraphs", "text")):
+        for (value,) in con.execute(f"SELECT {column} FROM {table} WHERE json_extract({column}, '$.fr') IS NOT NULL"):
+            memory.setdefault(db.tr(value), db.tr(value, "fr"))
     return memory  # skill names are lowercase: translate() also looks a label up in lowercase
 
 
@@ -94,8 +95,10 @@ def build(folder: Path) -> Path | None:
         con = db.connect()  # library lines and skills keep their French in the db, other strings in translations-fr.json
         rest = {}
         for en_text, fr_text in filled.items():
-            hit = con.execute("UPDATE descriptions SET text_fr = ? WHERE text_en = ?", (fr_text, en_text)).rowcount
-            hit += con.execute("UPDATE skills SET name_fr = ? WHERE name_en = lower(?)", (fr_text, en_text)).rowcount
+            hit = con.execute(f"UPDATE descriptions SET text = json_set(text, '$.fr', ?) WHERE {db.EN.format('text')} = ?",
+                              (fr_text, en_text)).rowcount
+            hit += con.execute(f"UPDATE skills SET name = json_set(name, '$.fr', ?) WHERE {db.EN.format('name')} = lower(?)",
+                               (fr_text, en_text)).rowcount
             if not hit:
                 rest[en_text] = fr_text
         con.commit()

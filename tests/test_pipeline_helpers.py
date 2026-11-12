@@ -18,6 +18,34 @@ import compose  # noqa: E402,F401  (its asserts check the pick: most offer terms
 import build_fr  # noqa: E402,F401  (its asserts check French-only posting detection)
 import skills_inventory  # noqa: E402,F401  (its asserts check skill splitting and year math)
 
+REPO = Path(__file__).resolve().parent.parent
+
+
+class FreshDb:
+    """A temporary db (never data/resume.db) holding the master resume, loaded from copies of default*.json."""
+
+    def __enter__(self):
+        import shutil
+        import db
+        import master
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        self.saved = (db.DB, db.DUMP, dict(master.FILES), master.STAMP)
+        db.DB, db.DUMP = self.root / "test.db", self.root / "test.sql"
+        for lang, path in dict(master.FILES).items():
+            shutil.copyfile(path, self.root / path.name)
+            master.FILES[lang] = self.root / path.name
+        master.STAMP = self.root / "stamp.json"
+        master.import_files(db.connect(empty=True))
+        return self.root
+
+    def __exit__(self, *exc):
+        import db
+        import master
+        db.DB, db.DUMP, files, master.STAMP = self.saved
+        master.FILES.update(files)
+        self.tmp.cleanup()
+
 
 class PublishModesTest(unittest.TestCase):
     """Runs publish_resume for real in modes none and folder, against a temporary config and job."""
@@ -176,7 +204,7 @@ class GapTableTest(unittest.TestCase):
 
 
 class SkillTypesTest(unittest.TestCase):
-    """The education type, its one-time table rebuild, and skills_inventory's type command. Temporary dbs only."""
+    """skills_inventory's type command and dates for hard skills only. Temporary dbs only."""
 
     def setUp(self):
         import db
@@ -197,28 +225,6 @@ class SkillTypesTest(unittest.TestCase):
         finally:
             sys.argv = argv
 
-    def test_old_check_is_rebuilt_keeping_rows_and_links(self):
-        import sqlite3
-        old = sqlite3.connect(self.db.DB)  # a db made before 'education' existed
-        old.executescript("""CREATE TABLE skills (id INTEGER PRIMARY KEY,
-          type TEXT NOT NULL CHECK (type IN ('technical', 'soft', 'language', 'location', 'design', 'ai')),
-          name_en TEXT NOT NULL UNIQUE, name_fr TEXT, start_at TEXT, end_at TEXT);
-          CREATE TABLE skill_keywords (skill_id INTEGER NOT NULL REFERENCES skills(id), keyword TEXT NOT NULL,
-          lang TEXT NOT NULL CHECK (lang IN ('en', 'fr')), PRIMARY KEY (keyword, lang));
-          INSERT INTO skills VALUES (7, 'technical', 'Computer Science', NULL, '2020', NULL);
-          INSERT INTO skill_keywords VALUES (7, 'informatique', 'fr');""")
-        old.commit()
-        old.close()
-        con = self.db.connect()
-        self.assertEqual(tuple(con.execute("SELECT id, type, name_en, start_at FROM skills").fetchone()),
-                         (7, "technical", "Computer Science", "2020"))
-        self.assertEqual(con.execute("PRAGMA foreign_key_check").fetchall(), [])
-        con.execute("UPDATE skills SET type = 'education' WHERE id = 7")  # allowed now
-        with self.assertRaises(sqlite3.IntegrityError):
-            con.execute("UPDATE skills SET type = 'nonsense' WHERE id = 7")
-        self.assertIn("REFERENCES skills(id)",
-                      con.execute("SELECT sql FROM sqlite_master WHERE name = 'skill_keywords'").fetchone()[0])
-
     def test_type_command_and_dates_for_hard_skills_only(self):
         self.db.connect().close()
         self.run_cli("type", "communication", "soft")  # a new term gets an entry with that type
@@ -230,69 +236,41 @@ class SkillTypesTest(unittest.TestCase):
         self.run_cli("set", "Git", "2016-03", "2024-06")
         self.run_cli("type", "Git", "education")  # leaving the hard types drops the dates
         con = self.db.connect()
-        rows = {r[0]: tuple(r[1:]) for r in con.execute("SELECT name_en, type, start_at, end_at FROM skills")}
+        rows = {r[0]: tuple(r[1:]) for r in con.execute(
+            "SELECT json_extract(name, '$.en'), type, start_at, end_at FROM skills")}
         self.assertEqual(rows, {"communication": ("soft", None, None), "git": ("education", None, None)})
         self.assertTrue(self.db.DUMP.exists())  # resume.sql (here test.sql) refreshed after each change
 
 
 
 class MarkSentTest(unittest.TestCase):
-    """offers.py sent: records the day, snapshots the results, and refuses a second time or a future day."""
+    """offers.py sent: records the day, and refuses a second time or a future day."""
 
-    def test_mark_sent_on_a_copy(self):
-        import shutil
-        import sqlite3
-        import db
+    def test_mark_sent_on_a_temporary_db(self):
         import offers
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            saved = (db.DB, db.DUMP)
-            shutil.copyfile(db.connect() and db.DB, root / "copy.db")  # a copy, never the real db
-            db.DB, db.DUMP = root / "copy.db", root / "copy.sql"
-            try:
-                con = sqlite3.connect(db.DB)
-                oid, folder = con.execute("SELECT id, folder FROM offers ORDER BY id LIMIT 1").fetchone()
-                con.execute("UPDATE offers SET sent_at = NULL, status = 'ready' WHERE id = ?", (oid,))
-                con.execute("DELETE FROM offer_results WHERE offer_id = ?", (oid,))
-                con.commit()
-                con.close()
-                job = offers.paths.ROOT / folder
-                with self.assertRaises(SystemExit):
-                    offers.mark_sent(job, "2999-01-01")  # never in the future
-                self.assertEqual(offers.mark_sent(job, "2026-11-10"), "2026-11-10")
-                self.assertEqual(offers.load(job)["sent"], "2026-11-10")
-                with self.assertRaises(SystemExit):
-                    offers.mark_sent(job)  # already sent
-                self.assertTrue(db.DUMP.exists())  # resume.sql (here copy.sql) refreshed
-            finally:
-                db.DB, db.DUMP = saved
-
-
-if __name__ == "__main__":
-    unittest.main()
+        with FreshDb() as root:
+            job = root / "acme-dev-v1"
+            offers.save(job, {"title": "Acme — Dev", "posting_text": "Build things.", "pdf_name": "A.pdf"})
+            with self.assertRaises(SystemExit):
+                offers.mark_sent(job, "2999-01-01")  # never in the future
+            self.assertEqual(offers.mark_sent(job, "2026-11-10"), "2026-11-10")
+            self.assertEqual(offers.load(job)["sent"], "2026-11-10")
+            with self.assertRaises(SystemExit):
+                offers.mark_sent(job)  # already sent
+            import db
+            self.assertTrue(db.DUMP.exists())  # resume.sql (here test.sql) refreshed
 
 
 class MasterTest(unittest.TestCase):
     """The master resume is generated from the db; hand edits are refused, db edits regenerate both files."""
 
     def setUp(self):
-        import shutil
-        import db
         import master
-        self.db, self.master = db, master
-        self.tmp = tempfile.TemporaryDirectory()
-        root = Path(self.tmp.name)
-        self.saved = (db.DB, db.DUMP, dict(master.FILES), master.STAMP)
-        shutil.copyfile(db.connect() and db.DB, root / "copy.db")  # a copy of the real db, never the db itself
-        db.DB, db.DUMP = root / "copy.db", root / "copy.sql"
-        master.FILES.update(en=root / "default.json", fr=root / "default-fr.json")
-        master.STAMP = root / "stamp.json"
-        master.write()
+        self.master, self.fresh = master, FreshDb()
+        self.fresh.__enter__()
 
     def tearDown(self):
-        self.db.DB, self.db.DUMP, files, self.master.STAMP = self.saved
-        self.master.FILES.update(files)
-        self.tmp.cleanup()
+        self.fresh.__exit__()
 
     def test_hand_edit_is_refused(self):
         path = self.master.FILES["en"]
@@ -308,58 +286,57 @@ class MasterTest(unittest.TestCase):
 
 
 class ComposeOnceTest(unittest.TestCase):
-    """compose.py writes the lines and their activities into content.json, and never recomposes a job."""
+    """compose.py picks each activity's line for the offer, writes text only, never recomposes a job; an agreed edit
+    joins its activity; a new version is composed again and gets the newest wording."""
 
     def test_first_composition_only(self):
         import json
         import shutil
         import compose
         import db
+        import db_sync
         import offers
         import paths
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            saved = (db.DB, db.DUMP)
-            shutil.copyfile(db.connect() and db.DB, root / "copy.db")  # a copy, never the real db
-            db.DB, db.DUMP = root / "copy.db", root / "copy.sql"
+        with FreshDb() as root:
+            con = db.connect()
+            base = "Integrated an AI agent experience that transforms"
+            aid = con.execute(f"SELECT activity_id FROM descriptions WHERE {db.EN.format('text')} LIKE ?", (base + "%",)).fetchone()[0]
+            variant = "Integrated Large Language Models into an AI agent that configures marketing campaigns."
+            db_sync.add_line(con, aid, "bullet", variant)  # a second approved wording of the same activity
+            con.commit()
+            folder = root / "acme-dev-v1"
+            paths.content(folder).parent.mkdir(parents=True)
+            shutil.copyfile(REPO / "template/content/default.json", paths.content(folder))
+            offers.save(folder, {"title": "Acme — Dev", "posting_text": "Large Language Models and APIs.",
+                                 "requirements": [{"id": "R01", "section": "requirement", "priority": "must_have",
+                                                   "quote": "Large Language Models and APIs.", "terms": ["Large Language Models"]}]})
+            compose.compose(folder)
+            content = json.loads(paths.content(folder).read_text(encoding="utf-8"))
+            hypeo = next(e for e in content["experience"] if e["company"].startswith("Phoenix"))
+            self.assertNotIn("activities", hypeo)  # the JSON holds text only
+            self.assertIn(variant, hypeo["bullets"])  # the variant with the offer's term
+            with self.assertRaises(SystemExit):
+                compose.compose(folder)  # already composed: refused
+            i = hypeo["bullets"].index(variant)  # an agreed edit: new wording; the db works out its activity
+            hypeo["bullets"][i] = variant.replace("Integrated", "Shipped")
+            paths.content(folder).write_text(json.dumps(content), encoding="utf-8")
+            db_sync.sync_job(folder)
+            find = f"SELECT activity_id FROM descriptions WHERE {db.EN.format('text')} = ?"
+            self.assertEqual(db.connect().execute(find, (hypeo["bullets"][i],)).fetchone()[0], aid)
+            import new_job  # a new version: same offer, lines composed again from the library
+            saved_new = (new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build)
+            new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build = root, root.parent, lambda *a, **k: None
             try:
-                folder = root / "acme-dev-v1"
-                paths.content(folder).parent.mkdir(parents=True)
-                shutil.copyfile(Path(__file__).resolve().parents[1] / "template/content/default.json", paths.content(folder))
-                offers.save(folder, {"title": "Acme — Dev", "posting_text": "Large Language Models and APIs.",
-                                     "requirements": [{"id": "R01", "section": "requirement", "priority": "must_have",
-                                                       "quote": "Large Language Models and APIs.", "description": "LLMs",
-                                                       "terms": ["Large Language Models"], "reviewed": True}]})
-                import db_sync
-                compose.compose(folder)
-                content = json.loads(paths.content(folder).read_text(encoding="utf-8"))
-                hypeo = next(e for e in content["experience"] if e["company"].startswith("Phoenix"))
-                self.assertNotIn("activities", hypeo)  # the JSON holds text only
-                self.assertIn("Large Language Models", " ".join(hypeo["bullets"]))  # the variant with the offer's term
-                with self.assertRaises(SystemExit):
-                    compose.compose(folder)  # already composed: refused
-                # an agreed edit: the AI-agent bullet gets new wording; the db works out its activity
-                con = db.connect()
-                i = next(i for i, b in enumerate(hypeo["bullets"]) if "Large Language Models" in b)
-                old_activity = con.execute("SELECT activity_id FROM descriptions WHERE text_en = ?", (hypeo["bullets"][i],)).fetchone()[0]
-                hypeo["bullets"][i] = hypeo["bullets"][i].replace("Integrated", "Shipped")
-                paths.content(folder).write_text(json.dumps(content), encoding="utf-8")
-                db_sync.sync_job(folder)
-                new_activity = db.connect().execute("SELECT activity_id FROM descriptions WHERE text_en = ?",
-                                                    (hypeo["bullets"][i],)).fetchone()[0]
-                self.assertEqual(new_activity, old_activity)
-                # a new version is composed again from the library: it gets the newest wording, the source keeps its own
-                import new_job
-                saved_new = (new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build)
-                new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build = root, root.parent, lambda *a, **k: None
-                try:
-                    v2 = new_job.new_version(folder)
-                finally:
-                    new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build = saved_new
-                self.assertEqual(v2.name, "acme-dev-v2")
-                v2_hypeo = next(e for e in json.loads(paths.content(v2).read_text(encoding="utf-8"))["experience"]
-                                if e["company"].startswith("Phoenix"))
-                self.assertIn(hypeo["bullets"][i], v2_hypeo["bullets"])  # the agreed edit, now the newest line
-                self.assertEqual(json.loads(paths.content(folder).read_text(encoding="utf-8")), content)  # v1 untouched
+                v2 = new_job.new_version(folder)
             finally:
-                db.DB, db.DUMP = saved
+                new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build = saved_new
+            self.assertEqual(v2.name, "acme-dev-v2")
+            self.assertEqual(offers.load(v2)["offer_id"], offers.load(folder)["offer_id"])  # one offer, two compositions
+            v2_hypeo = next(e for e in json.loads(paths.content(v2).read_text(encoding="utf-8"))["experience"]
+                            if e["company"].startswith("Phoenix"))
+            self.assertIn(hypeo["bullets"][i], v2_hypeo["bullets"])  # the agreed edit, now the newest line
+            self.assertEqual(json.loads(paths.content(folder).read_text(encoding="utf-8")), content)  # v1 untouched
+
+
+if __name__ == "__main__":
+    unittest.main()

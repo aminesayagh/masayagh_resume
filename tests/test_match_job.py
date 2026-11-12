@@ -7,7 +7,6 @@ from pathlib import Path
 from pypdf import PdfReader
 
 import check_pdf
-import db
 import match_job
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -83,7 +82,7 @@ class MatchJobTest(unittest.TestCase):
         job = json.loads((ROOT / "tests" / "fixtures" / "fictional-job.json").read_text(encoding="utf-8"))
         content = json.loads((ROOT / "template" / "content" / "default.json").read_text(encoding="utf-8"))
         pages = [p.extract_text() for p in PdfReader(ROOT / "template" / "build" / "resume.pdf").pages]
-        aliases = db.aliases()
+        aliases = {"APIs": ["API"]}  # the fixture's one synonym; tests never read the real db
         headings = check_pdf.template_headings(check_pdf.TEMPLATE)
         first = match_job.assess(job, pages, content, headings, aliases)
         self.assertEqual(first, match_job.assess(job, pages, content, headings, aliases))

@@ -138,7 +138,7 @@ Every job build also produces the cover letter, so a job folder always holds thr
 | `<stem>-Cover-Letter.pdf` | The cover letter, one page |
 | `<stem>-Resume-and-Cover-Letter.pdf` | The resume pages, then the cover letter page |
 
-The letter text lives in `jobs/<slug>/content/cover.json`. The first build creates it from the default letter in `data/resume.db` (paragraphs marked `default_order`, greeting and closing in `profile`), filling in the company and job title from the offer; an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
+The letter text lives in `jobs/<slug>/content/cover.json`. The first build creates it from the default letter in `data/resume.db` (the newest approved paragraph of each part; greeting and closing in `profile`, else plain ones; with none yet, the letter waits until it is drafted), filling in the company and job title from the offer; an empty `date` prints the build date. To tailor it, ask Claude to write the cover letter for the job (or run `/draft-cover-letter`): it follows `.claude/skills/draft-cover-letter/SKILL.md`, edits `cover.json` and rebuilds. After editing `cover.json` by hand, rebuild only the letter:
 
 ```bash
 .venv/bin/python src/build_cover.py jobs/company-role-v1

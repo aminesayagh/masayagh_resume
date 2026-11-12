@@ -6,8 +6,8 @@ Usage: python3 src/compose.py jobs/<slug>       (after the requirements are draf
 For each experience (master order) and each of its active activities, the line containing the most of the
 offer's requirement terms is chosen (a skill's keywords count as the term); on a tie, the most recently added
 line wins. Only experience descriptions and bullets change: summary, title and skills stay as they are.
-Writes jobs/<slug>/content/content.json (text only) and records in the db which library lines the offer uses (so a
-line approved later joins the right activity) and prints the choice per activity with its alternatives.
+Writes jobs/<slug>/content/content.json (text only) and records in the db which library lines the composition uses
+(offer_lines, so a line approved later joins the right activity); prints the choice per activity.
 """
 
 import json
@@ -52,25 +52,25 @@ def compose(folder: Path) -> dict:
         raise SystemExit("No requirements yet: draft them first, then compose.")
     content = json.loads(paths.content(folder).read_text(encoding="utf-8"))
     con = db.connect()
-    offer = con.execute("SELECT id FROM offers WHERE folder = ?", (f"jobs/{folder.name}",)).fetchone()[0]
-    if con.execute("SELECT composed_at FROM offers WHERE id = ?", (offer,)).fetchone()[0]:  # first composition only
+    comp = offers.composition(folder, con)["id"]
+    if con.execute("SELECT 1 FROM offer_lines WHERE composition_id = ?", (comp,)).fetchone():  # first composition only
         raise SystemExit("This job is already composed; its lines may hold edits approved for it. Change only the "
                          "lines we agree on (the next build records them in their activity).")
     patterns = term_patterns(job, db.aliases(con))
-    report = []
+    report, used = [], []
+    experiences = db_sync.experience_ids(con)
     for entry in content["experience"]:
         name = db_sync.company_name(entry)
-        exp = con.execute("SELECT e.id FROM experiences e JOIN companies c ON c.id = e.company_id WHERE c.name = ?",
-                          (name,)).fetchone()
+        exp = experiences.get(name.casefold())
         if exp is None:
             report.append(f"{name}: not in the library, left as it is")
             continue
         chosen = []  # library line ids, in resume order (description first)
         description, bullets = "", []
         for aid, label in con.execute("SELECT id, label FROM activities WHERE experience_id = ? AND active = 1 "
-                                      "ORDER BY sort_order", (exp[0],)).fetchall():
-            lines = [dict(r) for r in con.execute("SELECT id, kind, text_en, created_at FROM descriptions WHERE activity_id = ? "
-                                                  "AND status = 'approved'", (aid,))]
+                                      "ORDER BY sort_order", (exp,)).fetchall():
+            lines = [dict(r) for r in con.execute(f"SELECT id, kind, {db.EN.format('text')} AS text_en, text, created_at "
+                                                  "FROM descriptions WHERE activity_id = ? AND status = 'approved'", (aid,))]
             if not lines:
                 continue
             best, terms = choose(lines, patterns)
@@ -83,11 +83,10 @@ def compose(folder: Path) -> dict:
             report.append(f"{name} · {label}: line {best['id']} of {len(lines)}"
                           + (f" — terms: {', '.join(terms)}" if terms else " — no offer terms (most recent kept)"))
         entry["description"], entry["bullets"] = description, bullets
-        con.execute("DELETE FROM offer_lines WHERE offer_id = ? AND experience_id = ?", (offer, exp[0]))
-        con.executemany("INSERT INTO offer_lines VALUES (?, ?, ?, ?)",  # what this offer uses, kept in the db only
-                        [(offer, exp[0], i, line) for i, line in enumerate(chosen)])
+        used += chosen
+    con.executemany("INSERT INTO offer_lines VALUES (?, ?, ?)",  # what this composition uses, kept in the db only
+                    [(comp, i, line) for i, line in enumerate(used)])
     paths.content(folder).write_text(json.dumps(content, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    con.execute("UPDATE offers SET composed_at = date('now') WHERE id = ?", (offer,))
     con.commit()
     db.dump(con)
     print("\n".join(report))
