@@ -12,19 +12,24 @@ The backend for these is still to be decided. Each one is visible in the UI but 
 | Mark as sent | Jobs list "…" menu, job page main button |
 | Propose swap | Job page, "Gaps to work on" |
 | Interview notes (save) | Interview prep tab, every topic card |
-| Save start / end dates | Requirements page, term drawer (hard skills) |
-| Change a term's type | Requirements page, term drawer |
-| "+ add" keyword | Requirements page, term drawer |
 
 **Wired:** New version (jobs list and job page "…" menus) runs `src/new_job.py --from jobs/<slug>` after a
 confirmation, then opens the new job. One run at a time (server lock). **Dropped:** Reopen (not needed).
+
+**Wired (2026-11-12): the Requirements term drawer**, through `src/skills_inventory.py`:
+- Type: `type "<term>" <type>`; a term with no entry gets one. Leaving the hard types drops the dates.
+- Start / end dates (hard skills only): `set "<skill>" <start> [<end>]`; the dashboard checks the format and order first.
+- "+ add" keyword (en or fr): `keyword "<skill>" "<keyword>" <lang>`; only once the term has a type, and refused when
+  the keyword already counts as another skill.
+- The page now links a term to its skills-table entry by name, then keyword, at read time, so a type or keyword added
+  later shows up even on sent offers (whose stored `requirement_terms.skill_id` is never updated).
 
 ## Data the wireframes ask for but the database does not hold
 
 - **Degree requirements cannot be detected.** No field marks a requirement or interview topic as a degree, so the
   Interview prep "Quick facts" chip covers location requirements only (the `location` section in `review.json`).
-- **No `education` skill type.** The `skills.type` CHECK allows technical, soft, language, location, design, ai.
-  Degree terms such as "Computer Science" are typed `technical`, so they count as hard skills on the Requirements page.
+- **Education type added (2026-11-12),** but existing degree terms such as "Computer Science" are still typed
+  `technical`: change them to education in the term drawer.
 - **No start dates.** 0 of 85 hard-skill entries have `start_at`, so every "your years" reads "start date needed".
 - **`composed_at` and `published_at` are empty on every offer.** The job page timeline shows only "created" and "sent".
 - **`cover_letter_url` is empty on every offer.** "Published cover letter →" never shows (only the resume URL exists).
@@ -36,7 +41,7 @@ confirmation, then opens the new job. One run at a time (server lock). **Dropped
 
 ## Data quality seen in the real jobs
 
-- All 8 offers have `sent_at = 2026-11-11`, so "In progress", "Need you in Claude" and the average coverage card are
+- All 8 offers have `sent_at = 2026-11-11`, so "In progress", "With warnings" and the average coverage card are
   empty. Check whether every one was really sent that day.
 - The three Theodo jobs have no requirements, no location and no `review/interview.json`.
 - `theodo-software-engineer-fullstack-v1`: company name stored as lowercase "theodo" (the other two say "Theodo").

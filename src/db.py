@@ -16,6 +16,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DB = ROOT / "data" / "resume.db"
 DUMP = ROOT / "data" / "resume.sql"
+SKILL_TYPES = ("technical", "design", "ai", "soft", "language", "location", "education")
+HARD_TYPES = ("technical", "design", "ai")  # only these have start/end dates (years of experience)
+SKILLS_TABLE = ("CREATE TABLE skills (\n  id INTEGER PRIMARY KEY,\n"
+                f"  type TEXT NOT NULL CHECK (type IN ({', '.join(repr(t) for t in SKILL_TYPES)})),\n"
+                "  name_en TEXT NOT NULL UNIQUE,\n  name_fr TEXT,\n  start_at TEXT,\n  end_at TEXT\n)")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS companies (
@@ -107,14 +112,7 @@ CREATE TABLE IF NOT EXISTS cover_paragraph_skills (
   skill_id INTEGER NOT NULL REFERENCES skills(id),
   PRIMARY KEY (paragraph_id, skill_id)
 );
-CREATE TABLE IF NOT EXISTS skills (
-  id INTEGER PRIMARY KEY,
-  type TEXT NOT NULL CHECK (type IN ('technical', 'soft', 'language', 'location', 'design', 'ai')),
-  name_en TEXT NOT NULL UNIQUE,
-  name_fr TEXT,
-  start_at TEXT,
-  end_at TEXT
-);
+""" + SKILLS_TABLE.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS") + """;
 CREATE TABLE IF NOT EXISTS skill_keywords (
   skill_id INTEGER NOT NULL REFERENCES skills(id),
   keyword TEXT NOT NULL,
@@ -243,6 +241,15 @@ def connect(path: Path | None = None, empty: bool = False) -> sqlite3.Connection
         con.executescript("ALTER TABLE profile RENAME TO profile_old;"
                           "CREATE TABLE profile (id INTEGER PRIMARY KEY, key TEXT NOT NULL UNIQUE, text_en TEXT NOT NULL, text_fr TEXT);"
                           "INSERT INTO profile SELECT * FROM profile_old; DROP TABLE profile_old;")
+    sql = con.execute("SELECT sql FROM sqlite_master WHERE name = 'skills'").fetchone()[0]
+    if "'education'" not in sql:  # skills had no education type (degrees were typed technical): rebuild its CHECK
+        con.commit()
+        con.execute("PRAGMA foreign_keys = OFF")  # other tables reference skills(id); SQLite's table-rebuild procedure
+        con.executescript("BEGIN;" + SKILLS_TABLE.replace("CREATE TABLE skills", "CREATE TABLE skills_new") + ";"
+                          "INSERT INTO skills_new (id, type, name_en, name_fr, start_at, end_at) "
+                          "SELECT id, type, name_en, name_fr, start_at, end_at FROM skills;"
+                          "DROP TABLE skills; ALTER TABLE skills_new RENAME TO skills; COMMIT;")
+        con.execute("PRAGMA foreign_keys = ON")
     return con
 
 

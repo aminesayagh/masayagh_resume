@@ -82,8 +82,8 @@ const todoLine = (j) => {
     </el-col>
     <el-col :span="6">
       <el-card shadow="hover" class="kpi" @click="chip = 'warnings'">
-        <div class="kpi-label">Need you in Claude</div>
-        <div class="kpi-value">{{ cards.need_claude ?? '—' }}</div>
+        <div class="kpi-label">With warnings</div>
+        <div class="kpi-value">{{ cards.with_warnings ?? '—' }}</div>
         <div class="muted">in progress, with warnings</div>
       </el-card>
     </el-col>
@@ -147,7 +147,7 @@ const todoLine = (j) => {
           <template #reference><span class="todo">{{ todoLine(row) }}</span></template>
           <div v-for="(n, i) in row.notes" :key="i" class="note">
             <el-tag size="small" :type="n.severity === 'info' ? 'info' : 'warning'">{{ n.severity }}</el-tag>
-            {{ n.text }} <span class="ask">→ {{ n.ask }}</span>
+            {{ n.text }}
           </div>
         </el-popover>
         <span v-else class="muted">No warnings</span>
@@ -200,7 +200,6 @@ a.company:hover { color: var(--el-color-primary); }
 .board-card { cursor: pointer; }
 .todo { cursor: help; border-bottom: 1px dotted #909399; }
 .note { margin: 6px 0; font-size: 13px; }
-.ask { color: var(--el-color-primary); }
 .board-card { margin-bottom: 10px; }
 .frozen { opacity: 0.6; }
 :deep(.el-table tr.frozen td) { color: #a8abb2; background: #fafafa; }

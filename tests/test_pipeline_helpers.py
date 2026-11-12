@@ -174,6 +174,67 @@ class GapTableTest(unittest.TestCase):
         self.assertIn("automation | missing | skills, experience", rows[2])
 
 
+
+class SkillTypesTest(unittest.TestCase):
+    """The education type, its one-time table rebuild, and skills_inventory's type command. Temporary dbs only."""
+
+    def setUp(self):
+        import db
+        self.db, self.tmp = db, tempfile.TemporaryDirectory()
+        self.saved = (db.DB, db.DUMP)
+        root = Path(self.tmp.name)
+        db.DB, db.DUMP = root / "test.db", root / "test.sql"  # never the real data/resume.db
+
+    def tearDown(self):
+        self.db.DB, self.db.DUMP = self.saved
+        self.tmp.cleanup()
+
+    def run_cli(self, *args):
+        argv = sys.argv
+        sys.argv = ["skills_inventory.py", *args]
+        try:
+            skills_inventory.main()
+        finally:
+            sys.argv = argv
+
+    def test_old_check_is_rebuilt_keeping_rows_and_links(self):
+        import sqlite3
+        old = sqlite3.connect(self.db.DB)  # a db made before 'education' existed
+        old.executescript("""CREATE TABLE skills (id INTEGER PRIMARY KEY,
+          type TEXT NOT NULL CHECK (type IN ('technical', 'soft', 'language', 'location', 'design', 'ai')),
+          name_en TEXT NOT NULL UNIQUE, name_fr TEXT, start_at TEXT, end_at TEXT);
+          CREATE TABLE skill_keywords (skill_id INTEGER NOT NULL REFERENCES skills(id), keyword TEXT NOT NULL,
+          lang TEXT NOT NULL CHECK (lang IN ('en', 'fr')), PRIMARY KEY (keyword, lang));
+          INSERT INTO skills VALUES (7, 'technical', 'Computer Science', NULL, '2020', NULL);
+          INSERT INTO skill_keywords VALUES (7, 'informatique', 'fr');""")
+        old.commit()
+        old.close()
+        con = self.db.connect()
+        self.assertEqual(tuple(con.execute("SELECT id, type, name_en, start_at FROM skills").fetchone()),
+                         (7, "technical", "Computer Science", "2020"))
+        self.assertEqual(con.execute("PRAGMA foreign_key_check").fetchall(), [])
+        con.execute("UPDATE skills SET type = 'education' WHERE id = 7")  # allowed now
+        with self.assertRaises(sqlite3.IntegrityError):
+            con.execute("UPDATE skills SET type = 'nonsense' WHERE id = 7")
+        self.assertIn("REFERENCES skills(id)",
+                      con.execute("SELECT sql FROM sqlite_master WHERE name = 'skill_keywords'").fetchone()[0])
+
+    def test_type_command_and_dates_for_hard_skills_only(self):
+        self.db.connect().close()
+        self.run_cli("type", "communication", "soft")  # a new term gets an entry with that type
+        with self.assertRaises(SystemExit):  # only hard skills have dates
+            self.run_cli("set", "communication", "2020-01")
+        with self.assertRaises(SystemExit):
+            self.run_cli("type", "communication", "nonsense")
+        self.run_cli("type", "Git", "technical")
+        self.run_cli("set", "Git", "2016-03", "2024-06")
+        self.run_cli("type", "Git", "education")  # leaving the hard types drops the dates
+        con = self.db.connect()
+        rows = {r[0]: tuple(r[1:]) for r in con.execute("SELECT name_en, type, start_at, end_at FROM skills")}
+        self.assertEqual(rows, {"communication": ("soft", None, None), "Git": ("education", None, None)})
+        self.assertTrue(self.db.DUMP.exists())  # resume.sql (here test.sql) refreshed after each change
+
+
 if __name__ == "__main__":
     unittest.main()
 

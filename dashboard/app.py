@@ -2,9 +2,9 @@
 
 Run from the repo root:  python3 start.py   (or .venv/bin/python -m uvicorn dashboard.app:app --port 8000 after a build)
 The app itself only reads: data/resume.db is opened with mode=ro and jobs/ is only read.
-The one write action is "New version", which runs src/new_job.py --from (so the script's rules hold: the source folder,
-sent or not, is never changed). Every other write action in the UI is shown disabled ("not wired yet"); fixes happen
-in Claude.
+Writes run src/ scripts, so their rules hold: "New version" runs src/new_job.py --from (the source folder, sent or not,
+is never changed) and the Requirements term drawer runs src/skills_inventory.py. Every other write action in the UI is
+shown disabled ("not wired yet").
 """
 
 import json
@@ -17,6 +17,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pypdf import PdfReader
@@ -33,19 +34,6 @@ WRITE_LOCK = threading.Lock()  # one script at a time: two new versions at once 
 DIST = Path(__file__).parent / "web" / "dist"
 MAX_PAGES = 3
 BUILD_PARTS = {"resume": "Resume", "cover": "Cover letter", "resume-fr": "French resume", "cover-fr": "French cover letter"}
-
-# What to ask Claude for each finding code of the last build (review.json). Unknown codes fall back to a generic ask.
-ASK = {
-    "job_title": "ask Claude to align the resume title with the posting",
-    "field_missing": "ask Claude why the heading is missing from the PDF",
-    "meta_author": "ask Claude to set the PDF author",
-    "repeated_line": "nothing to do unless a parser misreads it",
-    "measurable": "ask Claude for measurable results you truthfully have",
-    "repeated_opener": "ask Claude to vary the verbs",
-    "experience_years": "nothing to do",
-    "date_overlap": "nothing to do unless the dates are wrong",
-}
-
 
 def ro() -> sqlite3.Connection:
     """The only way this app opens the database: read only, never migrated or restored (unlike src/db.connect)."""
@@ -69,40 +57,34 @@ def pdf(folder: Path, job: dict, kind: str = "resume", lang: str = "en") -> Path
 
 
 def build_notes(folder: Path, job: dict, review: dict) -> list[dict]:
-    """Warnings and info from the last build, each with what to ask Claude. Text only: the app fixes nothing."""
+    """Warnings and info from the last build. Text only: what to do about them is the user's call."""
     notes = []
     if not job.get("requirements"):
-        notes.append({"severity": "warning", "text": "No requirements yet", "ask": "ask Claude to draft them"})
+        notes.append({"severity": "warning", "text": "No requirements yet"})
     elif review.get("unreviewed"):
-        notes.append({"severity": "info", "text": f"{review['unreviewed']} requirements not reviewed",
-                      "ask": "ask Claude to review them"})
+        notes.append({"severity": "info", "text": f"{review['unreviewed']} requirements not reviewed"})
     # build.json: each built part's warnings, saying WHY a part is not ready. Jobs built before it existed (and sent
     # jobs, never rebuilt) have no file: fall back to the '_' file alone.
     build = load_json(paths.build_json(folder))
     if pdf(folder, job).name.startswith("_") and not (build.get("resume") or {}).get("warnings"):
-        notes.append({"severity": "warning", "text": "Resume marked not ready ('_' file)",
-                      "ask": "ask Claude to finish and rebuild it"})
+        notes.append({"severity": "warning", "text": "Resume marked not ready ('_' file)"})
     for part, label in BUILD_PARTS.items():
         built = build.get(part) or {}
         ready = built.get("ready", True)
         for warning in built.get("warnings", []):
             notes.append({"severity": "info" if ready else "warning",
-                          "text": f"{label}{'' if ready else ' not ready'}: {warning}",
-                          "ask": "ask Claude to fix it" + ("" if ready else ", then rebuild")})
+                          "text": f"{label}{'' if ready else ' not ready'}: {warning}"})
     pages = len((review.get("pdf_check") or {}).get("pages", []))
     if pages > MAX_PAGES:
-        notes.append({"severity": "warning", "text": f"Resume is {pages} pages (target {MAX_PAGES})",
-                      "ask": "ask Claude to trim it"})
+        notes.append({"severity": "warning", "text": f"Resume is {pages} pages (target {MAX_PAGES})"})
     title = review.get("job_title") or {}
     if title and not title.get("match"):
-        notes.append({"severity": title.get("severity", "warning"), "text": title["message"], "ask": ASK["job_title"]})
+        notes.append({"severity": title.get("severity", "warning"), "text": title["message"]})
     for part in ("pdf_check", "spelling", "style"):
         for f in (review.get(part) or {}).get("findings", []):
-            notes.append({"severity": f["severity"], "text": f["message"],
-                          "ask": ASK.get(f.get("code"), "ask Claude about it")})
+            notes.append({"severity": f["severity"], "text": f["message"]})
     if job.get("french_version") and not pdf(folder, job, lang="fr").exists():
-        notes.append({"severity": "warning", "text": "Posting is in French: French version needed",
-                      "ask": "ask Claude to build it"})
+        notes.append({"severity": "warning", "text": "Posting is in French: French version needed"})
     order = {"error": 0, "warning": 1, "info": 2}
     return sorted(notes, key=lambda n: order.get(n["severity"], 3))
 
@@ -137,7 +119,7 @@ def cards(jobs: list[dict], today: date | None = None) -> dict:
     covered = [j["must_have"] for j in open_ if j["must_have"] is not None]
     return {
         "in_progress": len(open_),
-        "need_claude": sum(j["warnings"] > 0 for j in open_),
+        "with_warnings": sum(j["warnings"] > 0 for j in open_),
         "sent_30_days": sum(bool(j["sent"]) and j["sent"] >= since for j in jobs),
         "avg_must_have": round(sum(covered) / len(covered), 2) if covered else None,
     }
@@ -246,27 +228,34 @@ def api_interview(slug: str):
     }
 
 
-HARD = ("technical", "design", "ai")  # hard skills; soft, language and location never get dates or a level
+HARD = ("technical", "design", "ai")  # hard skills; soft, language, location and education never get dates or a level
+SKILL_TYPES = HARD + ("soft", "language", "location", "education")  # same as src/db.py SKILL_TYPES
 RANK = {"met": 3, "partial": 2, "uncertain": 1, "missing": 0}
 
 
 def requirement_terms() -> dict:
-    """Every posting term across jobs (case-insensitive), typed through requirement_terms.skill_id -> skills.type,
-    with per job its best status and wording from review.json (exact, or synonym when only a keyword matched)."""
+    """Every posting term across jobs (case-insensitive), typed by its skills-table entry, with per job its best status
+    and wording from review.json (exact, or synonym when only a keyword matched).
+    A term's entry is found by name, then by keyword, at read time (the rule offers.save uses), not through the stored
+    requirement_terms.skill_id: sent offers are never saved again, so a type or keyword added later still shows."""
     with ro() as con:
-        rows = con.execute("SELECT rt.term, rt.skill_id, s.type, s.start_at, s.end_at, o.folder FROM requirement_terms rt "
-                           "JOIN requirements r ON r.id = rt.requirement_id JOIN offers o ON o.id = r.offer_id "
-                           "LEFT JOIN skills s ON s.id = rt.skill_id").fetchall()
-        keywords = {}
+        rows = con.execute("SELECT rt.term, o.folder FROM requirement_terms rt JOIN requirements r ON r.id = rt.requirement_id "
+                           "JOIN offers o ON o.id = r.offer_id").fetchall()
+        skills = {sid: {"id": sid, "name": name, "type": typ, "start": start, "end": end, "keywords": []}
+                  for sid, name, typ, start, end in con.execute("SELECT id, name_en, type, start_at, end_at FROM skills")}
         for sid, kw, lang in con.execute("SELECT skill_id, keyword, lang FROM skill_keywords ORDER BY lang, keyword"):
-            keywords.setdefault(sid, []).append({"keyword": kw, "lang": lang})
+            skills[sid]["keywords"].append({"keyword": kw, "lang": lang})
         hard = con.execute(f"SELECT count(*), count(start_at) FROM skills WHERE type IN {HARD}").fetchone()
         jobs = {f.name: summary(f, con) for f in offers.all_folders(con)}
+    by_name = {s["name"].casefold(): s for s in skills.values()}
+    by_keyword = {k["keyword"].casefold(): s for s in skills.values() for k in s["keywords"]}
 
     terms = {}
-    for term, sid, typ, start, end, folder in rows:
-        t = terms.setdefault(term.casefold(), {"term": term, "skill_id": sid, "type": typ, "start": start, "end": end,
-                                               "jobs": {}})
+    for term, folder in rows:
+        skill = by_name.get(term.casefold()) or by_keyword.get(term.casefold()) or {}
+        t = terms.setdefault(term.casefold(), {"term": term, "skill": skill.get("name"), "type": skill.get("type"),
+                                               "start": skill.get("start"), "end": skill.get("end"),
+                                               "keywords": skill.get("keywords", []), "jobs": {}})
         t["jobs"].setdefault(folder.removeprefix("jobs/"), None)
     for slug in jobs:  # per job: best status of the term and how the resume words it
         for r in load_json(paths.review_json(paths.JOBS / slug)).get("results", []):
@@ -293,7 +282,7 @@ def requirement_terms() -> dict:
             "term": t["term"], "type": t["type"], "hard": is_hard, "jobs": len(asked), **counts,
             "synonym": any(a["wording"] == "synonym" for a in asked),
             "experience": skills_inventory.label(skills_inventory.years(t)) if is_hard else None,
-            "start": t["start"], "end": t["end"], "keywords": keywords.get(t["skill_id"], []), "asked": asked,
+            "skill": t["skill"], "start": t["start"], "end": t["end"], "keywords": t["keywords"], "asked": asked,
         })
     out.sort(key=lambda t: (-t["jobs"], t["term"].casefold()))
     return {"terms": out, "jobs": len(jobs), "hard_entries": hard[0], "hard_with_start": hard[1]}
@@ -304,18 +293,24 @@ def api_requirements():
     return requirement_terms()
 
 
+def run_script(*args: str, timeout: int = 900) -> subprocess.CompletedProcess:
+    """Run one src/ script (the dashboard's only way to write). One at a time: two runs could clash on the same db."""
+    if not WRITE_LOCK.acquire(blocking=False):
+        raise HTTPException(409, "Another change is still running; wait for it to finish")
+    try:
+        return subprocess.run([str(PYTHON), *args], cwd=ROOT, capture_output=True, text=True, timeout=timeout)
+    finally:
+        WRITE_LOCK.release()
+
+
 def new_version(slug: str) -> dict:
-    """Copy the job into its next -vN folder with src/new_job.py --from (keeps its tailoring, drops the sent date)."""
+    """Copy the job into its next -vN folder with src/new_job.py --from: summary, title, skills and cover letters are
+    copied, the experience lines are composed again from the library (kept as they are when the job has no
+    requirements), and the sent date is dropped. The source folder is never changed."""
     with ro() as con:
         if "/" in slug or slug.startswith(".") or not offers.exists(paths.JOBS / slug, con):
             raise HTTPException(404, "No such job")
-    if not WRITE_LOCK.acquire(blocking=False):
-        raise HTTPException(409, "Another new version is being created; wait for it to finish")
-    try:
-        result = subprocess.run([str(PYTHON), "src/new_job.py", "--from", f"jobs/{slug}"], cwd=ROOT,
-                                capture_output=True, text=True, timeout=900)
-    finally:
-        WRITE_LOCK.release()
+    result = run_script("src/new_job.py", "--from", f"jobs/{slug}")
     created = re.search(r"^Created jobs/(\S+) from ", result.stdout, re.M)
     return {"ok": result.returncode == 0 and bool(created), "slug": created[1] if created else None,
             "output": (result.stdout + result.stderr).strip()}
@@ -324,6 +319,74 @@ def new_version(slug: str) -> dict:
 @app.post("/api/jobs/{slug}/new-version")
 def api_new_version(slug: str):
     return new_version(slug)
+
+
+# Requirements page, term drawer: type, dates (hard skills) and keywords, through src/skills_inventory.py.
+TEXT = r"^[^\n\r]+$"  # one line, not empty
+MONTH = r"^\d{4}(-(0[1-9]|1[0-2]))?$"  # YYYY or YYYY-MM, as skills_inventory expects
+
+
+class TypeChange(BaseModel):
+    term: str = Field(max_length=100, pattern=TEXT)
+    type: str
+
+
+class Dates(BaseModel):
+    skill: str = Field(max_length=100, pattern=TEXT)
+    start: str = Field(pattern=MONTH)
+    end: str | None = Field(default=None, pattern=MONTH)
+
+
+class Keyword(BaseModel):
+    skill: str = Field(max_length=100, pattern=TEXT)
+    keyword: str = Field(max_length=80, pattern=TEXT)
+    lang: str = Field(default="en", pattern="^(en|fr)$")
+
+
+def skill_named(name: str) -> sqlite3.Row | None:
+    with ro() as con:
+        return con.execute("SELECT id, name_en, type FROM skills WHERE lower(name_en) = lower(?)", (name,)).fetchone()
+
+
+def script_result(result: subprocess.CompletedProcess) -> dict:
+    return {"ok": result.returncode == 0, "output": (result.stdout + result.stderr).strip()}
+
+
+@app.post("/api/skills/type")
+def api_skill_type(body: TypeChange):
+    """Give a term (or its skill) a type; a term with no entry gets one, with that type and no dates."""
+    if body.type not in SKILL_TYPES:
+        raise HTTPException(422, f"Unknown type; use one of: {', '.join(SKILL_TYPES)}")
+    return script_result(run_script("src/skills_inventory.py", "type", body.term.strip(), body.type))
+
+
+@app.post("/api/skills/dates")
+def api_skill_dates(body: Dates):
+    skill = skill_named(body.skill)
+    if skill is None:
+        raise HTTPException(404, "No such skill: give the term a type first")
+    if skill["type"] not in HARD:
+        raise HTTPException(422, "Only hard skills (technical, design, AI) have dates")
+    if body.end and skills_inventory.months(body.end, end_of_period=True) < skills_inventory.months(body.start):
+        raise HTTPException(422, "The end date is before the start date")
+    return script_result(run_script("src/skills_inventory.py", "set", skill["name_en"], body.start,
+                                    *([body.end] if body.end else [])))
+
+
+@app.post("/api/skills/keyword")
+def api_skill_keyword(body: Keyword):
+    skill = skill_named(body.skill)
+    if skill is None:  # the keyword command would create the skill typed 'technical'; ask for the type first
+        raise HTTPException(404, "No such skill: give the term a type first")
+    keyword = body.keyword.strip()
+    with ro() as con:
+        taken = con.execute("SELECT s.name_en FROM skill_keywords k JOIN skills s ON s.id = k.skill_id "
+                            "WHERE lower(k.keyword) = lower(?) AND k.lang = ? UNION "
+                            "SELECT name_en FROM skills WHERE lower(name_en) = lower(?)",
+                            (keyword, body.lang, keyword)).fetchone()
+    if taken:
+        raise HTTPException(409, f"'{keyword}' already counts as {taken[0]}")
+    return script_result(run_script("src/skills_inventory.py", "keyword", skill["name_en"], keyword, body.lang))
 
 
 @app.get("/files/{slug}/{name:path}")

@@ -30,14 +30,14 @@ class CardsTest(unittest.TestCase):
         jobs = [job(must_have=0.6, warnings=2), job(must_have=None), job(status="sent", sent="2026-11-01", must_have=1.0),
                 job(status="sent", sent="2026-09-01")]
         self.assertEqual(app.cards(jobs, today=date(2026, 11, 11)),
-                         {"in_progress": 2, "need_claude": 1, "sent_30_days": 1, "avg_must_have": 0.6})
+                         {"in_progress": 2, "with_warnings": 1, "sent_30_days": 1, "avg_must_have": 0.6})
 
     def test_nothing_to_average(self):
         self.assertIsNone(app.cards([job(status="sent", sent="2026-11-01")])["avg_must_have"])
 
 
 class BuildNotesTest(unittest.TestCase):
-    def test_warnings_first_each_with_an_ask(self):
+    def test_warnings_first(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / "acme-dev-v1"
             review = {"pdf_check": {"pages": [{}] * 4, "findings": [{"severity": "info", "code": "meta_author", "message": "m"}]},
@@ -47,7 +47,7 @@ class BuildNotesTest(unittest.TestCase):
         texts = [n["text"] for n in notes]
         self.assertIn("Resume is 4 pages (target 3)", texts)
         self.assertIn("Posting is in French: French version needed", texts)
-        self.assertTrue(all(n["ask"] for n in notes))  # unknown codes still say what to ask Claude
+        self.assertTrue(all(set(n) == {"severity", "text"} for n in notes))  # warnings only, no advice
 
     def test_build_json_says_why_not_ready(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -66,7 +66,7 @@ class BuildNotesTest(unittest.TestCase):
 
     def test_no_requirements(self):
         notes = app.build_notes(Path("/nonexistent"), {}, {})
-        self.assertEqual(notes, [{"severity": "warning", "text": "No requirements yet", "ask": "ask Claude to draft them"}])
+        self.assertEqual(notes, [{"severity": "warning", "text": "No requirements yet"}])
 
 
 @unittest.skipUnless(app.DB.exists(), "no data/resume.db")
@@ -152,6 +152,39 @@ class ApiTest(unittest.TestCase):
             with app.WRITE_LOCK:  # one already running
                 self.assertEqual(self.client.post(f"/api/jobs/{slug}/new-version").status_code, 409)
             run.assert_not_called()
+
+    def test_term_drawer_writes_go_through_skills_inventory(self):
+        """The script is mocked: nothing is written. Checks validation, guards and the exact commands."""
+        from unittest import mock
+        ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
+        hard = {"name_en": "Git", "type": "technical"}
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            post = self.client.post
+            self.assertEqual(post("/api/skills/type", json={"term": "communication", "type": "soft"}).json()["ok"], True)
+            self.assertEqual(run.call_args.args[0][1:], ["src/skills_inventory.py", "type", "communication", "soft"])
+            self.assertEqual(post("/api/skills/type", json={"term": "x", "type": "nonsense"}).status_code, 422)
+            self.assertEqual(post("/api/skills/type", json={"term": "a\nb", "type": "soft"}).status_code, 422)
+
+            with mock.patch.object(app, "skill_named", return_value=hard):
+                post("/api/skills/dates", json={"skill": "Git", "start": "2016-03", "end": "2024-06"})
+                self.assertEqual(run.call_args.args[0][1:], ["src/skills_inventory.py", "set", "Git", "2016-03", "2024-06"])
+                for bad in ({"start": "2016-13"}, {"start": "March 2016"}, {"start": "2024", "end": "2016"}):
+                    self.assertEqual(post("/api/skills/dates", json={"skill": "Git", **bad}).status_code, 422, bad)
+            with mock.patch.object(app, "skill_named", return_value={"name_en": "communication", "type": "soft"}):
+                self.assertEqual(post("/api/skills/dates", json={"skill": "communication", "start": "2020"}).status_code, 422)
+            with mock.patch.object(app, "skill_named", return_value=None):  # no entry: type it first
+                self.assertEqual(post("/api/skills/dates", json={"skill": "x", "start": "2020"}).status_code, 404)
+                self.assertEqual(post("/api/skills/keyword", json={"skill": "x", "keyword": "y"}).status_code, 404)
+            calls = run.call_count
+
+            with app.ro() as con:  # a keyword already used by a skill is refused
+                taken = con.execute("SELECT s.name_en, k.keyword, k.lang FROM skill_keywords k "
+                                    "JOIN skills s ON s.id = k.skill_id LIMIT 1").fetchone()
+            if taken:
+                with mock.patch.object(app, "skill_named", return_value=hard):
+                    r = post("/api/skills/keyword", json={"skill": "Git", "keyword": taken[1].upper(), "lang": taken[2]})
+                self.assertEqual(r.status_code, 409)
+            self.assertEqual(run.call_count, calls)  # refused requests ran nothing
 
     def test_skills_redirects_to_requirements(self):
         r = self.client.get("/skills", follow_redirects=False)

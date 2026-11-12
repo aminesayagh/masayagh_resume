@@ -1,11 +1,13 @@
 <script setup>
 // Requirements ( /requirements, was /skills ): every posting term across jobs, typed from the skills table.
-// Posting terms are requirements, not skills. Read only: type, dates and keywords are not editable yet.
-import { computed, onMounted, ref } from 'vue'
+// Posting terms are requirements, not skills. The term drawer edits a term's type, dates (hard skills) and keywords
+// through src/skills_inventory.py on the server.
+import { computed, onMounted, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const data = ref(null)
 const error = ref('')
-onMounted(async () => {
+async function load() {
   try {
     const res = await fetch('/api/requirements')
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
@@ -13,10 +15,12 @@ onMounted(async () => {
   } catch (e) {
     error.value = `Could not load the requirements: ${e.message}`
   }
-})
+}
+onMounted(load)
 
 const TYPE_LABEL = { technical: 'hard skill', design: 'hard skill · design', ai: 'hard skill · AI', soft: 'soft skill',
-  language: 'language', location: 'location' }
+  language: 'language', location: 'location', education: 'education' }
+const HARD = ['technical', 'design', 'ai']
 const typeLabel = (t) => TYPE_LABEL[t.type] ?? 'not typed'
 const TABS = {
   all: ['All', () => true],
@@ -24,7 +28,7 @@ const TABS = {
   soft: ['Soft skills', (t) => t.type === 'soft'],
   language: ['Languages', (t) => t.type === 'language'],
   location: ['Location', (t) => t.type === 'location'],
-  education: ['Education', () => false], // no education type in the db yet
+  education: ['Education', (t) => t.type === 'education'],
   untyped: ['Not typed yet', (t) => !t.type],
 }
 const tab = ref('all')
@@ -65,6 +69,43 @@ function open(t) {
   selected.value = t
   drawerOpen.value = true
 }
+
+// Term drawer form
+const form = ref({ type: null, start: '', end: '', keyword: '', lang: 'en', adding: false })
+watch(selected, (t) => {
+  form.value = { type: t?.type ?? null, start: t?.start ?? '', end: t?.end ?? '', keyword: '', lang: 'en', adding: false }
+})
+const MONTH = /^\d{4}(-(0[1-9]|1[0-2]))?$/
+const startError = computed(() => (MONTH.test(form.value.start) ? '' : 'YYYY or YYYY-MM'))
+const endError = computed(() => (!form.value.end || MONTH.test(form.value.end) ? '' : 'YYYY or YYYY-MM, or empty'))
+const datesChanged = computed(() => form.value.start !== (selected.value?.start ?? '')
+  || form.value.end !== (selected.value?.end ?? ''))
+const busy = ref(false)
+
+async function post(url, body, done) {
+  busy.value = true
+  try {
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    const out = await res.json()
+    const detail = Array.isArray(out.detail) ? out.detail.map((d) => d.msg).join('; ') : out.detail
+    if (!res.ok || !out.ok) throw new Error(detail || out.output || `${res.status} ${res.statusText}`)
+    ElMessage.success(done)
+    const term = selected.value.term.toLowerCase()
+    await load() // the page reloads its data; the drawer stays on the same term
+    selected.value = data.value.terms.find((t) => t.term.toLowerCase() === term) ?? null
+  } catch (e) {
+    ElMessage.error({ message: e.message, duration: 6000 })
+  } finally {
+    busy.value = false
+  }
+}
+const saveType = (type) => post('/api/skills/type', { term: selected.value.skill ?? selected.value.term, type },
+  `${selected.value.term}: ${TYPE_LABEL[type]}` + (HARD.includes(type) || !selected.value.start ? '' : ' (dates removed)'))
+const saveDates = () => post('/api/skills/dates',
+  { skill: selected.value.skill, start: form.value.start, end: form.value.end || null }, 'Dates saved')
+const addKeyword = () => post('/api/skills/keyword',
+  { skill: selected.value.skill, keyword: form.value.keyword.trim(), lang: form.value.lang },
+  `‘${form.value.keyword.trim()}’ now counts as ${selected.value.skill}`)
 const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger' }
 const seg = (t, s) => `${(t[s] / t.jobs) * 100}%`
 </script>
@@ -110,8 +151,8 @@ const seg = (t, s) => `${(t[s] / t.jobs) * 100}%`
       <el-tab-pane v-for="(t, key) in TABS" :key="key" :name="key" :label="`${t[0]}  ${tabCount(key)}`" />
     </el-tabs>
     <p v-if="tab === 'education'" class="muted small">
-      There is no education type in the database yet: degree terms such as “Computer Science” are still typed technical,
-      so they appear under Hard skills.
+      Degrees and fields of study. Terms such as “Computer Science” may still be typed hard skill: open one and change
+      its type to education.
     </p>
 
     <div class="filters">
@@ -173,17 +214,23 @@ const seg = (t, s) => `${(t[s] / t.jobs) * 100}%`
       <template v-if="selected">
         <el-form label-width="70px" size="small">
           <el-form-item label="Type">
-            <el-select :model-value="typeLabel(selected)" disabled style="width: 200px" />
-            <span class="muted hint">not wired yet</span>
+            <el-select v-model="form.type" placeholder="not typed" :disabled="busy" style="width: 200px"
+              @change="saveType">
+              <el-option v-for="(label, key) in TYPE_LABEL" :key="key" :label="label" :value="key" />
+            </el-select>
+            <span v-if="selected.skill && selected.skill.toLowerCase() !== selected.term.toLowerCase()" class="muted hint">
+              via {{ selected.skill }}</span>
           </el-form-item>
           <template v-if="selected.hard">
-            <el-form-item label="Start">
-              <el-input :model-value="selected.start ?? ''" placeholder="YYYY-MM" disabled style="width: 120px" />
-              <span class="muted hint">End</span>
-              <el-input :model-value="selected.end ?? ''" placeholder="still using" disabled style="width: 120px" />
+            <el-form-item label="Start" :error="form.start && startError">
+              <el-input v-model.trim="form.start" placeholder="YYYY-MM" :disabled="busy" style="width: 120px" />
+            </el-form-item>
+            <el-form-item label="End" :error="endError">
+              <el-input v-model.trim="form.end" placeholder="still using" clearable :disabled="busy" style="width: 120px" />
             </el-form-item>
             <el-form-item>
-              <el-tooltip content="Not wired yet"><span><el-button disabled>Save</el-button></span></el-tooltip>
+              <el-button type="primary" :loading="busy" :disabled="!datesChanged || !!startError || !!endError"
+                @click="saveDates">Save</el-button>
             </el-form-item>
           </template>
           <p v-else class="muted small">Start / end dates are for hard skills only.</p>
@@ -195,7 +242,19 @@ const seg = (t, s) => `${(t[s] / t.jobs) * 100}%`
           <el-tag v-for="k in selected.keywords" :key="k.keyword + k.lang" type="info">
             {{ k.keyword }}<span v-if="k.lang === 'fr'" class="muted"> · fr</span>
           </el-tag>
-          <el-tooltip content="Not wired yet"><span><el-button size="small" disabled>+ add</el-button></span></el-tooltip>
+          <template v-if="form.adding">
+            <el-input v-model="form.keyword" size="small" placeholder="true synonym only" maxlength="80"
+              :disabled="busy" style="width: 170px" @keyup.enter="form.keyword.trim() && addKeyword()" />
+            <el-select v-model="form.lang" size="small" :disabled="busy" style="width: 70px">
+              <el-option label="en" value="en" /><el-option label="fr" value="fr" />
+            </el-select>
+            <el-button size="small" type="primary" :loading="busy" :disabled="!form.keyword.trim()"
+              @click="addKeyword">Add</el-button>
+            <el-button size="small" text :disabled="busy" @click="form.adding = false">Cancel</el-button>
+          </template>
+          <el-tooltip v-else :disabled="!!selected.skill" content="Give the term a type first">
+            <span><el-button size="small" :disabled="!selected.skill" @click="form.adding = true">+ add</el-button></span>
+          </el-tooltip>
         </div>
 
         <h4>Asked by {{ selected.jobs }} job{{ selected.jobs > 1 ? 's' : '' }} · status · wording</h4>

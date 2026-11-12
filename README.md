@@ -2,6 +2,52 @@
 
 [![Watch the 30-second tour of the job dashboard](.github/assets/dashboard-tour-poster.jpg)](https://cdn.lingowp.com/dashboard-tour.mp4)
 
+## Features
+
+**Your resume, tailored to every job**
+
+**One master resume**
+- Keep all your experience, skills and approved wording in one place
+- Reuse your best lines from one application to the next
+- Get your years of experience per skill, ready for application forms
+
+**Start an application in seconds**
+- Paste a job link and get the title, company, description and location
+- See right away whether the job's location matches yours
+- Create a new version of an application without touching the one you already sent
+
+**Understand what the job asks for**
+- Every requirement quoted word for word from the posting
+- Must-haves kept apart from nice-to-haves
+
+**Polished documents**
+- A professional A4 resume with a QR code to your portfolio
+- A one-page cover letter written for the job
+- A French version when the posting is in French
+- Files that aren't ready, such as a resume over 3 pages, are marked so you never send them by mistake
+
+**Checks before you apply**
+- Spelling check
+- Writing style tips: stronger verbs, measurable results, shorter bullets
+- A check that applicant tracking systems can read your PDF correctly
+- A match against the job: what your resume proves, what it only claims, and what's missing, with the exact line as evidence
+- A clear coverage figure for must-have and nice-to-have requirements
+
+**Interview preparation**
+- The stories to prepare behind your resume lines
+- The claims to back up with a concrete example
+- Honest answers ready for the gaps
+
+**Share and send**
+- Publish your resume and cover letter online, with one link per application
+- Sent applications stay frozen, exactly as the employer received them
+
+**Your job dashboard**
+- Every application at a glance, with its status and coverage
+- One page per job: gaps, requirements, documents, the posting and interview prep
+- Preview your PDFs and re-read the posting with matched and missing terms highlighted
+- See which requirements come up across all your applications, and which ones you miss most often
+
 Generate a job-specific A4 resume PDF from a JSON content file, and review it against a job posting. The HTML template handles layout, page breaks, fonts, and a portfolio QR code.
 
 [View the default PDF](template/build/resume.pdf)

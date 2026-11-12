@@ -5,10 +5,13 @@ Usage:
   python3 src/skills_inventory.py sync                  # add every skill found on any resume (start unknown)
   python3 src/skills_inventory.py missing               # skills that still need a start date
   python3 src/skills_inventory.py set "Vue 3" 2026-10   # record a start date (YYYY or YYYY-MM); optional end date
+  python3 src/skills_inventory.py type "communication" soft   # set a skill's type; creates the skill if it is new
   python3 src/skills_inventory.py job jobs/<slug>       # the job's skills with years, as on its dashboard
   python3 src/skills_inventory.py keyword "PostgreSQL" "Postgres" [en|fr]   # a true synonym (matching uses it)
 
-Each skill: {"name", "match": [English keywords], "start": "YYYY-MM" | null, "end": null} (skills + skill_keywords).
+Each skill: {"name", "type", "match": [English keywords], "start": "YYYY-MM" | null, "end": null} (skills +
+skill_keywords). Types: technical, design, ai (hard skills: the only ones with dates), soft, language, location,
+education.
 A resume skill item like "React / Next.js" or "Accessibility (WCAG)" counts as several skills.
 """
 
@@ -40,9 +43,10 @@ def atoms(item: str) -> list[tuple[str, list[str]]]:
 def load() -> dict:
     con = db.connect()
     skills = []
-    for sid, name, start, end in con.execute("SELECT id, name_en, start_at, end_at FROM skills ORDER BY lower(name_en)"):
+    for sid, name, kind, start, end in con.execute("SELECT id, name_en, type, start_at, end_at FROM skills "
+                                                   "ORDER BY lower(name_en)"):
         match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en'", (sid,))]
-        skills.append({"id": sid, "name": name, "match": match, "start": start, "end": end})
+        skills.append({"id": sid, "name": name, "type": kind, "match": match, "start": start, "end": end})
     return {"skills": skills}
 
 
@@ -117,7 +121,7 @@ def job_skills(job: dict, content: dict, inv: dict | None = None) -> list[dict]:
 
 
 def main() -> None:
-    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword"}:
+    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword", "type"}:
         sys.exit(__doc__)
     inv = load()
     if sys.argv[1] == "keyword":
@@ -131,6 +135,21 @@ def main() -> None:
         db.dump(con)
         print(f"{sys.argv[3]} ({lang}) now counts as {sys.argv[2]}")
         return
+    if sys.argv[1] == "type":
+        name, kind = sys.argv[2], sys.argv[3]
+        if kind not in db.SKILL_TYPES:
+            sys.exit(f"Unknown type '{kind}'; use one of: {', '.join(db.SKILL_TYPES)}")
+        skill, con = find(inv, name), db.connect()
+        if skill is None:
+            con.execute("INSERT INTO skills (type, name_en) VALUES (?, ?)", (kind, name))
+        elif kind in db.HARD_TYPES:
+            con.execute("UPDATE skills SET type = ? WHERE id = ?", (kind, skill["id"]))
+        else:  # only hard skills have dates
+            con.execute("UPDATE skills SET type = ?, start_at = NULL, end_at = NULL WHERE id = ?", (kind, skill["id"]))
+        con.commit()
+        db.dump(con)
+        print(f"{skill['name'] if skill else name}: {kind}" + ("" if skill else " (new skill)"))
+        return
     if sys.argv[1] == "sync":
         added = sync(inv)
         save(inv)
@@ -143,6 +162,8 @@ def main() -> None:
         print("\n".join(f"{n}: YYYY-MM" for n in todo) or "Every skill has a start date.")
     elif sys.argv[1] == "set":
         skill = find(inv, sys.argv[2]) or sys.exit(f"Unknown skill '{sys.argv[2]}'; run sync first.")
+        if skill["type"] not in db.HARD_TYPES:
+            sys.exit(f"{skill['name']} is a {skill['type']} skill: only hard skills ({', '.join(db.HARD_TYPES)}) have dates.")
         skill["start"] = sys.argv[3]
         skill["end"] = sys.argv[4] if len(sys.argv) > 4 else None
         months(skill["start"])  # validates the format

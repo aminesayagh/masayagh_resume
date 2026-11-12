@@ -1,6 +1,6 @@
 <script setup>
 // Job page ( /job/<slug> ): header, links, last build, coverage, gaps, requirements, files, timeline, drawers.
-// Read only: write actions are shown disabled ("not wired yet"); fixes are asked of Claude.
+// Write actions other than New version are shown disabled ("not wired yet").
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import InterviewPrep from './InterviewPrep.vue'
@@ -174,14 +174,12 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
           <div v-for="(n, i) in job.notes" :key="i" class="note">
             <el-tag size="small" :type="n.severity === 'info' ? 'info' : 'warning'">{{ n.severity === 'info' ? 'i' : '!' }}</el-tag>
             <span class="note-text">{{ n.text }}</span>
-            <span class="ask">→ {{ n.ask }}</span>
           </div>
-          <div class="muted small">Fixes happen in Claude: copy the line into your Claude session.</div>
         </el-card>
 
         <el-card shadow="never" class="block">
           <template #header>Evidence coverage</template>
-          <div v-if="!job.has_requirements" class="muted">No requirements yet → ask Claude to draft them.</div>
+          <div v-if="!job.has_requirements" class="muted">No requirements yet.</div>
           <div v-for="p in ['must_have', 'preferred']" v-else :key="p" class="cov">
             <span class="cov-label">{{ p === 'must_have' ? 'Must-have' : 'Preferred' }}</span>
             <template v-if="job.coverage[p].ratio != null">
@@ -264,7 +262,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
         <el-card shadow="never" class="block">
           <template #header>Files</template>
           <div class="lang">English</div>
-          <div v-if="!job.files.en.length" class="muted">Not built yet (ask Claude)</div>
+          <div v-if="!job.files.en.length" class="muted">Not built yet</div>
           <div v-for="f in job.files.en" :key="f.path" class="file">
             <a :href="fileUrl(f)" target="_blank" rel="noopener">{{ KIND[f.kind] }}</a>
             <span class="muted"> · {{ f.pages ?? '?' }} page{{ f.pages === 1 ? '' : 's' }}</span>
@@ -277,7 +275,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
           </div>
           <div class="lang">French</div>
           <div v-if="!job.files.fr.length" class="muted">
-            {{ job.french_version ? 'Not built yet (ask Claude)' : 'Not needed (English posting)' }}
+            {{ job.french_version ? 'Not built yet' : 'Not needed (English posting)' }}
           </div>
           <div v-for="f in job.files.fr" :key="f.path" class="file">
             <a :href="fileUrl(f)" target="_blank" rel="noopener">{{ KIND[f.kind] }}</a>
@@ -326,7 +324,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
             <iframe v-if="docsOpen && docTab === key" :src="fileUrl(docs[key].file)" class="pdf" :title="label" />
           </template>
           <div v-else class="muted">
-            {{ key === 'french' && !job.french_version ? 'Not needed (English posting).' : 'Not built yet (ask Claude).' }}
+            {{ key === 'french' && !job.french_version ? 'Not needed (English posting).' : 'Not built yet.' }}
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -345,7 +343,6 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
 .block { margin-bottom: 16px; }
 .note { display: flex; gap: 8px; align-items: baseline; margin: 6px 0; font-size: 14px; }
 .note-text { flex: 1; }
-.ask { color: var(--el-color-primary); white-space: nowrap; }
 .small { font-size: 12px; margin-top: 8px; }
 .cov { display: flex; gap: 12px; align-items: center; margin: 8px 0; font-size: 14px; }
 .cov-label { width: 80px; }

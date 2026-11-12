@@ -27,7 +27,7 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
 </script>
 
 <template>
-  <el-empty v-if="!prep.exists" description="No interview prep for this job yet (review/interview.json is missing): ask Claude to run the review." />
+  <el-empty v-if="!prep.exists" description="No interview prep for this job yet: it is written by the review." />
 
   <el-row v-else :gutter="20">
     <el-col :span="17">

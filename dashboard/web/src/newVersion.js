@@ -5,8 +5,13 @@ import { ElLoading, ElMessage, ElMessageBox } from 'element-plus'
 export async function newVersion(job, router) {
   try {
     await ElMessageBox.confirm(
-      `Copies ${job.company} · ${job.role} (v${job.version}) into its next version, keeping its tailoring ` +
-      `(resume content and cover letters). This job stays exactly as it is${job.sent ? ' (sent, frozen)' : ''}. ` +
+      `Copies ${job.company} · ${job.role} (v${job.version}) into its next version: summary, title, skills and ` +
+      'cover letters are copied. ' +
+      (job.has_requirements
+        ? 'The experience lines are composed again from the library, so the new version gets the latest approved ' +
+          'wording for this job. '
+        : 'This job has no requirements yet, so its experience lines are kept as they are. ') +
+      `This job stays exactly as it is${job.sent ? ' (sent, frozen)' : ''}. ` +
       'The new version is not sent, and its resume is built now, which can take a minute.',
       'New version', { confirmButtonText: 'Create new version', cancelButtonText: 'Cancel', type: 'info' })
   } catch {
