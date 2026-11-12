@@ -2,7 +2,7 @@
 """Scaffold a new job application folder from a posting.
 
 Usage: python3 src/new_job.py --url JOB_URL
-       python3 src/new_job.py --from jobs/<slug>     # next version of a job, keeping its tailoring
+       python3 src/new_job.py --from jobs/<slug>     # next version of a job: its tailoring, with the latest experience lines
        python3 src/new_job.py [--company NAME] [--title TITLE] [--posting FILE]
 
 --url reads the title, company, description and location from the posting page
@@ -61,7 +61,9 @@ COPIED = ("content/content.json", "content/cover.json", "content/cover-fr.json")
 
 
 def new_version(source: Path) -> Path:
-    """Copy a job (typically a sent, frozen one) into its next -vN folder, keeping its tailoring, ready to edit."""
+    """Copy a job (typically a sent, frozen one) into its next -vN folder, ready to edit. Summary, title, skills and
+    cover letters are copied; the experience lines are composed again from the library (db -> json), so the new
+    version gets the latest approved wording. The source folder is never changed."""
     source = source.resolve()
     base = re.sub(r"-v\d+$", "", source.name)
     folder = JOBS_DIR / f"{base}-v{next_version(base)}"
@@ -76,6 +78,11 @@ def new_version(source: Path) -> Path:
     job["previous_version"] = source.name
     offers.save(folder, job)
     print(f"Created {folder.relative_to(ROOT)} from {source.name} (not sent; edit, then run src/tailor.py).")
+    if job.get("requirements"):
+        import compose  # late: compose imports build_resume, like this module
+        compose.compose(folder)
+    else:
+        print("No requirements yet: experience lines kept as in the previous version; draft them, then compose.")
     build_resume.build(paths.content(folder))
     return folder
 

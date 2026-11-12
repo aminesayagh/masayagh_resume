@@ -254,5 +254,18 @@ class ComposeOnceTest(unittest.TestCase):
                 new_activity = db.connect().execute("SELECT activity_id FROM descriptions WHERE text_en = ?",
                                                     (hypeo["bullets"][i],)).fetchone()[0]
                 self.assertEqual(new_activity, old_activity)
+                # a new version is composed again from the library: it gets the newest wording, the source keeps its own
+                import new_job
+                saved_new = (new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build)
+                new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build = root, root.parent, lambda *a, **k: None
+                try:
+                    v2 = new_job.new_version(folder)
+                finally:
+                    new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build = saved_new
+                self.assertEqual(v2.name, "acme-dev-v2")
+                v2_hypeo = next(e for e in json.loads(paths.content(v2).read_text(encoding="utf-8"))["experience"]
+                                if e["company"].startswith("Phoenix"))
+                self.assertIn(hypeo["bullets"][i], v2_hypeo["bullets"])  # the agreed edit, now the newest line
+                self.assertEqual(json.loads(paths.content(folder).read_text(encoding="utf-8")), content)  # v1 untouched
             finally:
                 db.DB, db.DUMP = saved
