@@ -1,9 +1,37 @@
 <script setup>
 // Interview prep tab ( /job/<slug>/interview ): review/interview.json topics + the posting's skills with years.
-// Read only: the notes box has no storage yet.
+// Notes are saved in the db (src/offers.py note) when the box loses focus: one per requirement of the offer.
 import { computed, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps({ prep: { type: Object, required: true }, job: { type: Object, required: true } })
+
+// Notes: edited locally, saved on blur when changed; `saved` keeps the last stored text per keyword
+const saved = ref(Object.fromEntries(props.prep.topics.map((t) => [t.keyword, t.note])))
+const drafts = ref({ ...saved.value })
+const updated = ref(Object.fromEntries(props.prep.topics.map((t) => [t.keyword, t.updated])))
+const saving = ref({})
+async function saveNote(keyword) {
+  const note = (drafts.value[keyword] ?? '').trim()
+  if (note === (saved.value[keyword] ?? '').trim() || saving.value[keyword]) return
+  saving.value[keyword] = true
+  try {
+    const res = await fetch(`/api/jobs/${encodeURIComponent(props.job.slug)}/notes`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword, note }),
+    })
+    const out = await res.json()
+    if (!res.ok || !out.ok) throw new Error((typeof out.detail === 'string' && out.detail) || out.output || res.statusText)
+    saved.value[keyword] = note
+    updated.value[keyword] = note ? 'just now' : null
+  } catch (e) {
+    ElMessage.error({ message: `Note not saved: ${e.message}`, duration: 6000 })
+  } finally {
+    saving.value[keyword] = false
+  }
+}
+const noteState = (k) => (saving.value[k] ? 'saving…'
+  : (drafts.value[k] ?? '').trim() !== (saved.value[k] ?? '').trim() ? 'not saved yet'
+    : updated.value[k] ? `saved ${updated.value[k]}` : '')
 const emit = defineEmits(['open-doc', 'open-posting'])
 
 const TYPES = {
@@ -60,7 +88,9 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
           <template v-else>nothing yet</template>
         </p>
         <p v-if="t.focus === 'prepare_story'" class="star">STAR: {{ STAR }}</p>
-        <el-input type="textarea" :rows="2" disabled placeholder="My notes (not wired yet: no storage)" />
+        <el-input v-model="drafts[t.keyword]" type="textarea" :autosize="{ minRows: 2, maxRows: 12 }" maxlength="5000"
+          placeholder="My notes: the story, the example, what to say" @blur="saveNote(t.keyword)" />
+        <div class="note-state muted">{{ noteState(t.keyword) }}</div>
       </el-card>
     </el-col>
 
@@ -95,6 +125,7 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
 .topic { margin-bottom: 12px; font-size: 14px; }
 .topic p { margin: 6px 0; }
 .topic-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.note-state { font-size: 12px; min-height: 16px; margin-top: 2px; text-align: right; }
 .star { color: var(--el-color-success-dark-2); font-size: 13px; }
 .block { margin-bottom: 16px; }
 .skill { display: flex; justify-content: space-between; font-size: 14px; margin: 6px 0; }

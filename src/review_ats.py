@@ -38,12 +38,13 @@ import match_job
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
-COVERAGE_VERSION = 3
+COVERAGE_VERSION = 4
 COVERAGE_FORMULA = ("Σ weight × (1 met, 0.5 partial, 0 otherwise) ÷ Σ weight, per priority; "
                     "weight by skill type (TYPE_WEIGHTS); overall also weights must-have 1, preferred 0.25")
 PRIORITY_WEIGHTS = {"must_have": 1.0, "preferred": 0.25}  # overall: a preferred skill counts a quarter of a must-have
 # ponytail: hardcoded on purpose (the user's choice); move to config.json if they ever want to tune them per job
-TYPE_WEIGHTS = {"technical": 1.0, "ai": 1.0, "design": 1.0,       # hard skills: what the resume must prove
+TYPE_WEIGHTS = {"programming_language": 1.5, "technology": 1.5,     # named languages and products: ATS filters match the exact name
+                "technical": 1.0, "ai": 1.0, "design": 1.0,       # hard skills: what the resume must prove
                 "education": 0.5, "language": 0.5,                 # usually a fact on the resume, rarely tailored
                 "soft": 0.25, "location": 0.25,                    # hard to prove in text / a fact, not a skill
                 None: 0.5}                                         # not typed yet
@@ -131,12 +132,14 @@ def title_check(job: dict, content: dict | None) -> dict | None:
             f"match on the title first; use a title for the same role in content.json's 'role' if it truthfully describes you."}
 
 
-def review(job: dict, pdf: Path, content: dict | None, network: bool) -> dict:
+def review(job: dict, pdf: Path, content: dict | None, network: bool, letter: Path | None = None, con=None) -> dict:
+    """letter: the English cover letter PDF, searched as a claim (partial), like the skills list."""
     headings = check_pdf.template_headings(check_pdf.TEMPLATE)
     pdf_report = check_pdf.check(pdf, content, headings, network=network)
     pages = [p.extract_text() or "" for p in PdfReader(pdf).pages] if pdf_report["pages"] else []
-    aliases = db.aliases()  # skills + keywords in data/resume.db (was src/aliases.json)
-    match = match_job.assess(job, pages, content, headings, aliases)
+    aliases = db.aliases(con)  # skills + keywords in data/resume.db (was src/aliases.json)
+    letter_pages = [p.extract_text() or "" for p in PdfReader(letter).pages] if letter and letter.exists() else []
+    match = match_job.assess(job, pages, content, headings, aliases, letter_pages)
     reqs = {r["id"]: r for r in job["requirements"]}
     for r in match["results"]:
         r["kind_years"] = reqs[r["id"]].get("kind") == "years_experience"
@@ -330,7 +333,9 @@ def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bo
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
     md_path = md_path or paths.review_md(job_path.parent)
     previous = md_path.with_suffix(".json")
-    rep = review(job, cv, content, network=network)
+    letter = paths.cover_pdf(job_path.parent)  # ponytail: a resume build reviews before its letter is rebuilt, so a
+    letter = letter if letter.exists() else paths.not_ready(letter)  # changed letter counts from the next review
+    rep = review(job, cv, content, network=network, letter=letter)
     if previous.exists():
         changes, regressions = compare(summary(json.loads(previous.read_text(encoding="utf-8"))), summary(rep))
         print(f"Compared with the previous report:")
@@ -390,7 +395,8 @@ def main() -> None:
     content = json.loads(content_path.read_text(encoding="utf-8")) if content_path.exists() else None
 
     if args.preview:
-        rep = review(job, cv, content, network=False)
+        letter = paths.cover_pdf(folder)  # the employer gets it inside the combined PDF: its words count as claims
+        rep = review(job, cv, content, network=False, letter=letter if letter.exists() else paths.not_ready(letter))
         print_preview(rep)
         saved = paths.review_json(args.job.parent)
         if not saved.exists():

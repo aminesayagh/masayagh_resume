@@ -277,6 +277,56 @@ class MarkSentTest(unittest.TestCase):
             self.assertTrue(db.DUMP.exists())  # resume.sql (here test.sql) refreshed
 
 
+class InterviewNoteTest(unittest.TestCase):
+    """offers.py note: one note per requirement of the offer, kept on a sent job, deleted when empty."""
+
+    def test_note_on_a_temporary_db(self):
+        import offers
+        with FreshDb() as root:
+            job = root / "acme-dev-v1"
+            offers.save(job, {"title": "Acme — Dev", "posting_text": "Build things.", "pdf_name": "A.pdf",
+                              "requirements": [{"terms": ["Vue"], "priority": "must_have"}]})
+            offers.mark_sent(job, "2026-11-10")  # notes are for after sending too
+            note = lambda: offers.db.connect().execute("SELECT note FROM interview_notes").fetchall()
+            self.assertEqual(offers.save_note(job, "VUE", "  Story: the Hypeo dashboard  "), "saved")
+            self.assertEqual(offers.save_note(job, "vue", "Story: v2"), "saved")  # one note per requirement
+            self.assertEqual([tuple(r) for r in note()], [("Story: v2",)])
+            with self.assertRaises(SystemExit):
+                offers.save_note(job, "react", "x")  # not a requirement of this offer
+            self.assertEqual(offers.save_note(job, "vue", ""), "deleted")
+            self.assertEqual(note(), [])
+
+    def test_ignored_skill_leaves_the_requirements(self):
+        import offers
+        with FreshDb() as root:
+            job = root / "acme-dev-v1"
+            offers.save(job, {"title": "Acme — Dev", "posting_text": "Build things.",
+                              "requirements": [{"terms": [t], "priority": "must_have"} for t in ("Vue", "Budgets")]})
+            terms = lambda: [r["terms"][0] for r in offers.load(job)["requirements"]]
+            self.assertEqual(sorted(terms()), ["budgets", "vue"])
+            con = offers.db.connect()
+            con.execute("UPDATE skills SET ignored = 1 WHERE json_extract(name, '$.en') = 'budgets'")
+            con.commit()
+            self.assertEqual(terms(), ["vue"])  # kept in the db, left out of the job
+            offers.save(job, offers.load(job))  # a save of the loaded job keeps the ignored requirement
+            con.execute("UPDATE skills SET ignored = 0")
+            con.commit()
+            self.assertEqual(len(terms()), 2)
+
+    def test_note_survives_a_requirements_resave(self):
+        import offers
+        with FreshDb() as root:
+            job = root / "acme-dev-v1"
+            reqs = lambda *t: [{"terms": [x], "priority": "must_have"} for x in t]
+            offers.save(job, {"title": "Acme — Dev", "posting_text": "Build things.", "requirements": reqs("Vue", "Go")})
+            offers.save_note(job, "vue", "Story")
+            offers.save(job, {"title": "Acme — Dev", "posting_text": "Build things.", "requirements": reqs("Vue", "Rust")})
+            con = offers.db.connect()
+            self.assertEqual([tuple(r) for r in con.execute("SELECT note FROM interview_notes")], [("Story",)])
+            self.assertEqual(sorted(t for (t,) in con.execute(
+                "SELECT k.keyword FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id")), ["rust", "vue"])
+
+
 class MasterTest(unittest.TestCase):
     """The master resume is generated from the db; hand edits are refused, db edits regenerate both files."""
 

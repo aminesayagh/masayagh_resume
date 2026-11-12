@@ -82,6 +82,18 @@ class PostingQuoteTest(unittest.TestCase):
         self.assertEqual(app.posting_quote(parts, ["code reviews"]), "Skills: code review, design review.")
 
 
+class RepetitionsTest(unittest.TestCase):
+    def test_across_lines_and_in_one_line(self):
+        content = {"summary": "Software engineer building software.", "experience": [
+            {"company": "Acme", "description": "Business tools.", "bullets": ["Business a.", "Business b.", "Business c."]}]}
+        rows = app.repetitions(content)
+        self.assertEqual([(r["word"], r["count"], r["kind"]) for r in rows],
+                         [("business", 4, "across lines"), ("software", 2, "in one line")])
+        self.assertEqual(rows[0]["lines"][1], {"where": "Acme · bullet 1", "text": "Business a."})
+        self.assertEqual(rows[1]["lines"], [{"where": "Summary", "text": "Software engineer building software."}])
+        self.assertEqual(app.repetitions({}), [])
+
+
 SLUG = "cgi-senior-ai-engineer-java-spring-boot-h-f-v1"  # a real job folder (review.json, interview.json)
 
 
@@ -159,9 +171,6 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(len(d["requirements"]), len(review["results"]))
         must = d["coverage"]["must_have"]
         self.assertEqual(must["met"] + must["partial"] + must["missing"] + must["uncertain"], must["total"])
-        self.assertTrue(all(g["status"] != "met" for g in d["gaps"]))
-        self.assertEqual([g["priority"] for g in d["gaps"]], sorted((g["priority"] for g in d["gaps"]),
-                                                                       key=lambda p: p != "must_have"))
         self.assertEqual(self.client.get("/api/jobs/no-such-job").status_code, 404)
 
     def test_requirement_terms_follow_the_db(self):
@@ -217,11 +226,12 @@ class ApiTest(unittest.TestCase):
         with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
             post = self.client.post
             body = post("/api/skills/type", json={"term": "communication", "type": "soft"}).json()
-            # the type, then the review of the unsent version only (the sent one keeps its review)
+            # the type, then the review of every job asking for it, sent ones included
             self.assertEqual([c.args[0][1:] for c in run.call_args_list],
                              [["src/skills_inventory.py", "type", "communication", "soft"],
+                              ["src/review_ats.py", "--job", f"jobs/{SLUG}", "--no-network"],
                               ["src/review_ats.py", "--job", f"jobs/{SLUG[:-1]}2", "--no-network"]])
-            self.assertEqual((body["ok"], body["reviewed"]), (True, [f"{SLUG[:-1]}2"]))
+            self.assertEqual((body["ok"], body["reviewed"]), (True, [SLUG, f"{SLUG[:-1]}2"]))
             self.assertEqual(post("/api/skills/type", json={"term": "x", "type": "nonsense"}).status_code, 422)
             self.assertEqual(post("/api/skills/type", json={"term": "a\nb", "type": "soft"}).status_code, 422)
 
@@ -256,13 +266,89 @@ class ApiTest(unittest.TestCase):
             body = self.client.post("/api/skills/move", json={"keyword": "Spring Boot", "skill": "java"}).json()
             self.assertEqual([c.args[0][1:] for c in run.call_args_list][0],
                              ["src/skills_inventory.py", "move", "spring boot", "java"])
-            self.assertEqual(body["reviewed"], [f"{SLUG[:-1]}2"])  # the open version only
+            self.assertEqual(body["reviewed"], [SLUG, f"{SLUG[:-1]}2"])  # sent ones included
             calls = run.call_count
             post = lambda **b: self.client.post("/api/skills/move", json=b).status_code
             self.assertEqual(post(keyword="java", skill="java"), 409)  # already there
             self.assertEqual(post(keyword="nope", skill="java"), 404)
             self.assertEqual(post(keyword="java", skill="nope"), 404)
             self.assertEqual(run.call_count, calls)  # refused requests ran nothing
+
+    def test_interview_notes(self):
+        """Notes come from the db with each topic; saving runs src/offers.py note (mocked: nothing is written)."""
+        import db
+        con = db.connect(app.DB)
+        rid = con.execute("SELECT r.id FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id "
+                          "WHERE k.keyword = 'java'").fetchone()[0]
+        con.execute("INSERT INTO interview_notes (requirement_id, note) VALUES (?, 'Java story')", (rid,))
+        con.commit()
+        try:
+            topics = self.client.get(f"/api/jobs/{SLUG}/interview").json()["topics"]
+            java = [t for t in topics if t["keyword"] == "java"]
+            self.assertTrue(java and all(t["note"] == "Java story" and t["updated"] for t in java))
+            self.assertTrue(all(t["note"] == "" for t in topics if t["keyword"] != "java"))
+        finally:
+            con.execute("DELETE FROM interview_notes")
+            con.commit()
+        from unittest import mock
+        ok = mock.Mock(returncode=0, stdout="Note on 'java' saved\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            post = lambda slug, **b: self.client.post(f"/api/jobs/{slug}/notes", json=b)
+            self.assertTrue(post(SLUG, keyword="Java", note=" Tell the Hypeo story ").json()["ok"])  # sent job: fine
+            self.assertEqual(run.call_args.args[0][1:], ["src/offers.py", "note", f"jobs/{SLUG}", "java", "Tell the Hypeo story"])
+            post(SLUG, keyword="java", note="  ")
+            self.assertEqual(run.call_args.args[0][1:], ["src/offers.py", "note", f"jobs/{SLUG}", "java"])  # empty: delete
+            calls = run.call_count
+            self.assertEqual(post(SLUG, keyword="react", note="x").status_code, 404)  # not asked by this offer
+            self.assertEqual(post("no-such-job", keyword="java", note="x").status_code, 404)
+            self.assertEqual(post(SLUG, keyword="java", note="x" * 5001).status_code, 422)
+            self.assertEqual(run.call_count, calls)
+
+    def test_set_aside_runs_the_script(self):
+        """The script is mocked: nothing is written."""
+        from unittest import mock
+        self.assertTrue(all(t["ignored"] is False for t in self.client.get("/api/requirements").json()["terms"]))
+        ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            body = self.client.post("/api/skills/ignore", json={"skill": "Java", "ignored": True}).json()
+            calls = [c.args[0][1:] for c in run.call_args_list]
+            self.assertEqual(calls[0], ["src/skills_inventory.py", "ignore", "java"])
+            self.assertEqual(body["reviewed"], [SLUG, f"{SLUG[:-1]}2"])  # sent ones included
+            self.client.post("/api/skills/ignore", json={"skill": "java", "ignored": False})
+            self.assertIn(["src/skills_inventory.py", "ignore", "java", "off"], [c.args[0][1:] for c in run.call_args_list])
+            n = run.call_count
+            self.assertEqual(self.client.post("/api/skills/ignore", json={"skill": "nope", "ignored": True}).status_code, 404)
+            self.assertEqual(run.call_count, n)
+
+    def test_set_aside_shows_on_sent_jobs_without_rewriting_them(self):
+        """A skill set aside after a job was sent: its saved review still says missing, the pages say set aside."""
+        import db
+        con = db.connect(app.DB)
+        con.execute("UPDATE skills SET ignored = 1 WHERE json_extract(name, '$.en') = 'java'")
+        con.commit()
+        try:
+            d = self.client.get(f"/api/jobs/{SLUG}").json()
+            java = [r for r in d["requirements"] if [t["term"].lower() for t in r["terms"]] == ["java"]]
+            self.assertTrue(java and all(r["status"] == "set aside" for r in java))
+            terms = {t["term"]: t for t in self.client.get("/api/requirements").json()["terms"]}
+            self.assertEqual((terms["java"]["missing"], terms["java"]["partial"], terms["java"]["met"]), (0, 0, 0))
+            self.assertEqual({a["status"] for a in terms["java"]["asked"]}, {"set aside"})
+            prep = self.client.get(f"/api/jobs/{SLUG}/interview").json()
+            self.assertFalse([t for t in prep["topics"] if t["keyword"] == "java"])
+            self.assertEqual(sum(prep["summary"].values()), len(prep["topics"]))
+        finally:
+            con.execute("UPDATE skills SET ignored = 0")
+            con.commit()
+
+    def test_refresh_saves_the_review_of_every_job(self):
+        """Sent jobs too: review_ats rewrites only their review/ reports (mocked here: nothing is written)."""
+        from unittest import mock
+        ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            for slug in (SLUG, f"{SLUG[:-1]}2"):
+                self.assertTrue(self.client.post(f"/api/jobs/{slug}/refresh").json()["ok"])
+                self.assertEqual(run.call_args.args[0][1:], ["src/review_ats.py", "--job", f"jobs/{slug}", "--no-network"])
+            self.assertEqual(self.client.post("/api/jobs/no-such-job/refresh").status_code, 404)
 
     def test_mark_sent_runs_the_script(self):
         """The script is mocked: nothing is written."""

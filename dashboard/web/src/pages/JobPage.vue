@@ -1,7 +1,8 @@
 <script setup>
-// Job page ( /job/<slug> ): header, links, last build, coverage, gaps, requirements, files, timeline, drawers.
-// Write actions run src/ scripts on the server (Mark as sent, New version); the rest are shown disabled ("not wired yet").
+// Job page ( /job/<slug> ): header, links, last build, coverage, repetitions, skills, files, timeline, drawers.
+// Write actions run src/ scripts on the server (Mark as sent, New version, Refresh on a job not sent yet).
 import { computed, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import TermDrawer from '../components/TermDrawer.vue'
 import InterviewPrep from './InterviewPrep.vue'
@@ -45,10 +46,10 @@ const tab = computed({
 const pct = (v) => Math.round(v * 100)
 const barColor = (v) => (v >= 0.75 ? '#67c23a' : '#e6a23c')
 const PRIORITY = { must_have: 'must', preferred: 'pref' }
-const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger', uncertain: 'info' }
+const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger', uncertain: 'info', 'set aside': 'info' }
 // Column sorts by rank, not alphabet: must before preferred; missing, partial, uncertain, then met
 const priorityRank = (r) => (r.priority === 'must_have' ? 0 : 1)
-const statusRank = (r) => ({ missing: 0, partial: 1, uncertain: 2, met: 3 })[r.status] ?? 4
+const statusRank = (r) => ({ missing: 0, partial: 1, uncertain: 2, met: 3, 'set aside': 4 })[r.status] ?? 5
 const version = (slug) => slug.match(/-v(\d+)$/)?.[1] ?? '1'
 const warnings = computed(() => job.value.notes.filter((n) => n.severity !== 'info'))
 const infos = computed(() => job.value.notes.filter((n) => n.severity === 'info'))
@@ -66,7 +67,7 @@ const CHIPS = {
 const termFilter = computed(() => route.query.term?.toString().toLowerCase() || '')
 const hasTerm = (r) => !termFilter.value || r.terms.some((t) => t.term.toLowerCase() === termFilter.value)
 // Skills tab: search (requirement, terms, evidence) and type, on top of the chips and ?term=
-const TYPE_LABEL = { technical: 'technical', design: 'design', ai: 'AI', soft: 'soft skill', language: 'language',
+const TYPE_LABEL = { programming_language: 'programming language', technology: 'technology', technical: 'technical', design: 'design', ai: 'AI', soft: 'soft skill', language: 'language',
   location: 'location', education: 'education' }
 const typeLabel = (r) => TYPE_LABEL[r.type] ?? 'not typed'
 // Term drawer (same as the Requirements page): edit a requirement's skill without leaving the job
@@ -81,6 +82,27 @@ const STATES = {
 }
 const stateCount = (s, must = false) => job.value.requirements
   .filter((r) => r.status === s && (!must || r.priority === 'must_have')).length
+// Repetitions: the text cut around each use of the word (odd parts are the word, highlighted)
+const highlight = (text, word) => text.split(new RegExp(`(?<!\\w)(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?!\\w)`, 'i'))
+// Refresh: run the keyword search again and save the review (src/review_ats.py), sent jobs too (only their review/
+// reports change, never the PDFs), then reload.
+const refreshing = ref(false)
+const refreshedAt = ref('')
+async function refresh() {
+  refreshing.value = true
+  try {
+    const base = `/api/jobs/${encodeURIComponent(route.params.slug)}`
+    const res = await fetch(`${base}/refresh`, { method: 'POST' })
+    const out = await res.json()
+    if (!res.ok || !out.ok) throw new Error((typeof out.detail === 'string' && out.detail) || out.output || res.statusText)
+    await load(true)
+    refreshedAt.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  } catch (e) {
+    ElMessage.error({ message: `Refresh failed: ${e.message}`, duration: 6000 })
+  } finally {
+    refreshing.value = false
+  }
+}
 const reqQ = ref('')
 const reqType = ref('')
 const reqTypes = computed(() => [...new Set(job.value.requirements.map(typeLabel))].sort())
@@ -216,24 +238,25 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
           <div class="muted small">Partial counts ½. Overall: a preferred skill counts ¼ of a must-have. A tailoring aid, not an ATS score.</div>
         </el-card>
 
-        <el-card v-if="job.gaps.length" shadow="never" class="block">
-          <template #header>Gaps to work on (must-have first) · {{ job.gaps.length }}</template>
-          <el-table :data="job.gaps" max-height="420" size="small">
-            <el-table-column prop="description" label="Requirement" min-width="200" />
-            <el-table-column label="Priority" width="95" sortable :sort-by="priorityRank">
-              <template #default="{ row }">{{ PRIORITY[row.priority] }}</template>
-            </el-table-column>
-            <el-table-column label="Status" width="100" sortable :sort-by="statusRank">
-              <template #default="{ row }"><el-tag size="small" :type="STATUS_TAG[row.status]">{{ row.status }}</el-tag></template>
-            </el-table-column>
-            <el-table-column prop="hint" label="Hint" min-width="260" />
-            <el-table-column width="130">
-              <template #default>
-                <el-tooltip content="Not wired yet: how it works is decided later">
-                  <span><el-button size="small" plain disabled class="dashed">Propose swap</el-button></span>
-                </el-tooltip>
+        <el-card v-if="job.repetitions.length" shadow="never" class="block">
+          <template #header>Repetitions to fix · {{ job.repetitions.length }}</template>
+          <div class="muted small rep-note">Same words in many experience lines, or twice in one line. Vary some of them.</div>
+          <el-table :data="job.repetitions" size="small" :default-sort="{ prop: 'count', order: 'descending' }">
+            <el-table-column type="expand">
+              <template #default="{ row }">
+                <div class="expand">
+                  <p v-for="(l, i) in row.lines" :key="i">
+                    <b>{{ l.where }}: </b>
+                    <template v-for="(part, j) in highlight(l.text, row.word)" :key="j">
+                      <mark v-if="j % 2" class="t-partial">{{ part }}</mark><template v-else>{{ part }}</template>
+                    </template>
+                  </p>
+                </div>
               </template>
             </el-table-column>
+            <el-table-column prop="word" label="Word" min-width="160" sortable />
+            <el-table-column prop="count" label="Uses" width="100" sortable />
+            <el-table-column prop="kind" label="Where" min-width="140" sortable />
           </el-table>
         </el-card>
       </el-col>
@@ -282,6 +305,14 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
     </el-row>
     </el-tab-pane>
     <el-tab-pane :label="`Skills (${job.requirements.length})`" name="skills">
+        <div class="refresh-bar">
+          <span class="muted small">
+            Review{{ job.build.date ? ` · ${job.build.date}` : '' }}{{ refreshedAt ? ` · refreshed ${refreshedAt}` : '' }}
+          </span>
+          <el-tooltip :content="job.sent ? 'Runs the search again and saves the review; the sent PDFs are not touched' : 'Runs the search again and saves the review'">
+            <el-button size="small" :loading="refreshing" @click="refresh">Refresh</el-button>
+          </el-tooltip>
+        </div>
         <el-row :gutter="16" class="state-cards">
           <el-col v-for="(c, key) in STATES" :key="key" :span="6">
             <el-card shadow="hover" :class="['state', `state-${key}`, { on: reqChip === key }]"
@@ -309,7 +340,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
             <el-table-column type="expand">
               <template #default="{ row }">
                 <div class="expand">
-                  <p><b>Posting:</b> {{ row.posting_quote || '—' }}</p>
+                  <p><b>Hint:</b> {{ row.hint || '—' }}</p>
                   <p><b>Terms:</b>
                     <span v-if="!row.terms.length" class="muted">—</span>
                     <el-tag v-for="t in row.terms" :key="t.term" size="small" :type="STATUS_TAG[t.status]" class="term">
@@ -415,6 +446,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
 .cov { display: flex; gap: 12px; align-items: center; margin: 8px 0; font-size: 14px; }
 .cov-label { width: 80px; }
 .cov-bar { width: 220px; }
+.refresh-bar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 10px; }
 .state-cards { margin-bottom: 16px; }
 .state { cursor: pointer; border-top: 3px solid var(--state); }
 .state.on { outline: 2px solid var(--state); }
@@ -424,10 +456,10 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
 .state-uncertain { --state: #909399; }
 .state-label { font-size: 13px; color: #606266; }
 .state-value { font-size: 28px; font-weight: 600; margin: 4px 0; }
+.rep-note { margin: 0 0 8px; }
 .chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
 .expand { padding: 4px 48px; font-size: 13px; }
 .term { margin: 2px 4px 2px 0; }
-.dashed { border-style: dashed; }
 .lang { font-weight: 600; margin: 8px 0 4px; font-size: 14px; }
 .file { font-size: 14px; margin: 4px 0; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .preview-buttons { margin: 8px 0 12px; }

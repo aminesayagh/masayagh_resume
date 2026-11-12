@@ -22,8 +22,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DB = ROOT / "data" / "resume.db"
 DUMP = ROOT / "data" / "resume.sql"
-SKILL_TYPES = ("technical", "design", "ai", "soft", "language", "location", "education")
-HARD_TYPES = ("technical", "design", "ai")  # only these have start/end dates (years of experience)
+SKILL_TYPES = ("programming_language", "technology", "technical", "design", "ai", "soft", "language", "location", "education")
+HARD_TYPES = ("programming_language", "technology", "technical", "design", "ai")  # only these have start/end dates (years of experience)
 MUST_HAVE = 100  # requirements.priority: 100 = must-have, 0 = preferred (an int 0-100)
 
 SCHEMA = f"""
@@ -118,7 +118,8 @@ CREATE TABLE IF NOT EXISTS skills (
   name TEXT NOT NULL,      -- json, lowercase
   start_at TEXT,
   end_at TEXT,
-  confirmed INTEGER NOT NULL DEFAULT 1 CHECK (confirmed IN (0, 1))  -- 0 = created from a posting, to review or merge
+  confirmed INTEGER NOT NULL DEFAULT 1 CHECK (confirmed IN (0, 1)),  -- 0 = created from a posting, to review or merge
+  ignored INTEGER NOT NULL DEFAULT 0 CHECK (ignored IN (0, 1))  -- 1 = left out of every job's requirements and scoring
 );
 CREATE TABLE IF NOT EXISTS skill_keywords (
   id INTEGER PRIMARY KEY,

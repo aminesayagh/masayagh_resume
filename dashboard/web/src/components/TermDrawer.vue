@@ -52,6 +52,8 @@ const saveType = (type) => post('/api/skills/type', { term: selected.value.skill
   `${selected.value.term}: ${TYPE_LABEL[type]}` + (HARD.includes(type) || !selected.value.start ? '' : ' (dates removed)'), 'type')
 const saveDates = () => post('/api/skills/dates',
   { skill: selected.value.skill, start: form.value.start, end: form.value.end || null }, 'Dates saved', 'dates')
+const setIgnored = (ignored) => post('/api/skills/ignore', { skill: selected.value.skill, ignored },
+  ignored ? `${selected.value.skill} set aside: it no longer counts in any job` : `${selected.value.skill} counts again`, 'ignore')
 const addKeyword = () => post('/api/skills/keyword',
   { skill: selected.value.skill, keyword: form.value.keyword.trim(), lang: form.value.lang },
   `‘${form.value.keyword.trim()}’ now counts as ${selected.value.skill}`, 'keyword')
@@ -74,7 +76,7 @@ async function moveTo() {
   target.value = ''
   skills.value = (await (await fetch('/api/skills')).json()).skills
 }
-const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger' }
+const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger', 'set aside': 'info' }
 </script>
 
 <template>
@@ -103,6 +105,19 @@ const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger' }
       </template>
       <p v-else class="muted small">Start / end dates are for hard skills only.</p>
     </el-form>
+
+    <h4>Scoring</h4>
+    <div class="ignore">
+      <el-switch :model-value="!!selected.ignored" :disabled="busy || !selected.skill" :loading="busy"
+        active-text="Set aside" style="--el-switch-on-color: #909399; flex-shrink: 0"
+        @change="setIgnored" />
+      <span class="muted small">
+        <template v-if="!selected.skill">Give the term a type first.</template>
+        <template v-else-if="selected.ignored">Set aside: left out of every job's requirements, gaps, interview prep and
+          coverage. Their reviews are run again.</template>
+        <template v-else>Counts in the requirements and coverage of every job asking for it.</template>
+      </span>
+    </div>
 
     <h4>Keywords <span class="muted small">(any one on the resume = has it)</span></h4>
     <div class="keywords">
@@ -164,6 +179,7 @@ const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger' }
 <style scoped>
 .small { font-size: 12px; }
 .hint { margin: 0 8px; }
+.ignore { display: flex; gap: 12px; align-items: center; }
 .merge { display: flex; gap: 8px; align-items: center; }
 .opt { float: right; margin-left: 16px; font-size: 12px; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
 .keywords { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }

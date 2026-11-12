@@ -8,6 +8,8 @@ Usage:
   python3 src/skills_inventory.py type "communication" soft   # set a skill's type; creates the skill if it is new
   python3 src/skills_inventory.py job jobs/<slug>       # the job's skills with years, as on its dashboard
   python3 src/skills_inventory.py keyword "PostgreSQL" "Postgres" [en|fr]   # a true synonym (matching uses it)
+  python3 src/skills_inventory.py ignore "budgets" [off]          # leave a skill out of every job's requirements
+                                                                 # and scoring (off: count it again)
   python3 src/skills_inventory.py move "postgres" "PostgreSQL"   # merge: the keyword now counts as that skill; its old
                                                                  # skill is dropped once it has no keyword left
 
@@ -45,11 +47,12 @@ def atoms(item: str) -> list[tuple[str, list[str]]]:
 def load() -> dict:
     con = db.connect()
     skills = []
-    for sid, name, kind, start, end in con.execute(f"SELECT id, {db.EN.format('name')}, type, start_at, end_at FROM skills "
+    for sid, name, kind, start, end, ignored in con.execute(f"SELECT id, {db.EN.format('name')}, type, start_at, end_at, ignored FROM skills "
                                                    f"ORDER BY {db.EN.format('name')}"):
         match = [k for (k,) in con.execute("SELECT keyword FROM skill_keywords WHERE skill_id = ? AND lang = 'en' "
                                            "AND keyword <> ?", (sid, name))]
-        skills.append({"id": sid, "name": name, "type": kind, "match": match, "start": start, "end": end})
+        skills.append({"id": sid, "name": name, "type": kind, "match": match, "start": start, "end": end,
+                       "ignored": bool(ignored)})
     return {"skills": skills}
 
 
@@ -155,7 +158,7 @@ def move(word: str, target: str) -> str:
 
 
 def main() -> None:
-    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword", "type", "move"}:
+    if len(sys.argv) < 2 or sys.argv[1] not in {"sync", "missing", "set", "job", "keyword", "type", "move", "ignore"}:
         sys.exit(__doc__)
     inv = load()
     if sys.argv[1] == "keyword":
@@ -168,6 +171,15 @@ def main() -> None:
         con.commit()
         db.dump(con)
         print(f"{sys.argv[3]} ({lang}) now counts as {sys.argv[2]}")
+        return
+    if sys.argv[1] == "ignore":
+        skill = find(inv, sys.argv[2]) or sys.exit(f"Unknown skill '{sys.argv[2]}'")
+        off = sys.argv[3:] == ["off"]
+        con = db.connect()
+        con.execute("UPDATE skills SET ignored = ? WHERE id = ?", (int(not off), skill["id"]))
+        con.commit()
+        db.dump(con)
+        print(f"{skill['name']}: " + ("counted again" if off else "ignored in every job's requirements and scoring"))
         return
     if sys.argv[1] == "move":
         print(move(sys.argv[2], sys.argv[3]))

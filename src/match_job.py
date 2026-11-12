@@ -8,7 +8,7 @@ For each requirement it reports two separate things:
               exact | alias (wording differs) | absent
   evidence  - does the resume back it up:
               met       found in experience, education, languages or header text
-              partial   found only in the skills list or summary (a claim, not proof),
+              partial   found only in the skills list, summary or English cover letter (a claim, not proof),
                         or only some of the requirement's terms are met
               missing   no supporting text in this PDF (not proof you lack the skill)
               uncertain the text cannot support a decision (e.g. unreadable dates)
@@ -32,9 +32,9 @@ import db
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent  # repo root: template/, src/, jobs/
-VERSION = 2  # 2: Languages heading found, Projects and Certifications count as evidence. Bump when matching rules change, so old reports can be told apart
+VERSION = 3  # 3: the English cover letter is searched too (a claim, like the skills list). 2: Languages heading found, Projects and Certifications count as evidence. Bump when matching rules change, so old reports can be told apart
 EVIDENCE_SECTIONS = {"experience", "projects", "certifications", "education", "languages", "header"}
-CLAIM_SECTIONS = {"skills", "summary"}
+CLAIM_SECTIONS = {"skills", "summary", "cover letter"}  # resume lines come first, so they win over the letter
 SECTION_WORDS = [("summary", "summary"), ("skills", "skill"), ("skills", "proficienc"), ("education", "education"),
                  ("languages", "language"), ("experience", "experience"), ("projects", "project"),
                  ("certifications", "certific")]  # first match wins: "Summary of Experience" is summary
@@ -106,14 +106,14 @@ def match_term(term: str, lines: list[dict], aliases: dict) -> dict:
     claims = [h for h in hits if h["section"] in CLAIM_SECTIONS]
     best = (evidence or claims or [None])[0]
     status = "met" if evidence else "partial" if claims else "missing"
-    label = {"skills": "skills list", "summary": "summary"}
+    label = {"skills": "skills list", "summary": "summary", "cover letter": "cover letter"}
     where = {"met": f"{best['section']} text" if best else "",
              "partial": f"the {label.get(best['section'], best['section'])} only" if best else "", "missing": ""}[status]
     rationale = (f"'{term}' found in {where}." if status != "missing" else f"'{term}' not found in this PDF.")
     if keyword == "alias":
         rationale += f" Wording differs: the PDF says '{best['alias']}'; the posting says '{term}'. Use the posting's term."
     if status == "partial":
-        rationale += " A skills-list or summary mention is a claim, not proof of professional experience."
+        rationale += " A skills-list, summary or cover-letter mention is a claim, not proof of professional experience."
     return {"term": term, "keyword": keyword, "status": status, "method": "exact" if exact else "alias" if alias_hits else None,
             "quote": best["quote"] if best else None, "page": best["page"] if best else None,
             "section": best["section"] if best else None, "rationale": rationale,
@@ -124,7 +124,7 @@ def summarize(terms: list[dict]) -> str:
     """One line for a multi-term requirement; per-term detail stays in the report's 'terms'."""
     group = lambda status: ", ".join(t["term"] for t in terms if t["status"] == status)
     parts = [f"{label}: {group(s)}." for s, label in (("met", "Backed by experience"),
-             ("partial", "Skills list or summary only"), ("missing", "Not found")) if group(s)]
+             ("partial", "Skills list, summary or cover letter only"), ("missing", "Not found")) if group(s)]
     differs = [f"'{t['term']}' (PDF: '{t['quote']}')" for t in terms if t["keyword"] == "alias"]
     if differs:
         parts.append("Wording differs for " + ", ".join(differs) + "; use the posting's term.")
@@ -154,8 +154,11 @@ def match_years(req: dict, content: dict, lines: list[dict]) -> dict:
             "rationale": why + " Computed from the job dates; the quote is your earliest date range."}
 
 
-def assess(job: dict, pages: list[str], content: dict | None, headings: list[str], aliases: dict) -> dict:
-    lines = pdf_lines(pages, headings)
+def assess(job: dict, pages: list[str], content: dict | None, headings: list[str], aliases: dict,
+           letter_pages: list[str] = ()) -> dict:
+    """letter_pages: the English cover letter's text; a term found only there counts as partial, never met."""
+    lines = pdf_lines(pages, headings) + [{"page": p, "section": "cover letter", "text": line}
+                                          for p, t in enumerate(letter_pages, 1) for line in t.splitlines() if line.strip()]
     aliases = {k.casefold(): v for k, v in aliases.items() if not k.startswith("_")}
     results = []
     for req in job["requirements"]:

@@ -12,6 +12,8 @@ Requirements are rebuilt from the db on every load (one per keyword, its min_yea
 stored, so quote is empty and description is the keyword. save(folder, data) writes a job dict back.
 
 Usage: python3 src/offers.py sent jobs/<slug> [YYYY-MM-DD]   # mark a job as sent (default today); it is then frozen
+       python3 src/offers.py note jobs/<slug> "<keyword>" ["text"]   # interview note on one of its offer's requirements
+                                                                     # (no text: delete it); fine on a sent job
 """
 
 import json
@@ -25,7 +27,8 @@ import db
 import paths
 from db import i18n, tr
 
-TARGETS = {"technical": ["skills", "experience"], "design": ["skills", "experience"], "ai": ["skills", "experience"],
+TARGETS = {"programming_language": ["skills", "experience"], "technology": ["skills", "experience"],
+           "technical": ["skills", "experience"], "design": ["skills", "experience"], "ai": ["skills", "experience"],
            "soft": ["experience"], "language": ["summary"], "location": ["summary"], "education": ["summary"]}
 DEGREE = re.compile(r"\b(bachelor|master|degree|diploma|bac\s*\+|licence|ingénieur|engineering school)", re.I)
 
@@ -82,7 +85,7 @@ def load(folder: Path, con=None) -> dict:
                 "skipped_terms": json.loads(offer["skipped_terms"] or "{}"), "offer_id": offer["id"]})
     rows = con.execute("SELECT r.priority, r.min_years, k.keyword, s.type FROM requirements r "
                        "JOIN skill_keywords k ON k.id = r.keyword_id JOIN skills s ON s.id = k.skill_id "
-                       "WHERE r.offer_id = ? ORDER BY r.priority DESC, r.id", (offer["id"],)).fetchall()
+                       "WHERE r.offer_id = ? AND NOT s.ignored ORDER BY r.priority DESC, r.id", (offer["id"],)).fetchall()
     for r in rows:  # one requirement per keyword; the years it asks for are part of it, never a second requirement
         job["requirements"].append({
             "section": "location" if r["type"] == "location" else "requirement",
@@ -169,9 +172,14 @@ def save_requirements(con, offer_id: int, requirements: list[dict]) -> None:
             row["priority"] = max(row["priority"], db.MUST_HAVE if r.get("priority") == "must_have" else 0)
             if r.get("kind") == "years_experience":
                 row["min_years"] = max(row["min_years"] or 0, r["min_years"])
-    con.execute("DELETE FROM requirements WHERE offer_id = ?", (offer_id,))
-    con.executemany("INSERT INTO requirements (offer_id, keyword_id, priority, min_years) VALUES (?, ?, ?, ?)",
-                    [(offer_id, kid, r["priority"], r["min_years"]) for kid, r in rows.items()])
+    # upsert, never delete-all: a kept requirement keeps its id, so its interview note (ON DELETE CASCADE) survives
+    # an ignored skill's requirement is missing from load(), so a save must not delete it: un-ignoring brings it back
+    con.execute(f"DELETE FROM requirements WHERE offer_id = ? AND keyword_id NOT IN ({', '.join('?' * len(rows))}) "
+                "AND keyword_id NOT IN (SELECT k.id FROM skill_keywords k JOIN skills s ON s.id = k.skill_id "
+                "WHERE s.ignored)", (offer_id, *rows))
+    con.executemany("INSERT INTO requirements (offer_id, keyword_id, priority, min_years) VALUES (?, ?, ?, ?) "
+                    "ON CONFLICT (offer_id, keyword_id) DO UPDATE SET priority = excluded.priority, "
+                    "min_years = excluded.min_years", [(offer_id, kid, r["priority"], r["min_years"]) for kid, r in rows.items()])
 
 
 def all_folders(con=None) -> list[Path]:
@@ -211,7 +219,32 @@ def mark_sent(folder: Path, when: str | None = None) -> str:
     return day.isoformat()
 
 
+def save_note(folder: Path, keyword: str, text: str = "") -> str:
+    """The interview note of one requirement (offer + keyword): set, or deleted when empty. Notes live in the db only,
+    on the offer's requirement, so every version of the job shows them and a sent folder is never touched."""
+    con = db.connect()
+    comp = composition(folder, con)
+    row = con.execute("SELECT r.id FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id "
+                      "WHERE r.offer_id = ? AND k.keyword = ?", (comp["offer_id"], keyword.strip().lower())).fetchone()
+    if row is None:
+        sys.exit(f"'{keyword}' is not a requirement of {Path(folder).name}")
+    if text.strip():
+        con.execute("INSERT INTO interview_notes (requirement_id, note) VALUES (?, ?) ON CONFLICT (requirement_id) "
+                    "DO UPDATE SET note = excluded.note, updated_at = datetime('now')", (row[0], text.strip()))
+    else:
+        con.execute("DELETE FROM interview_notes WHERE requirement_id = ?", (row[0],))
+    con.commit()
+    db.dump(con)
+    return "saved" if text.strip() else "deleted"
+
+
 def main() -> None:
+    if len(sys.argv) in (4, 5) and sys.argv[1] == "note":
+        folder = paths.folder_arg(Path(sys.argv[2]))
+        if not exists(folder):
+            sys.exit(f"No composition for {folder.name} in data/resume.db")
+        print(f"Note on '{sys.argv[3]}' {save_note(folder, sys.argv[3], sys.argv[4] if len(sys.argv) == 5 else '')}")
+        return
     if len(sys.argv) not in (3, 4) or sys.argv[1] != "sent":
         sys.exit(__doc__)
     folder = paths.folder_arg(Path(sys.argv[2]))

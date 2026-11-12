@@ -34,6 +34,7 @@ const q = ref('')
 const twoPlus = ref(false)
 const missingSomewhere = ref(false)
 const synonym = ref(false)
+const hideIgnored = ref(false)
 
 const terms = computed(() => data.value?.terms ?? [])
 const tabCount = (key) => terms.value.filter(TABS[key][1]).length
@@ -43,7 +44,8 @@ const shown = computed(() => {
     && (!needle || t.term.toLowerCase().includes(needle) || t.keywords.some((k) => k.keyword.toLowerCase().includes(needle)))
     && (!twoPlus.value || t.jobs >= 2)
     && (!missingSomewhere.value || t.missing > 0)
-    && (!synonym.value || t.synonym))
+    && (!synonym.value || t.synonym)
+    && (!hideIgnored.value || !t.ignored))
 })
 const cards = computed(() => ({
   total: terms.value.length,
@@ -51,6 +53,7 @@ const cards = computed(() => ({
   missing: terms.value.filter((t) => t.missing > 0).length,
   untyped: terms.value.filter((t) => !t.type).length,
   synonym: terms.value.filter((t) => t.synonym).length,
+  ignored: terms.value.filter((t) => t.ignored).length,
 }))
 function card(key) {
   tab.value = key === 'untyped' ? 'untyped' : 'all'
@@ -121,13 +124,18 @@ const seg = (t, s) => `${(t[s] / t.jobs) * 100}%`
       <el-check-tag :checked="twoPlus" @change="twoPlus = !twoPlus">2+ jobs</el-check-tag>
       <el-check-tag :checked="missingSomewhere" @change="missingSomewhere = !missingSomewhere">Missing somewhere</el-check-tag>
       <el-check-tag :checked="synonym" @change="synonym = !synonym">Synonym only {{ cards.synonym }}</el-check-tag>
+      <el-check-tag :checked="hideIgnored" @change="hideIgnored = !hideIgnored">Hide set aside {{ cards.ignored }}</el-check-tag>
     </div>
 
     <el-row :gutter="20">
       <el-col :span="17">
         <el-table :data="shown" size="small" empty-text="No term matches these filters" class="clickable"
-          @row-click="open">
-          <el-table-column prop="term" label="Term" min-width="170" />
+          @row-click="open" :row-class-name="({ row }) => (row.ignored ? 'set-aside' : '')">
+          <el-table-column label="Term" min-width="170">
+            <template #default="{ row }">
+              {{ row.term }} <el-tag v-if="row.ignored" size="small" type="info" round>set aside</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="Type" width="150">
             <template #default="{ row }">
               <el-tag size="small" :type="row.type ? (row.hard ? 'primary' : 'success') : 'info'" round>{{ typeLabel(row) }}</el-tag>
@@ -183,6 +191,8 @@ const seg = (t, s) => `${(t[s] / t.jobs) * 100}%`
 .filters { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
 .small { font-size: 12px; }
 .clickable :deep(tr) { cursor: pointer; }
+:deep(tr.set-aside td) { color: #a8abb2; }
+:deep(tr.set-aside .stack) { opacity: 0.4; }
 .stack { display: inline-flex; width: 110px; height: 8px; border-radius: 4px; overflow: hidden; background: #ebeef5;
   vertical-align: middle; margin-right: 8px; }
 .stack .met { background: #67c23a; }

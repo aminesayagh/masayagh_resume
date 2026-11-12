@@ -222,7 +222,7 @@ The report, `review.md` next to the job file (with `review.json` beside it), con
 2. **PDF readability:** the `src/check_pdf.py` findings.
 3. **Content checks:** spelling and style warnings.
 4. **Must-have requirements, then preferred requirements:** gaps first, each with the posting quote, your PDF quote and page, the reason, and a rule-based suggestion such as "the posting says X; your PDF says Y".
-5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: Σ weight × (1 met, 0.5 partial) ÷ Σ weight, per priority, weighted by skill type (hard skills 1, education and language 0.5, soft and location 0.25; `TYPE_WEIGHTS` in `src/review_ats.py`). An **overall** figure covers every requirement, a preferred one weighted ¼ of a must-have (`PRIORITY_WEIGHTS`). Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
+5. **Summary:** the met/partial/missing/uncertain counts, and **evidence coverage**: Σ weight × (1 met, 0.5 partial) ÷ Σ weight, per priority, weighted by skill type (programming languages and technologies 1.5, other hard skills 1, education and language 0.5, soft and location 0.25; `TYPE_WEIGHTS` in `src/review_ats.py`). An **overall** figure covers every requirement, a preferred one weighted ¼ of a must-have (`PRIORITY_WEIGHTS`). Evidence coverage is not an ATS score or a hiring probability, and it is kept separate from PDF readability.
 
 Without `--cv`/`--content`, the command uses the job's `pdf/` resume and `content/content.json`. To correct a result, add an override to the offer's requirement (`override_status`, `override_reason`, `override_quote` in `data/resume.db`); the report keeps the automated finding next to it.
 
@@ -231,7 +231,7 @@ Without `--cv`/`--content`, the command uses the job's `pdf/` resume and `conten
 `src/match_job.py` checks a validated job file against the resume PDF text. For each requirement it reports two separate things:
 
 - **Keyword:** whether the posting's exact term appears anywhere in the PDF, which is what a recruiter's search sees. The result is `exact`, `alias` (wording differs: use the posting's term), or `absent`.
-- **Evidence:** whether the resume backs the requirement up. `met` means it was found in experience, education, languages or header text. `partial` means it was found only in the skills list or summary (a claim, not proof), or only some of the requirement's terms were met. `missing` means there is no supporting text in this PDF; it does not mean you lack the skill. `uncertain` means the text cannot support a decision.
+- **Evidence:** whether the resume backs the requirement up. `met` means it was found in experience, education, languages or header text. `partial` means it was found only in the skills list, summary or English cover letter (a claim, not proof), or only some of the requirement's terms were met. `missing` means there is no supporting text in this PDF; it does not mean you lack the skill. `uncertain` means the text cannot support a decision.
 
 Every `met` or `partial` result quotes the exact PDF line and its page. "At least N years" requirements are computed from your job dates. Matching is deterministic: no model and no network. Alternative spellings that count as the same term (for example Postgres for PostgreSQL) are skill keywords in `data/resume.db`; add one with `src/skills_inventory.py keyword "PostgreSQL" "Postgres"`, true synonyms only.
 

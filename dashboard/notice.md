@@ -3,14 +3,15 @@
 Found while rebuilding the dashboard from `dashboard-flow.excalidraw` (2026-11-11). Nothing here was changed: each
 point needs a decision or a change outside the dashboard (data in `data/resume.db`, scripts in `src/`).
 
-## Write actions shown disabled ("not wired yet")
+## Write actions
 
-The backend for these is still to be decided. Each one is visible in the UI but cannot be clicked.
+No disabled action is left. **Dropped (2026-11-12):** the job page's "Gaps to work on" card and its "Propose swap"
+button (the Skills tab lists every requirement with its hint).
 
-| Action | Where |
-|---|---|
-| Propose swap | Job page, "Gaps to work on" |
-| Interview notes (save) | Interview prep tab, every topic card. The `interview_notes` table exists (one note per `requirements.id`), but it needs a `src/` command to write it, and interview.json topics (R01…) do not carry a `requirements.id` yet |
+**Wired (2026-11-12): Interview notes.** Each topic card's box saves when it loses focus, through
+`src/offers.py note jobs/<slug> "<keyword>" ["text"]` (empty deletes). One note per requirement of the offer
+(`interview_notes`), so every version of the job shares it and sent jobs work (the folder is not touched). A topic is
+matched to its requirement by keyword ("java (10+ years)" -> java), so a years topic shares its keyword's note.
 
 **Wired:** New version (jobs list and job page "…" menus) runs `src/new_job.py --from jobs/<slug>` after a
 confirmation, then opens the new job. One run at a time (server lock). **Dropped:** Reopen (not needed).
@@ -26,7 +27,7 @@ results; the job is then frozen. Sent jobs show "Sent on <date>" instead.
   the keyword already counts as another skill.
 - Merge (2026-11-12): "Merge into another skill" runs `move "<keyword>" "<skill>"`: the keyword joins the chosen skill
   (and takes its type); the old skill is dropped once it has no keyword left (its resume-line and cover-paragraph links
-  go to the target; its dates are not carried over). Open jobs asking for it get their review recomputed; sent ones don't.
+  go to the target; its dates are not carried over). Every job asking for it gets its review recomputed, sent ones included (only their review/ reports change).
 - Since the offer / composition schema (2026-11-12), a requirement points to a keyword, which belongs to one skill, so a
   type or keyword added later shows on every job.
 

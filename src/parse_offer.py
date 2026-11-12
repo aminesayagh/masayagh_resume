@@ -3,7 +3,7 @@
 1. Code splits the posting into phrases (lines, bullets, sentences).
 2. One Claude Haiku call (via the `claude` CLI, no API key) reads the numbered phrases:
    company, title, location, spoken languages, and the skills each phrase asks for,
-   each typed technical, design, ai, soft, language, location, education or none,
+   each typed programming_language, technology, technical, design, ai, soft, language, location, education or none,
    with priority (100 must-have, 0 preferred) and min_years (or null).
    Phrases without skills are typed none.
 
@@ -29,8 +29,11 @@ EFFORT = "low"   # same accuracy as default on the 100 samples, ~30% faster
 CACHE = Path(__file__).resolve().parent.parent / "data" / "cache" / "parse_offer"
 
 TYPES = {
-    "technical": "Hard or professional skill: programming language, framework, tool, platform, database, "
-                 "method, or a non-software trade skill (e.g. Java, Kubernetes, SQL, CI/CD, Excel, accounting)",
+    "programming_language": "Programming, query or markup language (e.g. Java, Python, TypeScript, SQL, Bash)",
+    "technology": "Named product: framework, library, tool, platform, database, cloud or service "
+                  "(e.g. React, Spring Boot, Docker, Kubernetes, PostgreSQL, AWS, Jira, Excel)",
+    "technical": "Other hard or professional skill: method, practice, concept or a non-software trade skill, "
+                 "not a product name (e.g. CI/CD, REST APIs, microservices, unit testing, accounting)",
     "design": "Design skill or tool: UI, UX, visual, interaction or product design (e.g. Figma, wireframing)",
     "ai": "AI, machine learning or data science skill (e.g. LLMs, RAG, PyTorch, generative AI, NLP)",
     "soft": "Interpersonal or work trait (e.g. communication, leadership, autonomy, teamwork)",
@@ -44,7 +47,7 @@ TYPES = {
 
 class Skill(BaseModel):
     name: str
-    type: Literal["technical", "design", "ai", "soft", "language", "location", "education", "none"]
+    type: Literal["programming_language", "technology", "technical", "design", "ai", "soft", "language", "location", "education", "none"]
     required: bool           # True only when asked of the candidate; False for "a plus" and for responsibilities
     min_years: int | None    # years of experience asked for this skill, if stated
 

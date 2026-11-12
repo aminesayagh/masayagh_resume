@@ -44,8 +44,8 @@ def overused(texts: list[str], min_lines: int = OVERUSED_LINES) -> dict[str, int
 def check(content: dict) -> dict:
     findings = []
 
-    def add(severity, code, field, message):
-        findings.append({"severity": severity, "code": code, "field": field, "message": f"{field}: {message}"})
+    def add(severity, code, field, message, **extra):
+        findings.append({"severity": severity, "code": code, "field": field, "message": f"{field}: {message}", **extra})
 
     summary = content.get("summary", "")
     if FIRST_PERSON.search(summary):
@@ -79,7 +79,9 @@ def check(content: dict) -> dict:
                 "vary the wording.")
     if lines and (words := overused([t for _, t in lines])):
         add("info", "overused_word", "experience", "same words in many lines: "
-            + ", ".join(f"'{w}' ({n})" for w, n in words.items()) + ". Vary some of them.")
+            + ", ".join(f"'{w}' ({n})" for w, n in words.items()) + ". Vary some of them.",
+            words=[{"word": w, "count": n, "lines": [{"field": f, "text": t} for f, t in lines
+                                                     if w in WORD.findall(t.casefold())]} for w, n in words.items()])
 
     measured = [f for f, t in lines if RESULT.search(t)]
     if lines:

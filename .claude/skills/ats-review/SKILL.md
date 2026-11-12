@@ -99,13 +99,13 @@ Each tool defaults to its input's own folder: run against `template/content/defa
 - **Keyword:** `exact` means the posting's term is in the PDF, which recruiter search sees. `alias` means the wording differs, so suggest the posting's term. `absent` means the term is not in the PDF.
 - **Evidence:**
   - `met`: found in experience, education, languages or header text.
-  - `partial`: found only in the skills list or summary (a claim, not proof), or only some terms are met.
+  - `partial`: found only in the skills list, summary or English cover letter (a claim, not proof; the letter is read from the job's cover-letter PDF), or only some terms are met.
   - `missing`: no supporting text in this PDF. It does **not** mean the user lacks the skill.
   - `uncertain`: the text cannot support a decision.
 
 **Years of experience:** reported two ways, with overlaps counted once and with every job added up. `met` needs the first number to reach the minimum.
 
-**Evidence coverage** (v3) is Σ weight × (1 met, 0.5 partial, 0 otherwise) ÷ Σ weight, per priority, where the weight comes from the skill's type (`TYPE_WEIGHTS` in `src/review_ats.py`: hard skills 1, education and language 0.5, soft and location 0.25, not typed 0.5). The **overall** figure covers every requirement, with a preferred one weighted ¼ of a must-have (`PRIORITY_WEIGHTS`). Always present it with its formula, never as an ATS score, and never combined with PDF readability.
+**Evidence coverage** (v4) is Σ weight × (1 met, 0.5 partial, 0 otherwise) ÷ Σ weight, per priority, where the weight comes from the skill's type (`TYPE_WEIGHTS` in `src/review_ats.py`: programming languages and technologies 1.5, other hard skills 1, education and language 0.5, soft and location 0.25, not typed 0.5). The **overall** figure covers every requirement, with a preferred one weighted ¼ of a must-have (`PRIORITY_WEIGHTS`). Always present it with its formula, never as an ATS score, and never combined with PDF readability.
 
 ## Tailoring a job resume on the user's behalf
 

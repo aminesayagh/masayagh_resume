@@ -3,7 +3,7 @@
 Run from the repo root:  python3 start.py   (or .venv/bin/python -m uvicorn dashboard.app:app --port 8000 after a build)
 The app itself only reads: data/resume.db is opened with mode=ro and jobs/ is only read.
 Writes run src/ scripts, so their rules hold: "New version" runs src/new_job.py --from (the source folder, sent or not,
-is never changed), "Mark as sent" runs src/offers.py sent, and the Requirements term drawer runs
+is never changed), "Mark as sent" runs src/offers.py sent, interview notes run src/offers.py note, and the Requirements term drawer runs
 src/skills_inventory.py. Every other write action in the UI is
 shown disabled ("not wired yet").
 """
@@ -14,6 +14,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -27,6 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 import offers  # noqa: E402  (load/all_folders take a connection: we pass a read-only one)
 import paths  # noqa: E402  (only plain path joins: resume_pdf & co. call stem(), which opens a writable db)
+import check_style  # noqa: E402  (check(content) is pure: reads a dict, writes nothing)
 import skills_inventory  # noqa: E402  (pure helpers only: job_skills/years/label; its load() opens a writable db)
 from db import EN  # noqa: E402  (a JSON column's English text in SQL: json_extract(col, '$.en'))
 
@@ -173,10 +175,53 @@ def posting_quote(parts: list[str], terms: list[str]) -> str:
     return ""
 
 
+FIELD = re.compile(r"experience\[(\d+)\]\.(description|bullets\[(\d+)\])(?: \((.*)\))?")
+
+
+def line_at(content: dict, field: str) -> dict | None:
+    """A check_style field ("summary", "experience[1].bullets[3] (Company)") -> where it is, in words, and its text."""
+    if field == "summary":
+        return {"where": "Summary", "text": content.get("summary", "")}
+    if not (m := FIELD.fullmatch(field)):
+        return None
+    job = content.get("experience", [])[int(m[1])]
+    where = f"{m[4] or job.get('company', '').strip(' ,')} · " + (f"bullet {int(m[3]) + 1}" if m[3] else "description")
+    return {"where": where, "text": job["bullets"][int(m[3])] if m[3] else job.get("description", "")}
+
+
+def repetitions(content: dict) -> list[dict]:
+    """Words to vary, from src/check_style.py run on the job's content.json now (saved reports may predate it):
+    a word used in many experience lines (overused_word, info), or twice in one line (repeated_word, warning).
+    Most repeated first."""
+    rows = []
+    for f in check_style.check(content)["findings"] if content else []:
+        if f["code"] == "overused_word":
+            rows += [{"word": w["word"], "count": w["count"], "kind": "across lines",
+                      "lines": [x for line in w["lines"] if (x := line_at(content, line["field"]))]}
+                     for w in f.get("words", [])]
+        elif f["code"] == "repeated_word" and (line := line_at(content, f["field"])):
+            for word in re.findall(r"'([^']+)'", f["message"].split(": ", 1)[1]):
+                n = len(re.findall(rf"(?<!\w){re.escape(word)}(?!\w)", line["text"], re.I))
+                rows.append({"word": word, "count": n, "kind": "in one line", "lines": [line]})
+    return sorted(rows, key=lambda r: (-r["count"], r["kind"], r["word"]))
+
+
+def ignored_keywords(con: sqlite3.Connection) -> set[str]:
+    """Keywords of skills set aside (skills.ignored): they count in no job, even where a saved review still lists them."""
+    return {k for (k,) in con.execute("SELECT k.keyword FROM skill_keywords k JOIN skills s ON s.id = k.skill_id "
+                                      "WHERE s.ignored = 1")}
+
+
+def set_aside(result: dict, ignored: set[str]) -> bool:
+    """A saved review result whose every term is a set-aside skill (sent jobs keep reviews made before it was set aside)."""
+    terms = [t["term"].lower() for t in result.get("terms", [])]
+    return bool(terms) and all(t in ignored for t in terms)
+
+
 def coverage(results: list[dict], ratio: dict) -> dict:
     out = {}
     for priority in ("overall", "must_have", "preferred"):  # overall: every requirement (review.json v3; None before)
-        rows = [r for r in results if priority in ("overall", r["priority"])]
+        rows = [r for r in results if priority in ("overall", r["priority"]) and r["status"] != "set aside"]
         out[priority] = {"ratio": ratio.get(priority), "total": len(rows),
                          **{s: sum(r["status"] == s for r in rows) for s in ("met", "partial", "missing", "uncertain")}}
     return out
@@ -193,6 +238,7 @@ def detail(slug: str) -> dict:
             if comp["offer_id"] else None
         # versions = the compositions of the same offer, oldest first (no version number in the db: created_at orders them)
         types = dict(con.execute("SELECT k.keyword, s.type FROM skill_keywords k JOIN skills s ON s.id = k.skill_id"))
+        ignored = ignored_keywords(con)
         versions = [f.removeprefix("jobs/") for (f,) in con.execute(
             "SELECT folder FROM compositions WHERE offer_id = ? ORDER BY created_at, id", (comp["offer_id"],))] \
             if offer else [slug]
@@ -200,16 +246,14 @@ def detail(slug: str) -> dict:
     parts = sentences(job.get("posting_text", ""))
     overrides = {o["id"]: o for o in job.get("overrides", [])}
     requirements = [{
-        "id": r["id"], "description": r["description"], "priority": r["priority"], "status": r["status"],
+        "id": r["id"], "description": r["description"], "priority": r["priority"],
+        "status": "set aside" if set_aside(r, ignored) else r["status"],
         # the skill type of its first typed term (None = not typed yet)
         "type": r.get("type") or next((types[k] for t in r.get("terms", []) if types.get(k := t["term"].lower())), None),
         "evidence": r.get("quote"), "posting_quote": r.get("posting_quote") or posting_quote(parts, [t["term"] for t in r.get("terms", [])]), "section": r.get("section"),
         "hint": r.get("suggestion") or r.get("rationale"), "override": overrides.get(r["id"]),
         "terms": [{"term": t["term"], "status": t["status"], "keyword": t.get("keyword")} for t in r.get("terms", [])],
     } for r in review.get("results", [])]
-    rank = {"missing": 0, "partial": 1, "uncertain": 2}
-    gaps = sorted((r for r in requirements if r["status"] in rank),
-                  key=lambda r: (r["priority"] != "must_have", rank[r["status"]]))
     timeline = [{"date": offer and offer["created_at"], "event": "posting saved"},
                 {"date": comp["created_at"], "event": "version created"},
                 {"date": comp["sent_at"], "event": "sent"}]
@@ -218,14 +262,25 @@ def detail(slug: str) -> dict:
         "created": comp["created_at"][:10], "versions": versions, "posting": job.get("posting_text", ""),
         "build": {"date": review.get("generated"), "pages": len((review.get("pdf_check") or {}).get("pages", [])) or None},
         "coverage": coverage(requirements, review.get("evidence_coverage") or {}),
-        "requirements": requirements, "gaps": gaps, "files": files_of(folder, job),
+        "requirements": requirements, "files": files_of(folder, job),
         "french_version": bool(job.get("french_version")), "timeline": timeline,
+        "repetitions": repetitions(load_json(paths.content(folder))),
     }
 
 
 @app.get("/api/jobs/{slug}")
 def api_job(slug: str):
     return detail(slug)
+
+
+@app.post("/api/jobs/{slug}/refresh")
+def api_refresh(slug: str):
+    """Run the search again and save it (src/review_ats.py). Sent jobs too: it rewrites only their review/ reports
+    (which keywords the sent PDFs contain), never the PDFs, content or requirements (AGENTS.md exception)."""
+    with ro() as con:
+        if "/" in slug or slug.startswith(".") or not offers.exists(paths.JOBS / slug, con):
+            raise HTTPException(404, "No such job")
+    return script_result(run_script("src/review_ats.py", "--job", f"jobs/{slug}", "--no-network"))
 
 
 def inventory(con: sqlite3.Connection) -> dict:
@@ -239,6 +294,32 @@ def inventory(con: sqlite3.Connection) -> dict:
     return {"skills": skills}
 
 
+def keyword_of(topic: dict) -> str:
+    """The requirement keyword behind an interview topic: "java (10+ years)" -> "java"."""
+    return re.sub(r"\s*\(.*\)$", "", topic.get("requirement", "")).strip().lower()
+
+
+class Note(BaseModel):
+    keyword: str = Field(max_length=100, pattern=r"^[^\n\r]+$")  # one line
+    note: str = Field(default="", max_length=5000)  # empty: delete
+
+
+@app.post("/api/jobs/{slug}/notes")
+def api_note(slug: str, body: Note):
+    """Save one interview note with src/offers.py note. Notes are on the offer's requirement in the db, never in the
+    job folder, so they work on sent jobs and every version of the offer shares them."""
+    with ro() as con:
+        if "/" in slug or slug.startswith(".") or not offers.exists(paths.JOBS / slug, con):
+            raise HTTPException(404, "No such job")
+        asked = con.execute("SELECT 1 FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id JOIN compositions c "
+                            "ON c.offer_id = r.offer_id WHERE c.folder = ? AND k.keyword = ?",
+                            (f"jobs/{slug}", body.keyword.strip().lower())).fetchone()
+    if not asked:
+        raise HTTPException(404, f"'{body.keyword}' is not a requirement of this job")
+    return script_result(run_script("src/offers.py", "note", f"jobs/{slug}", body.keyword.strip().lower(),
+                                    *([body.note.strip()] if body.note.strip() else [])))
+
+
 @app.get("/api/jobs/{slug}/interview")
 def api_interview(slug: str):
     folder = paths.JOBS / slug
@@ -246,20 +327,26 @@ def api_interview(slug: str):
         if "/" in slug or slug.startswith(".") or not offers.exists(folder, con):
             raise HTTPException(404, "No such job")
         job, inv = offers.load(folder, con), inventory(con)
+        ignored = ignored_keywords(con)
+        notes = {kw: {"note": n, "updated": u} for kw, n, u in con.execute(
+            "SELECT k.keyword, n.note, n.updated_at FROM interview_notes n JOIN requirements r ON r.id = n.requirement_id "
+            "JOIN skill_keywords k ON k.id = r.keyword_id WHERE r.offer_id = ?", (job.get("offer_id"),))}
     prep = load_json(paths.interview(folder))
+    topics = [t for t in prep.get("topics", []) if keyword_of(t) not in ignored]  # set-aside skills: nothing to prepare
     content = load_json(paths.content(folder))
     skills = [{"name": s["name"], "years": skills_inventory.label(s["years"])}
               for s in skills_inventory.job_skills(job, content, inv) if s["in_job"]]
     return {
         "exists": bool(prep), "generated": prep.get("generated"), "how_to_prepare": prep.get("how_to_prepare", {}),
-        "summary": prep.get("summary", {}), "skills": skills,
-        "topics": [{**t, "posting_says": t.get("posting_says") or posting_quote(
+        "summary": dict(Counter(t["focus"] for t in topics)), "skills": skills,
+        "topics": [{**t, **notes.get(keyword_of(t), {"note": "", "updated": None}), "keyword": keyword_of(t),
+                    "posting_says": t.get("posting_says") or posting_quote(
             sentences(job.get("posting_text", "")), [re.sub(r"\s*\(.*\)$", "", t.get("requirement", "")), *t.get("terms_not_met", [])])}
-            for t in prep.get("topics", [])],
+            for t in topics],
     }
 
 
-HARD = ("technical", "design", "ai")  # hard skills; soft, language, location and education never get dates or a level
+HARD = ("programming_language", "technology", "technical", "design", "ai")  # hard skills; soft, language, location and education never get dates or a level
 SKILL_TYPES = HARD + ("soft", "language", "location", "education")  # same as src/db.py SKILL_TYPES
 RANK = {"met": 3, "partial": 2, "uncertain": 1, "missing": 0}
 
@@ -272,9 +359,10 @@ def requirement_terms() -> dict:
         rows = con.execute("SELECT k.keyword, k.skill_id, c.folder FROM requirements r "
                            "JOIN skill_keywords k ON k.id = r.keyword_id "
                            "JOIN compositions c ON c.offer_id = r.offer_id").fetchall()
-        skills = {sid: {"id": sid, "name": name, "type": typ, "start": start, "end": end, "keywords": []}
-                  for sid, name, typ, start, end in con.execute(
-                      f"SELECT id, {EN.format('name')}, type, start_at, end_at FROM skills")}
+        skills = {sid: {"id": sid, "name": name, "type": typ, "start": start, "end": end, "ignored": bool(ignored),
+                        "keywords": []}
+                  for sid, name, typ, start, end, ignored in con.execute(
+                      f"SELECT id, {EN.format('name')}, type, start_at, end_at, ignored FROM skills")}
         for sid, kw, lang in con.execute("SELECT skill_id, keyword, lang FROM skill_keywords ORDER BY lang, keyword"):
             skills[sid]["keywords"].append({"keyword": kw, "lang": lang})
         hard = con.execute(f"SELECT count(*), count(start_at) FROM skills WHERE type IN {HARD}").fetchone()
@@ -285,6 +373,7 @@ def requirement_terms() -> dict:
         t = terms.setdefault(term.casefold(), {"term": term.lower(),  # one spelling, lowercase like the skills
                                                "skill": skill.get("name"), "type": skill.get("type"),
                                                "start": skill.get("start"), "end": skill.get("end"),
+                                               "ignored": skill.get("ignored", False),
                                                "keywords": skill.get("keywords", []), "jobs": {}})
         t["jobs"].setdefault(folder.removeprefix("jobs/"), None)
     for slug in jobs:  # per job: best status of the term and how the resume words it
@@ -306,13 +395,15 @@ def requirement_terms() -> dict:
         asked = [{"slug": slug, "company": jobs[slug]["company"], "role": jobs[slug]["role"],
                   "job_status": jobs[slug]["status"], **(seen or {"status": None, "wording": None})}
                  for slug, seen in t["jobs"].items()]
+        if t["ignored"]:  # set aside: counts nowhere, whatever the saved reviews say
+            asked = [{**a, "status": "set aside"} for a in asked]
         counts = {s: sum(a["status"] == s for a in asked) for s in ("met", "partial", "missing")}
         is_hard = t["type"] in HARD
         out.append({
             "term": t["term"], "type": t["type"], "hard": is_hard, "jobs": len(asked), **counts,
             "synonym": any(a["wording"] == "synonym" for a in asked),
             "experience": skills_inventory.label(skills_inventory.years(t)) if is_hard else None,
-            "skill": t["skill"], "start": t["start"], "end": t["end"], "keywords": t["keywords"], "asked": asked,
+            "skill": t["skill"], "ignored": t["ignored"], "start": t["start"], "end": t["end"], "keywords": t["keywords"], "asked": asked,
         })
     out.sort(key=lambda t: (-t["jobs"], t["term"].casefold()))
     return {"terms": out, "jobs": len(jobs), "hard_entries": hard[0], "hard_with_start": hard[1]}
@@ -417,16 +508,34 @@ def api_skill_type(body: TypeChange):
 
 
 def rereview(term: str) -> list[str]:
-    """Run src/review_ats.py again for the jobs whose requirements use that term's skill. Not for sent jobs: their
-    folder keeps what was sent, review included."""
+    """Run src/review_ats.py again for the jobs whose requirements use that term's skill, sent ones included (only their
+    review/ reports are rewritten, never what was sent)."""
     with ro() as con:
         folders = [f for (f,) in con.execute(
             "SELECT DISTINCT c.folder FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id "
-            "JOIN compositions c ON c.offer_id = r.offer_id WHERE c.sent_at IS NULL AND k.skill_id IN "
+            "JOIN compositions c ON c.offer_id = r.offer_id WHERE k.skill_id IN "
             f"(SELECT skill_id FROM skill_keywords WHERE keyword = lower(?) UNION "
-            f"SELECT id FROM skills WHERE lower({EN.format('name')}) = lower(?))", (term, term))]
+            f"SELECT id FROM skills WHERE lower({EN.format('name')}) = lower(?)) ORDER BY c.folder", (term, term))]
     return [f.removeprefix("jobs/") for f in folders
             if run_script("src/review_ats.py", "--job", f, "--no-network").returncode == 0]
+
+
+class Ignore(BaseModel):
+    skill: str = Field(max_length=100, pattern=TEXT)
+    ignored: bool
+
+
+@app.post("/api/skills/ignore")
+def api_skill_ignore(body: Ignore):
+    """Set a skill aside (it counts in no job's requirements or scoring) or count it again, with
+    src/skills_inventory.py ignore; then recompute the reviews of the open jobs asking for it (sent ones keep theirs)."""
+    skill = skill_named(body.skill)
+    if skill is None:
+        raise HTTPException(404, "No such skill: give the term a type first")
+    out = script_result(run_script("src/skills_inventory.py", "ignore", skill["name_en"], *([] if body.ignored else ["off"])))
+    if out["ok"]:
+        out["reviewed"] = rereview(skill["name_en"])
+    return out
 
 
 @app.post("/api/skills/dates")
