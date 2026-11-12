@@ -47,6 +47,9 @@ const pct = (v) => Math.round(v * 100)
 const barColor = (v) => (v >= 0.75 ? '#67c23a' : '#e6a23c')
 const PRIORITY = { must_have: 'must', preferred: 'pref' }
 const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger', uncertain: 'info' }
+// Column sorts by rank, not alphabet: must before preferred; missing, partial, uncertain, then met
+const priorityRank = (r) => (r.priority === 'must_have' ? 0 : 1)
+const statusRank = (r) => ({ missing: 0, partial: 1, uncertain: 2, met: 3 })[r.status] ?? 4
 const version = (slug) => slug.match(/-v(\d+)$/)?.[1] ?? '1'
 const warnings = computed(() => job.value.notes.filter((n) => n.severity !== 'info'))
 const infos = computed(() => job.value.notes.filter((n) => n.severity === 'info'))
@@ -103,10 +106,14 @@ const fileOf = (lang, kind) => job.value.files[lang].find((f) => f.kind === kind
 const fileUrl = (f) => `/files/${job.value.slug}/${f.path}`
 const KIND = { resume: 'Resume', cover: 'Cover letter', combined: 'Resume + cover letter' }
 const docs = computed(() => ({
-  resume: { file: fileOf('en', 'resume'), published: job.value.resume_url },
-  cover: { file: fileOf('en', 'cover'), published: job.value.cover_letter_url },
-  french: { file: fileOf('fr', 'resume'), published: null },
+  resume: { label: 'Resume', file: fileOf('en', 'resume'), published: job.value.resume_url },
+  cover: { label: 'Cover letter', file: fileOf('en', 'cover'), published: job.value.cover_letter_url },
+  frResume: { label: 'French resume', file: fileOf('fr', 'resume'), published: null }, // French is never published
+  frCover: { label: 'French letter', file: fileOf('fr', 'cover'), published: null },
 }))
+// French tabs only when there is (or should be) a French version
+const docTabs = computed(() => Object.keys(docs.value)
+  .filter((k) => !k.startsWith('fr') || job.value.files.fr.length || job.value.french_version))
 function openDoc(tab) {
   docTab.value = tab
   docsOpen.value = true
@@ -153,14 +160,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
       </div>
     </div>
 
-    <div class="links">
-      <el-button link type="primary" @click="postingOpen = true">View posting</el-button>
-      <a v-if="job.url" :href="job.url" target="_blank" rel="noopener">Original offer →</a>
-      <a v-if="job.resume_url" :href="job.resume_url" target="_blank" rel="noopener">Published resume →</a>
-      <a v-if="job.cover_letter_url" :href="job.cover_letter_url" target="_blank" rel="noopener">Published cover letter →</a>
-    </div>
-
-    <el-tabs v-model="tab">
+    <el-tabs v-model="tab" class="page-tabs">
     <el-tab-pane label="Overview" name="overview">
     <el-row :gutter="20">
       <el-col :span="17">
@@ -196,10 +196,10 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
           <template #header>Gaps to work on (must-have first) · {{ job.gaps.length }}</template>
           <el-table :data="job.gaps" max-height="420" size="small">
             <el-table-column prop="description" label="Requirement" min-width="200" />
-            <el-table-column label="Priority" width="80">
+            <el-table-column label="Priority" width="95" sortable :sort-by="priorityRank">
               <template #default="{ row }">{{ PRIORITY[row.priority] }}</template>
             </el-table-column>
-            <el-table-column label="Status" width="90">
+            <el-table-column label="Status" width="100" sortable :sort-by="statusRank">
               <template #default="{ row }"><el-tag size="small" :type="STATUS_TAG[row.status]">{{ row.status }}</el-tag></template>
             </el-table-column>
             <el-table-column prop="hint" label="Hint" min-width="260" />
@@ -242,10 +242,10 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
               </template>
             </el-table-column>
             <el-table-column prop="description" label="Requirement" min-width="220" />
-            <el-table-column label="Priority" width="80">
+            <el-table-column label="Priority" width="95" sortable :sort-by="priorityRank">
               <template #default="{ row }">{{ PRIORITY[row.priority] }}</template>
             </el-table-column>
-            <el-table-column label="Status" width="90">
+            <el-table-column label="Status" width="100" sortable :sort-by="statusRank">
               <template #default="{ row }"><el-tag size="small" :type="STATUS_TAG[row.status]">{{ row.status }}</el-tag></template>
             </el-table-column>
             <el-table-column label="Evidence (resume quote)" min-width="260">
@@ -260,11 +260,16 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
       <el-col :span="7">
         <el-card shadow="never" class="block">
           <template #header>Files</template>
+          <div class="links">
+            <el-button link type="primary" @click="postingOpen = true">View posting</el-button>
+            <a v-if="job.url" :href="job.url" target="_blank" rel="noopener">Original offer →</a>
+            <a v-if="job.resume_url" :href="job.resume_url" target="_blank" rel="noopener">Published resume →</a>
+            <a v-if="job.cover_letter_url" :href="job.cover_letter_url" target="_blank" rel="noopener">Published cover letter →</a>
+          </div>
           <div class="lang">English</div>
           <div v-if="!job.files.en.length" class="muted">Not built yet</div>
           <div v-for="f in job.files.en" :key="f.path" class="file">
             <a :href="fileUrl(f)" target="_blank" rel="noopener">{{ KIND[f.kind] }}</a>
-            <span class="muted"> · {{ f.pages ?? '?' }} page{{ f.pages === 1 ? '' : 's' }}</span>
             <el-tag v-if="f.not_ready" size="small" type="warning">not ready</el-tag>
             <el-tag v-if="f.kind === 'resume' && f.pages > 3" size="small" type="warning">over 3 pages</el-tag>
           </div>
@@ -278,8 +283,11 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
           </div>
           <div v-for="f in job.files.fr" :key="f.path" class="file">
             <a :href="fileUrl(f)" target="_blank" rel="noopener">{{ KIND[f.kind] }}</a>
-            <span class="muted"> · {{ f.pages ?? '?' }} page{{ f.pages === 1 ? '' : 's' }}</span>
             <el-tag v-if="f.not_ready" size="small" type="warning">not ready</el-tag>
+          </div>
+          <div v-if="job.files.fr.length" class="preview-buttons">
+            <el-button size="small" :disabled="!docs.frResume.file" @click="openDoc('frResume')">Preview resume</el-button>
+            <el-button size="small" :disabled="!docs.frCover.file" @click="openDoc('frCover')">Preview letter</el-button>
           </div>
         </el-card>
 
@@ -313,17 +321,16 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
 
     <el-drawer v-model="docsOpen" title="Documents" size="55%">
       <el-tabs v-model="docTab">
-        <el-tab-pane v-for="(label, key) in { resume: 'Resume', cover: 'Cover letter', french: 'French' }" :key="key"
-          :label="label" :name="key">
+        <el-tab-pane v-for="key in docTabs" :key="key" :label="docs[key].label" :name="key">
           <template v-if="docs[key].file">
             <div class="drawer-actions">
               <a :href="fileUrl(docs[key].file)" :download="docs[key].file.name">Download</a>
               <a v-if="docs[key].published" :href="docs[key].published" target="_blank" rel="noopener">Published →</a>
             </div>
-            <iframe v-if="docsOpen && docTab === key" :src="fileUrl(docs[key].file)" class="pdf" :title="label" />
+            <iframe v-if="docsOpen && docTab === key" :src="fileUrl(docs[key].file)" class="pdf" :title="docs[key].label" />
           </template>
           <div v-else class="muted">
-            {{ key === 'french' && !job.french_version ? 'Not needed (English posting).' : 'Not built yet.' }}
+            Not built yet.
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -335,9 +342,11 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
 .back { color: #606266; text-decoration: none; font-size: 14px; }
 .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .head h1 { margin: 8px 0; }
+.page-tabs { margin-top: 16px; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: #606266; font-size: 14px; }
 .head-actions { display: flex; gap: 8px; margin-top: 12px; }
-.links { display: flex; gap: 20px; align-items: center; margin: 16px 0; font-size: 14px; }
+.links { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 12px; font-size: 14px; }
+.links .el-button { padding: 0; height: auto; font-size: 14px; }
 .links a, .drawer-actions a, .file a { color: var(--el-color-primary); text-decoration: none; }
 .block { margin-bottom: 16px; }
 .note { display: flex; gap: 8px; align-items: baseline; margin: 6px 0; font-size: 14px; }

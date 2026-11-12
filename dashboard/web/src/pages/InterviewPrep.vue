@@ -20,7 +20,6 @@ const CHIPS = {
   claims: ['Claims', (t) => t.focus === 'prove_claim'],
   gaps: ['Gaps', (t) => t.focus === 'gap'],
   must: ['Must-have', (t) => t.priority === 'must_have'],
-  quick: ['Quick facts', (t) => t.quick_fact],
 }
 const count = (key) => props.prep.topics.filter(CHIPS[key][1]).length
 const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
@@ -46,7 +45,6 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
           {{ c[0] }} {{ count(key) }}
         </el-check-tag>
       </div>
-      <div class="muted small">Quick facts = location requirements (no story needed).</div>
 
       <el-empty v-if="!topics.length" description="No topic here" :image-size="60" />
       <el-card v-for="t in topics" :key="t.id" shadow="never" class="topic">
@@ -54,17 +52,13 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
           <b>{{ t.requirement }}</b>
           <el-tag size="small" :type="TYPES[t.focus]?.tag" round>{{ TYPES[t.focus]?.label ?? t.focus }}</el-tag>
           <el-tag size="small" type="info" round>{{ t.priority === 'must_have' ? 'must-have' : 'preferred' }}</el-tag>
-          <el-tag v-if="t.quick_fact" size="small" round>quick fact</el-tag>
         </div>
         <p><span class="muted">Posting:</span> ‘{{ t.posting_says }}’</p>
         <p>
           <span class="muted">Resume: </span>
           <template v-if="t.your_resume_says?.length">‘{{ t.your_resume_says.join(' … ') }}’</template>
           <template v-else>nothing yet</template>
-          <span v-if="t.terms_not_met?.length" class="muted"> · term{{ t.terms_not_met.length > 1 ? 's' : '' }} not met:
-            {{ t.terms_not_met.join(', ') }}</span>
         </p>
-        <p class="hint">{{ prep.how_to_prepare[t.focus] }}</p>
         <p v-if="t.focus === 'prepare_story'" class="star">STAR: {{ STAR }}</p>
         <el-input type="textarea" :rows="2" disabled placeholder="My notes (not wired yet: no storage)" />
       </el-card>
@@ -96,12 +90,11 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
 .cards { margin-bottom: 16px; }
 .card-label { font-size: 13px; color: #606266; }
 .card-value { font-size: 28px; font-weight: 600; margin: 4px 0; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
 .small { font-size: 12px; margin: 6px 0 12px; }
 .topic { margin-bottom: 12px; font-size: 14px; }
 .topic p { margin: 6px 0; }
 .topic-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.hint { color: #606266; }
 .star { color: var(--el-color-success-dark-2); font-size: 13px; }
 .block { margin-bottom: 16px; }
 .skill { display: flex; justify-content: space-between; font-size: 14px; margin: 6px 0; }

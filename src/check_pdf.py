@@ -253,13 +253,7 @@ def check(pdf: Path, content: dict | None, headings: list[str], network: bool = 
         check_links(uris | {contact.get(k, "") for k in ("linkedin", "github", "website_link")}, add)
         years = check_dates(content, add)
     check_metadata(reader, pdf, content, add)
-
-    if len(pages) > 1:  # first/last line repeated on every page = header/footer; digits ignored so "P1"/"P2" match
-        edges = [[l for l in t.splitlines() if l.strip()] for t in pages]
-        per_page = [{re.sub(r"\d+", "#", norm(l)) for l in e[:1] + e[-1:]} for e in edges]
-        for line in sorted(set.intersection(*per_page)):
-            add("info", "repeated_line", f"'{line}' appears on every page (header/footer?). Usually harmless, "
-                "but some parsers fold it into the surrounding section.")
+    # ponytail: no check for lines repeated on every page; that is the template's own page header/footer, by design
 
     return {"pdf": str(pdf), "pages": [{"page": i, "chars": len(t)} for i, t in enumerate(pages, 1)],
             "experience_years": years, "findings": findings}

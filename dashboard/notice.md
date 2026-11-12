@@ -29,8 +29,6 @@ results; the job is then frozen. Sent jobs show "Sent on <date>" instead.
 
 ## Data the wireframes ask for but the database does not hold
 
-- **Degree requirements cannot be detected.** No field marks a requirement or interview topic as a degree, so the
-  Interview prep "Quick facts" chip covers location requirements only (the `location` section in `review.json`).
 - **Education type added (2026-11-12),** but existing degree terms such as "Computer Science" are still typed
   `technical`: change them to education in the term drawer.
 - **No start dates.** 0 of 85 hard-skill entries have `start_at`, so every "your years" reads "start date needed".

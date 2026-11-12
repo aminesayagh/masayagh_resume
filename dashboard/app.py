@@ -217,15 +217,13 @@ def api_interview(slug: str):
             raise HTTPException(404, "No such job")
         job, inv = offers.load(folder, con), inventory(con)
     prep = load_json(paths.interview(folder))
-    sections = {r["id"]: r.get("section") for r in load_json(paths.review_json(folder)).get("results", [])}
     content = load_json(paths.content(folder))
     skills = [{"name": s["name"], "years": skills_inventory.label(s["years"])}
               for s in skills_inventory.job_skills(job, content, inv) if s["in_job"]]
     return {
         "exists": bool(prep), "generated": prep.get("generated"), "how_to_prepare": prep.get("how_to_prepare", {}),
         "summary": prep.get("summary", {}), "skills": skills,
-        # quick fact = a location requirement (no story needed); degrees have no field that marks them
-        "topics": [{**t, "quick_fact": sections.get(t["id"]) == "location"} for t in prep.get("topics", [])],
+        "topics": prep.get("topics", []),
     }
 
 
@@ -255,7 +253,7 @@ def requirement_terms() -> dict:
     for term, folder in rows:
         skill = by_name.get(term.casefold()) or by_keyword.get(term.casefold()) or {}
         t = terms.setdefault(term.casefold(), {"term": term.lower(),  # one spelling, lowercase like the skills
-                                                "skill": skill.get("name"), "type": skill.get("type"),
+                                               "skill": skill.get("name"), "type": skill.get("type"),
                                                "start": skill.get("start"), "end": skill.get("end"),
                                                "keywords": skill.get("keywords", []), "jobs": {}})
         t["jobs"].setdefault(folder.removeprefix("jobs/"), None)

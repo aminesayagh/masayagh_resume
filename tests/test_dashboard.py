@@ -120,6 +120,8 @@ class ApiTest(unittest.TestCase):
             distinct = {t.casefold() for (t,) in con.execute("SELECT term FROM requirement_terms")}
             untyped = {t.casefold() for (t,) in con.execute("SELECT term FROM requirement_terms WHERE skill_id IS NULL")}
         self.assertEqual({t["term"].casefold() for t in d["terms"]}, distinct)
+        self.assertEqual(len(d["terms"]), len(distinct))  # one row per term, whatever each posting's case
+        self.assertTrue(all(t["term"] == t["term"].lower() for t in d["terms"]))  # shown lowercase, like the skills
         self.assertEqual({t["term"].casefold() for t in d["terms"] if not t["type"]}, untyped)
         for t in d["terms"]:
             self.assertEqual(t["jobs"], len(t["asked"]))
