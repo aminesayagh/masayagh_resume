@@ -9,9 +9,12 @@ Usage:
 data/resume.db is local and ignored by git; data/resume.sql is the reviewable copy. Job folders keep their
 files (content.json, cover letters, PDFs, reports); the database holds what is reused across jobs.
 Text shown on a resume in several languages is one JSON column: {"en": "...", "fr": "..."} (see tr() and i18n()).
+Tables named bloc_* hold the resume's blocs: the master sections (contact, profile, languages, skill layout,
+education, projects, certifications) and the experience library (experiences, activities, descriptions).
 """
 
 import json
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -29,7 +32,7 @@ CREATE TABLE IF NOT EXISTS locations (
   city TEXT NOT NULL,      -- json {{"en", "fr"}}
   country TEXT NOT NULL    -- json {{"en", "fr"}}
 );
-CREATE TABLE IF NOT EXISTS contact (
+CREATE TABLE IF NOT EXISTS bloc_contact (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
@@ -39,38 +42,38 @@ CREATE TABLE IF NOT EXISTS contact (
   linkedin TEXT,
   location_id INTEGER REFERENCES locations(id)
 );
-CREATE TABLE IF NOT EXISTS profile (
+CREATE TABLE IF NOT EXISTS bloc_profile (
   id INTEGER PRIMARY KEY,
   key TEXT NOT NULL UNIQUE,
   text TEXT NOT NULL       -- json
 );
-CREATE TABLE IF NOT EXISTS languages (
+CREATE TABLE IF NOT EXISTS bloc_languages (
   id INTEGER PRIMARY KEY,
   sort_order INTEGER NOT NULL,
   name TEXT NOT NULL,      -- json
   level TEXT NOT NULL      -- json
 );
-CREATE TABLE IF NOT EXISTS skill_layout (
+CREATE TABLE IF NOT EXISTS bloc_skill_layout (
   row INTEGER NOT NULL,
   position INTEGER NOT NULL,
   label TEXT NOT NULL,     -- json
   PRIMARY KEY (row, position)
 );
-CREATE TABLE IF NOT EXISTS education (
+CREATE TABLE IF NOT EXISTS bloc_education (
   id INTEGER PRIMARY KEY,
   degree TEXT NOT NULL,       -- json
   institution TEXT NOT NULL,  -- json
   start_at TEXT NOT NULL,
   end_at TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS projects (
+CREATE TABLE IF NOT EXISTS bloc_projects (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   tech TEXT NOT NULL,      -- json
   link TEXT NOT NULL,
   duration TEXT NOT NULL   -- json
 );
-CREATE TABLE IF NOT EXISTS certifications (
+CREATE TABLE IF NOT EXISTS bloc_certifications (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   issuer TEXT NOT NULL,
@@ -88,22 +91,22 @@ CREATE TABLE IF NOT EXISTS contracts (
   start_at TEXT NOT NULL,
   end_at TEXT
 );
-CREATE TABLE IF NOT EXISTS experiences (
+CREATE TABLE IF NOT EXISTS bloc_experiences (
   id INTEGER PRIMARY KEY,
   contract_id INTEGER NOT NULL REFERENCES contracts(id),
   role TEXT NOT NULL,      -- json
   location TEXT            -- json ("Morocco" / "Maroc"); free text, not linked to locations (countries and cities)
 );
-CREATE TABLE IF NOT EXISTS activities (
+CREATE TABLE IF NOT EXISTS bloc_activities (
   id INTEGER PRIMARY KEY,
-  experience_id INTEGER NOT NULL REFERENCES experiences(id),
+  experience_id INTEGER NOT NULL REFERENCES bloc_experiences(id),
   label TEXT NOT NULL,
   sort_order INTEGER NOT NULL,
   active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1))
 );
-CREATE TABLE IF NOT EXISTS descriptions (
+CREATE TABLE IF NOT EXISTS bloc_descriptions (
   id INTEGER PRIMARY KEY,
-  activity_id INTEGER NOT NULL REFERENCES activities(id),
+  activity_id INTEGER NOT NULL REFERENCES bloc_activities(id),
   kind TEXT NOT NULL CHECK (kind IN ('description', 'bullet')),
   text TEXT NOT NULL,      -- json
   status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved', 'rejected')),
@@ -114,7 +117,8 @@ CREATE TABLE IF NOT EXISTS skills (
   type TEXT CHECK (type IN ({', '.join(repr(t) for t in SKILL_TYPES)})),  -- NULL = not typed yet
   name TEXT NOT NULL,      -- json, lowercase
   start_at TEXT,
-  end_at TEXT
+  end_at TEXT,
+  confirmed INTEGER NOT NULL DEFAULT 1 CHECK (confirmed IN (0, 1))  -- 0 = created from a posting, to review or merge
 );
 CREATE TABLE IF NOT EXISTS skill_keywords (
   id INTEGER PRIMARY KEY,
@@ -124,7 +128,7 @@ CREATE TABLE IF NOT EXISTS skill_keywords (
   UNIQUE (keyword, lang)
 );
 CREATE TABLE IF NOT EXISTS description_skills (
-  description_id INTEGER NOT NULL REFERENCES descriptions(id) ON DELETE CASCADE,
+  description_id INTEGER NOT NULL REFERENCES bloc_descriptions(id) ON DELETE CASCADE,
   skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
   PRIMARY KEY (description_id, skill_id)
 );
@@ -137,7 +141,7 @@ CREATE TABLE IF NOT EXISTS cover_paragraphs (
 );
 CREATE TABLE IF NOT EXISTS cover_paragraph_experiences (
   paragraph_id INTEGER NOT NULL REFERENCES cover_paragraphs(id) ON DELETE CASCADE,
-  experience_id INTEGER NOT NULL REFERENCES experiences(id) ON DELETE CASCADE,
+  experience_id INTEGER NOT NULL REFERENCES bloc_experiences(id) ON DELETE CASCADE,
   PRIMARY KEY (paragraph_id, experience_id)
 );
 CREATE TABLE IF NOT EXISTS cover_paragraph_skills (
@@ -171,7 +175,7 @@ CREATE TABLE IF NOT EXISTS compositions (
 CREATE TABLE IF NOT EXISTS offer_lines (
   composition_id INTEGER NOT NULL REFERENCES compositions(id) ON DELETE CASCADE,
   position INTEGER NOT NULL,
-  description_id INTEGER NOT NULL REFERENCES descriptions(id),
+  description_id INTEGER NOT NULL REFERENCES bloc_descriptions(id),
   PRIMARY KEY (composition_id, position)
 );
 CREATE TABLE IF NOT EXISTS requirements (
@@ -230,14 +234,41 @@ def has(value: str | None, lang: str) -> bool:
 EN = "json_extract({}, '$.en')"  # SQL: a JSON column's English text, e.g. EN.format("d.text")
 
 
-def keyword_id(con: sqlite3.Connection, word: str, lang: str = "en", kind: str | None = None) -> int:
-    """The keyword row for a word, creating its skill (lowercase, type `kind` or not typed yet) when it is new."""
-    word = word.strip().lower()
-    row = con.execute("SELECT id FROM skill_keywords WHERE keyword = ? AND lang IN (?, 'en') ORDER BY lang = ? DESC",
-                      (word, lang, lang)).fetchone()
-    if row:
-        return row[0]
-    sid = con.execute("INSERT INTO skills (type, name) VALUES (?, ?)", (kind, i18n(word))).lastrowid
+def clean(word: str) -> str:
+    """How a keyword is stored: lowercase, one space between words, plain hyphens."""
+    return re.sub(r"\s+", " ", re.sub(r"[‐-―]", "-", word)).strip().lower()
+
+
+def spelling(word: str) -> str:
+    """The comparison form of a keyword: spaces, hyphens and dots don't count ('event-driven' = 'event driven',
+    'node.js' = 'nodejs'). Plurals are handled in find_keyword."""
+    return re.sub(r"[\s.\-]+", "", clean(word))
+
+
+def find_keyword(con: sqlite3.Connection, word: str, lang: str = "en") -> int | None:
+    """An existing keyword spelled the same way: same comparison form, or the same word with or without a final s
+    ('apis' finds 'api' and the other way round). Same language first, then English."""
+    key = spelling(word)
+    forms = {key} | ({key[:-1]} if key.endswith("s") and len(key) > 3 else set()) | {key + "s"}
+    rows = con.execute("SELECT id, keyword, lang FROM skill_keywords ORDER BY lang = ? DESC, lang = 'en' DESC, id",
+                       (lang,)).fetchall()
+    return next((r[0] for r in rows if spelling(r[1]) == key), None) or \
+        next((r[0] for r in rows if spelling(r[1]) in forms), None)
+
+
+def keyword_id(con: sqlite3.Connection, word: str, lang: str = "en", kind: str | None = None,
+               confirmed: bool = False) -> int:
+    """The keyword for a word: an existing one spelled the same way (find_keyword), or a new skill (type `kind`,
+    not typed yet when None; confirmed = 0 unless it comes from your own resume) whose name is its first keyword.
+    A known keyword keeps its skill; the skill's type is only filled in when it had none."""
+    if found := find_keyword(con, word, lang):
+        if kind:
+            con.execute("UPDATE skills SET type = ? WHERE type IS NULL AND id = (SELECT skill_id FROM skill_keywords "
+                        "WHERE id = ?)", (kind, found))
+        return found
+    word = clean(word)
+    sid = con.execute("INSERT INTO skills (type, name, confirmed) VALUES (?, ?, ?)",
+                      (kind, i18n(word), int(confirmed))).lastrowid
     return con.execute("INSERT INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, ?)", (sid, word, lang)).lastrowid
 
 
@@ -273,6 +304,8 @@ def restore() -> Path:
 
 assert tr(i18n("Native", "Natif"), "fr") == "Natif" and tr(i18n("Native"), "fr") == "Native"
 assert json.loads(i18n("Java", "Java")) == {"en": "Java"}
+assert spelling("Event-Driven") == spelling("event driven") and spelling("Node.js") == spelling("nodejs")
+assert clean("  CI/CD   Pipelines ") == "ci/cd pipelines"
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["dump"]:

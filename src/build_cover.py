@@ -60,7 +60,7 @@ def default_letter(company: str, title: str, lang: str = "en", con=None) -> dict
     paragraphs = db_sync.default_paragraphs(con, lang)
     if not paragraphs:
         return None
-    words = {k: db.tr(t, lang) for k, t in con.execute("SELECT key, text FROM profile WHERE key IN ('cover_greeting', 'cover_closing')")}
+    words = {k: db.tr(t, lang) for k, t in con.execute("SELECT key, text FROM bloc_profile WHERE key IN ('cover_greeting', 'cover_closing')")}
     fill = lambda t: t.replace("{company}", company).replace("{job_title}", title)
     return {"date": "", "company": company, "hiring_contact": "", "job_title": title, "reference": "",
             "greeting": words.get("cover_greeting") or ("Madame, Monsieur," if lang == "fr" else "Dear Hiring Manager,"),

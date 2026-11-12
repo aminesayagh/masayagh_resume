@@ -132,12 +132,33 @@ def save(folder: Path, job: dict, con=None) -> int:
     return oid or 0
 
 
+def from_parsed(parsed: dict) -> list[dict]:
+    """src/parse_offer.py's output -> requirement dicts for save(): one per skill the posting asks for (type 'none'
+    is skipped), with its type, priority (100 / 0) and min_years."""
+    out = []
+    for phrase in parsed.get("phrases", []):
+        for s in phrase.get("skills", []):
+            if s.get("type") in (None, "none"):
+                continue
+            out.append({"terms": [s["name"]], "type": s["type"], "quote": phrase["text"],
+                        "section": "location" if s["type"] == "location" else "requirement",
+                        "priority": "must_have" if (s.get("priority") or 0) >= 50 else "preferred",
+                        **({"kind": "years_experience", "min_years": s["min_years"]} if s.get("min_years") else {})})
+    return out
+
+
+def parsed_location(parsed: dict) -> str | None:
+    """'Berlin, Germany (hybrid)' -> 'Berlin, Germany' (the work arrangement isn't a place)."""
+    return re.sub(r"\s*\([^)]*\)", "", parsed.get("location") or "").strip() or None
+
+
 def save_requirements(con, offer_id: int, requirements: list[dict]) -> None:
-    """Old-style requirement dicts (terms, priority, section, min_years) -> one row per keyword, highest priority
-    and largest min_years kept when a keyword appears twice. A years requirement attaches to its terms."""
+    """Requirement dicts (terms, priority, type or section, min_years) -> one row per keyword, highest priority and
+    largest min_years kept when a keyword appears twice. A years requirement attaches to its terms."""
     rows: dict[int, dict] = {}
     for r in requirements:
-        kind = "location" if r.get("section") == "location" else "education" if DEGREE.search(r.get("quote", "")) else None
+        kind = r.get("type") or ("location" if r.get("section") == "location" else
+                                 "education" if DEGREE.search(r.get("quote", "")) else None)
         for term in r.get("terms", []):
             kid = db.keyword_id(con, term, kind=kind)
             row = rows.setdefault(kid, {"priority": 0, "min_years": None})

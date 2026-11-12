@@ -40,7 +40,7 @@ def word_in(word: str, text: str) -> bool:
 def experience_ids(con) -> dict[str, int]:
     """Company name (English or French, lowercase) -> experience id."""
     out = {}
-    for x, name in con.execute("SELECT e.id, c.name FROM experiences e JOIN contracts k ON k.id = e.contract_id "
+    for x, name in con.execute("SELECT e.id, c.name FROM bloc_experiences e JOIN contracts k ON k.id = e.contract_id "
                                "JOIN companies c ON c.id = k.company_id"):
         for value in json.loads(name).values():
             out[value.casefold()] = x
@@ -61,7 +61,7 @@ def link_skills(con, table: str, key: str, row_id: int, text: str) -> None:
 
 def line_id(con, experience_id: int, text: str) -> int | None:
     """Lines are found by exact English text within an experience: a resume never repeats a line."""
-    row = con.execute(f"SELECT d.id FROM descriptions d JOIN activities a ON a.id = d.activity_id "
+    row = con.execute(f"SELECT d.id FROM bloc_descriptions d JOIN bloc_activities a ON a.id = d.activity_id "
                       f"WHERE a.experience_id = ? AND {EN.format('d.text')} = ?", (experience_id, text)).fetchone()
     return row and row[0]
 
@@ -70,10 +70,10 @@ def add_line(con, activity_id: int, kind: str, text: str, text_fr: str | None = 
     """A new line joins the library in that activity (returns its id; an existing identical line is reused)."""
     if not text.strip():
         return None
-    x = con.execute("SELECT experience_id FROM activities WHERE id = ?", (activity_id,)).fetchone()[0]
+    x = con.execute("SELECT experience_id FROM bloc_activities WHERE id = ?", (activity_id,)).fetchone()[0]
     if found := line_id(con, x, text):
         return found
-    lid = con.execute("INSERT INTO descriptions (activity_id, kind, text) VALUES (?, ?, ?)",
+    lid = con.execute("INSERT INTO bloc_descriptions (activity_id, kind, text) VALUES (?, ?, ?)",
                       (activity_id, kind, i18n(text, text_fr))).lastrowid
     link_skills(con, "description_skills", "description_id", lid, text)
     return lid
@@ -82,10 +82,10 @@ def add_line(con, activity_id: int, kind: str, text: str, text_fr: str | None = 
 def new_activity(con, experience_id: int, text: str) -> int:
     """A line that rewords no known line gets its own activity, inactive until reviewed (so it never adds a bullet
     to other resumes by itself)."""
-    order = con.execute("SELECT coalesce(max(sort_order), 0) + 1 FROM activities WHERE experience_id = ?",
+    order = con.execute("SELECT coalesce(max(sort_order), 0) + 1 FROM bloc_activities WHERE experience_id = ?",
                         (experience_id,)).fetchone()[0]
     print(f"db_sync: new activity (inactive, review it in the library) for: {text[:60]}…")
-    return con.execute("INSERT INTO activities (experience_id, label, sort_order, active) VALUES (?, ?, ?, 0)",
+    return con.execute("INSERT INTO bloc_activities (experience_id, label, sort_order, active) VALUES (?, ?, ?, 0)",
                        (experience_id, " ".join(text.split()[:5]), order)).lastrowid
 
 
@@ -99,7 +99,7 @@ def sync_lines(con, previous: list[int], experience_id: int, lines: list[tuple[s
     for pos in new:
         kind, text = lines[pos]
         replaced = (list(gone.values()) if len(gone) == 1 and len(new) == 1 else [gone[pos]] if pos in gone else [])
-        activity = con.execute("SELECT activity_id FROM descriptions WHERE id = ?", (replaced[0],)).fetchone()[0] \
+        activity = con.execute("SELECT activity_id FROM bloc_descriptions WHERE id = ?", (replaced[0],)).fetchone()[0] \
             if len(replaced) == 1 else new_activity(con, experience_id, text)
         known[pos] = add_line(con, activity, kind, text)
     return known
@@ -159,7 +159,7 @@ def sync_job(folder: Path, con=None) -> int | None:
 
 
 def line_experience(con, description_id: int) -> int | None:
-    row = con.execute("SELECT a.experience_id FROM descriptions d JOIN activities a ON a.id = d.activity_id "
+    row = con.execute("SELECT a.experience_id FROM bloc_descriptions d JOIN bloc_activities a ON a.id = d.activity_id "
                       "WHERE d.id = ?", (description_id,)).fetchone()
     return row and row[0]
 

@@ -41,7 +41,7 @@ def main() -> None:
     job_path = paths.job(folder)
     job = offers.load(folder)
     if not job.get("requirements"):
-        sys.exit("No requirements yet: draft them first (job-requirements agent).")
+        sys.exit("No requirements yet: the posting was not parsed; rerun src/parse_offer.py or create the job again.")
 
     build_resume.build(paths.content(folder))
     review = json.loads(paths.review_json(folder).read_text(encoding="utf-8"))

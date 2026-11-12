@@ -3,7 +3,7 @@
 jobs/<slug>/            (the offer itself: posting, details, requirements, is in data/resume.db)
   content/   content.json, content-fr.json, cover.json, cover-fr.json, translate-fr.json
   pdf/       <name>.pdf, <name>-Cover-Letter.pdf, <name>-Resume-and-Cover-Letter.pdf;  pdf/fr/ the -FR files
-  review/    review.md, review.json, interview.json, draft-picks.json
+  review/    review.md, review.json, interview.json, build.json
   history/   sent-<date>/ (exact copies kept when a sent job is reopened)
 """
 
@@ -62,9 +62,6 @@ def build_json(folder: Path) -> Path:
 def interview(folder: Path) -> Path:
     return folder / "review" / "interview.json"
 
-
-def draft_picks(folder: Path) -> Path:
-    return folder / "review" / "draft-picks.json"
 
 
 def history(folder: Path) -> Path:

@@ -60,7 +60,7 @@ def translation_memory() -> dict:
     if MEMORY.exists():
         memory.update(json.loads(MEMORY.read_text(encoding="utf-8")))
     con = db.connect()  # French of library lines and skills
-    for table, column in (("descriptions", "text"), ("skills", "name"), ("skill_layout", "label"), ("cover_paragraphs", "text")):
+    for table, column in (("bloc_descriptions", "text"), ("skills", "name"), ("bloc_skill_layout", "label"), ("cover_paragraphs", "text")):
         for (value,) in con.execute(f"SELECT {column} FROM {table} WHERE json_extract({column}, '$.fr') IS NOT NULL"):
             memory.setdefault(db.tr(value), db.tr(value, "fr"))
     return memory  # skill names are lowercase: translate() also looks a label up in lowercase
@@ -95,7 +95,7 @@ def build(folder: Path) -> Path | None:
         con = db.connect()  # library lines and skills keep their French in the db, other strings in translations-fr.json
         rest = {}
         for en_text, fr_text in filled.items():
-            hit = con.execute(f"UPDATE descriptions SET text = json_set(text, '$.fr', ?) WHERE {db.EN.format('text')} = ?",
+            hit = con.execute(f"UPDATE bloc_descriptions SET text = json_set(text, '$.fr', ?) WHERE {db.EN.format('text')} = ?",
                               (fr_text, en_text)).rowcount
             hit += con.execute(f"UPDATE skills SET name = json_set(name, '$.fr', ?) WHERE {db.EN.format('name')} = lower(?)",
                                (fr_text, en_text)).rowcount

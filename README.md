@@ -84,7 +84,7 @@ The QR generator is bundled in `src/vendor/`, so it needs no additional install.
 
 Version 1 workflow after the folder exists:
 
-1. **Draft requirements** with the `job-requirements` agent (`.claude/agents/job-requirements.md`, Haiku). It uses `src/draft_job.py` (`lines`, `apply`, `missed`): quotes are copied from line numbers, terms must be short, the location and degree lines must be covered, and every technology-looking word is covered or skipped with a reason.
+1. **Requirements are parsed when the job is created:** `src/parse_offer.py` (Haiku via the `claude` CLI) reads the company, title, location and every skill the posting asks for, with its type, priority (must-have 100 / preferred 0) and minimum years. A word already known as a keyword (same spelling, ignoring case, spaces, hyphens, dots and a final s) reuses its skill; anything new is saved as an unconfirmed skill to review. Check them, then the job is composed.
 2. **Review** with `src/review_ats.py --job jobs/<slug>`: report, and `interview.json` (prep topics), labelled draft until requirements are reviewed. `--preview` prints the match and compares with the last saved report (verdict: no regression / REGRESSION).
 3. **Tailor** `content.json` within the rules in `.claude/skills/ats-review/SKILL.md` (3 pages, 6 skill rows of 4, experience edits proposed and confirmed first), rebuild, publish. It refuses to run if `template/content/default.json` has any unresolved spelling/style/PDF-readability finding — fix the baseline first, since every new application starts from it. On success it creates `jobs/<slug>/`, builds the resume, and writes a partial report (no job-matching yet).
 

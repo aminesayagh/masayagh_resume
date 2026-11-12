@@ -81,7 +81,7 @@ def location_id(con, text: str | None, text_fr: str | None = None) -> int | None
 
 def experiences(con) -> list:
     """Experiences with their company and contract, newest contract first."""
-    return con.execute("SELECT e.id, e.role, e.location, c.name AS company, k.start_at, k.end_at FROM experiences e "
+    return con.execute("SELECT e.id, e.role, e.location, c.name AS company, k.start_at, k.end_at FROM bloc_experiences e "
                        "JOIN contracts k ON k.id = e.contract_id JOIN companies c ON c.id = k.company_id "
                        "ORDER BY k.start_at DESC, e.id").fetchall()
 
@@ -89,9 +89,9 @@ def experiences(con) -> list:
 def master_lines(con, experience_id: int) -> list:
     """The line each active activity shows on the master: its newest approved line."""
     out = []
-    for (aid,) in con.execute("SELECT id FROM activities WHERE experience_id = ? AND active = 1 ORDER BY sort_order",
+    for (aid,) in con.execute("SELECT id FROM bloc_activities WHERE experience_id = ? AND active = 1 ORDER BY sort_order",
                               (experience_id,)):
-        line = con.execute("SELECT kind, text FROM descriptions WHERE activity_id = ? AND status = 'approved' "
+        line = con.execute("SELECT kind, text FROM bloc_descriptions WHERE activity_id = ? AND status = 'approved' "
                            "ORDER BY created_at DESC, id DESC LIMIT 1", (aid,)).fetchone()
         if line:
             out.append(line)
@@ -100,8 +100,8 @@ def master_lines(con, experience_id: int) -> list:
 
 def generate(lang: str = "en", con=None) -> dict:
     con = con or db.connect()
-    c = con.execute("SELECT * FROM contact WHERE id = 1").fetchone()
-    profile = {k: tr(t, lang) for k, t in con.execute("SELECT key, text FROM profile")}
+    c = con.execute("SELECT * FROM bloc_contact WHERE id = 1").fetchone()
+    profile = {k: tr(t, lang) for k, t in con.execute("SELECT key, text FROM bloc_profile")}
     out = {"lang": "fr"} if lang == "fr" else {}
     out.update({
         "name": c["name"], "role": profile.get("role", ""),
@@ -109,9 +109,9 @@ def generate(lang: str = "en", con=None) -> dict:
                     "location": place(con, c["location_id"], lang), "website": c["website"],
                     "website_link": website_link(c["website"]), "github": c["github"], "linkedin": c["linkedin"]},
         "summary": profile.get("summary", ""), "skills": [], "experience": []})
-    for (row,) in con.execute("SELECT DISTINCT row FROM skill_layout ORDER BY row"):
+    for (row,) in con.execute("SELECT DISTINCT row FROM bloc_skill_layout ORDER BY row"):
         out["skills"].append([tr(t, lang) for (t,) in con.execute(
-            "SELECT label FROM skill_layout WHERE row = ? ORDER BY position", (row,))])
+            "SELECT label FROM bloc_skill_layout WHERE row = ? ORDER BY position", (row,))])
     for e in experiences(con):
         detail = tr(e["location"], lang)
         description, bullets = "", []
@@ -125,13 +125,13 @@ def generate(lang: str = "en", con=None) -> dict:
             "company": tr(e["company"], lang) + ("," if detail else ""),
             "detail": detail, "role": tr(e["role"], lang), "description": description, "bullets": bullets})
     out["projects"] = [{"dates": tr(p["duration"], lang), "name": p["name"], "tech": tr(p["tech"], lang), "link": p["link"]}
-                       for p in con.execute("SELECT * FROM projects ORDER BY id")]
+                       for p in con.execute("SELECT * FROM bloc_projects ORDER BY id")]
     out["education"] = [{"dates": f"{e['start_at']} - {e['end_at']}", "degree": tr(e["degree"], lang),
-                         "institution": tr(e["institution"], lang)} for e in con.execute("SELECT * FROM education ORDER BY id")]
+                         "institution": tr(e["institution"], lang)} for e in con.execute("SELECT * FROM bloc_education ORDER BY id")]
     out["certifications"] = [{"name": x["name"], "issuer": x["issuer"], "link": x["link"]}
-                             for x in con.execute("SELECT * FROM certifications ORDER BY id")]
+                             for x in con.execute("SELECT * FROM bloc_certifications ORDER BY id")]
     out["languages"] = [{"language": tr(x["name"], lang), "level": tr(x["level"], lang)}
-                        for x in con.execute("SELECT * FROM languages ORDER BY sort_order")]
+                        for x in con.execute("SELECT * FROM bloc_languages ORDER BY sort_order")]
     return out
 
 
@@ -164,19 +164,19 @@ def set_value(args: list[str], con=None) -> None:
     what = args[0]
     fr = lambda i: args[i] if len(args) > i else None
     if what in ("summary", "role"):
-        old = con.execute("SELECT text FROM profile WHERE key = ?", (what,)).fetchone()
-        con.execute("INSERT INTO profile (key, text) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET text = excluded.text",
+        old = con.execute("SELECT text FROM bloc_profile WHERE key = ?", (what,)).fetchone()
+        con.execute("INSERT INTO bloc_profile (key, text) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET text = excluded.text",
                     (what, i18n(args[1], fr(2) or (tr(old[0], "fr") if old and db.has(old[0], "fr") else None))))
     elif what == "skill":
-        con.execute("INSERT INTO skill_layout VALUES (?, ?, ?) ON CONFLICT (row, position) DO UPDATE SET label = excluded.label",
+        con.execute("INSERT INTO bloc_skill_layout VALUES (?, ?, ?) ON CONFLICT (row, position) DO UPDATE SET label = excluded.label",
                     (int(args[1]), int(args[2]), i18n(args[3], fr(4))))
     elif what == "line":
         import db_sync  # late: db_sync imports offers, which imports this module's db
         aid = int(args[1])
-        kind = con.execute("SELECT kind FROM descriptions WHERE activity_id = ? LIMIT 1", (aid,)).fetchone()
+        kind = con.execute("SELECT kind FROM bloc_descriptions WHERE activity_id = ? LIMIT 1", (aid,)).fetchone()
         db_sync.add_line(con, aid, kind[0] if kind else "bullet", args[2], fr(3))
     elif what == "contact" and args[1] in {"email", "phone", "website", "github", "linkedin"}:
-        con.execute(f"UPDATE contact SET {args[1]} = ? WHERE id = 1", (args[2],))
+        con.execute(f"UPDATE bloc_contact SET {args[1]} = ? WHERE id = 1", (args[2],))
     else:
         raise SystemExit(__doc__)
     con.commit()
@@ -188,22 +188,22 @@ def set_value(args: list[str], con=None) -> None:
 def import_files(con=None) -> None:
     """Load default.json and default-fr.json into an empty db, then regenerate them and report any difference."""
     con = con or db.connect()
-    if con.execute("SELECT 1 FROM experiences LIMIT 1").fetchone():
+    if con.execute("SELECT 1 FROM bloc_experiences LIMIT 1").fetchone():
         raise SystemExit("The db already holds a master resume; reset it first (python3 src/db.py reset).")
     en, fr = (json.loads(p.read_text(encoding="utf-8")) for p in FILES.values())
     c = en["contact"]
-    con.execute("INSERT INTO contact (id, name, email, phone, website, github, linkedin, location_id) "
+    con.execute("INSERT INTO bloc_contact (id, name, email, phone, website, github, linkedin, location_id) "
                 "VALUES (1, ?, ?, ?, ?, ?, ?, ?)", (en["name"], c["email"], c["phone"], c["website"], c.get("github"),
                                                     c.get("linkedin"), location_id(con, c["location"], fr["contact"]["location"])))
     for key in ("role", "summary"):
-        con.execute("INSERT INTO profile (key, text) VALUES (?, ?)", (key, i18n(en[key], fr[key])))
+        con.execute("INSERT INTO bloc_profile (key, text) VALUES (?, ?)", (key, i18n(en[key], fr[key])))
     for r, (row, row_fr) in enumerate(zip(en["skills"], fr["skills"]), 1):
         for i, (label_en, label_fr) in enumerate(zip(row, row_fr), 1):
-            con.execute("INSERT INTO skill_layout VALUES (?, ?, ?)", (r, i, i18n(label_en, label_fr)))
+            con.execute("INSERT INTO bloc_skill_layout VALUES (?, ?, ?)", (r, i, i18n(label_en, label_fr)))
             for word in re.split(r"\s+/\s+", label_en):  # a layout item names one or more skills
-                db.keyword_id(con, re.sub(r"\s*\([^)]*\)", "", word))
+                db.keyword_id(con, re.sub(r"\s*\([^)]*\)", "", word), confirmed=True)  # your own skills
     for i, (x, xf) in enumerate(zip(en["languages"], fr["languages"]), 1):
-        con.execute("INSERT INTO languages (sort_order, name, level) VALUES (?, ?, ?)",
+        con.execute("INSERT INTO bloc_languages (sort_order, name, level) VALUES (?, ?, ?)",
                     (i, i18n(x["language"], xf["language"]), i18n(x["level"], xf["level"])))
     for e, ef in zip(en["experience"], fr["experience"]):
         name = e["company"].strip().rstrip(",").strip()
@@ -215,24 +215,24 @@ def import_files(con=None) -> None:
                                 unlabel(start), unlabel(end))).lastrowid
         # ponytail: a detail that isn't a place ("- Hypeo, MENA") has no column since detail was dropped
         location = e["detail"] if e["detail"] and not e["detail"].startswith("-") else None
-        x = con.execute("INSERT INTO experiences (contract_id, role, location) VALUES (?, ?, ?)",
+        x = con.execute("INSERT INTO bloc_experiences (contract_id, role, location) VALUES (?, ?, ?)",
                         (contract, i18n(e["role"], ef["role"]), location and i18n(location, ef["detail"]))).lastrowid
         lines = ([("description", e["description"], ef["description"])] if e["description"] else []) + \
                 [("bullet", b, bf) for b, bf in zip(e["bullets"], ef["bullets"])]
         for slot, (kind, text_en, text_fr) in enumerate(lines, 1):
-            aid = con.execute("INSERT INTO activities (experience_id, label, sort_order) VALUES (?, ?, ?)",
+            aid = con.execute("INSERT INTO bloc_activities (experience_id, label, sort_order) VALUES (?, ?, ?)",
                               (x, " ".join(text_en.split()[:5]), slot)).lastrowid
             import db_sync  # late: db_sync imports offers
             db_sync.add_line(con, aid, kind, text_en, text_fr)
     for p, pf in zip(en["projects"], fr["projects"]):
-        con.execute("INSERT INTO projects (name, tech, link, duration) VALUES (?, ?, ?, ?)",
+        con.execute("INSERT INTO bloc_projects (name, tech, link, duration) VALUES (?, ?, ?, ?)",
                     (p["name"], i18n(p["tech"], pf["tech"]), p["link"], i18n(p["dates"], pf["dates"])))
     for e, ef in zip(en["education"], fr["education"]):
         start, _, end = e["dates"].partition(" - ")
-        con.execute("INSERT INTO education (degree, institution, start_at, end_at) VALUES (?, ?, ?, ?)",
+        con.execute("INSERT INTO bloc_education (degree, institution, start_at, end_at) VALUES (?, ?, ?, ?)",
                     (i18n(e["degree"], ef["degree"]), i18n(e["institution"], ef["institution"]), start, end))
     for x in en["certifications"]:
-        con.execute("INSERT INTO certifications (name, issuer, link) VALUES (?, ?, ?)", (x["name"], x["issuer"], x["link"]))
+        con.execute("INSERT INTO bloc_certifications (name, issuer, link) VALUES (?, ?, ?)", (x["name"], x["issuer"], x["link"]))
     con.commit()
     db.dump(con)
     for lang, path in FILES.items():

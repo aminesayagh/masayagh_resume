@@ -67,10 +67,10 @@ def compose(folder: Path) -> dict:
             continue
         chosen = []  # library line ids, in resume order (description first)
         description, bullets = "", []
-        for aid, label in con.execute("SELECT id, label FROM activities WHERE experience_id = ? AND active = 1 "
+        for aid, label in con.execute("SELECT id, label FROM bloc_activities WHERE experience_id = ? AND active = 1 "
                                       "ORDER BY sort_order", (exp,)).fetchall():
             lines = [dict(r) for r in con.execute(f"SELECT id, kind, {db.EN.format('text')} AS text_en, text, created_at "
-                                                  "FROM descriptions WHERE activity_id = ? AND status = 'approved'", (aid,))]
+                                                  "FROM bloc_descriptions WHERE activity_id = ? AND status = 'approved'", (aid,))]
             if not lines:
                 continue
             best, terms = choose(lines, patterns)

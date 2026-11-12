@@ -10,7 +10,6 @@ import check_pdf  # noqa: E402
 import build_resume  # noqa: E402
 import check_job  # noqa: E402
 import check_spelling  # noqa: E402
-import draft_job  # noqa: E402,F401  (its asserts check line numbering, quotes and candidates)
 import fetch_posting  # noqa: E402,F401  (its asserts check the JobPosting parsing)
 import review_ats  # noqa: E402
 import tailor  # noqa: E402
@@ -300,7 +299,7 @@ class ComposeOnceTest(unittest.TestCase):
         with FreshDb() as root:
             con = db.connect()
             base = "Integrated an AI agent experience that transforms"
-            aid = con.execute(f"SELECT activity_id FROM descriptions WHERE {db.EN.format('text')} LIKE ?", (base + "%",)).fetchone()[0]
+            aid = con.execute(f"SELECT activity_id FROM bloc_descriptions WHERE {db.EN.format('text')} LIKE ?", (base + "%",)).fetchone()[0]
             variant = "Integrated Large Language Models into an AI agent that configures marketing campaigns."
             db_sync.add_line(con, aid, "bullet", variant)  # a second approved wording of the same activity
             con.commit()
@@ -321,7 +320,7 @@ class ComposeOnceTest(unittest.TestCase):
             hypeo["bullets"][i] = variant.replace("Integrated", "Shipped")
             paths.content(folder).write_text(json.dumps(content), encoding="utf-8")
             db_sync.sync_job(folder)
-            find = f"SELECT activity_id FROM descriptions WHERE {db.EN.format('text')} = ?"
+            find = f"SELECT activity_id FROM bloc_descriptions WHERE {db.EN.format('text')} = ?"
             self.assertEqual(db.connect().execute(find, (hypeo["bullets"][i],)).fetchone()[0], aid)
             import new_job  # a new version: same offer, lines composed again from the library
             saved_new = (new_job.JOBS_DIR, new_job.ROOT, new_job.build_resume.build)
@@ -336,6 +335,48 @@ class ComposeOnceTest(unittest.TestCase):
                             if e["company"].startswith("Phoenix"))
             self.assertIn(hypeo["bullets"][i], v2_hypeo["bullets"])  # the agreed edit, now the newest line
             self.assertEqual(json.loads(paths.content(folder).read_text(encoding="utf-8")), content)  # v1 untouched
+
+
+class ParsedImportTest(unittest.TestCase):
+    """parse_offer.py output -> requirements: one per keyword, priority and min_years kept, 'none' skipped, a known
+    spelling reused (layer 1), anything new saved unconfirmed (layer 3). No model call: the parsed dict is given."""
+
+    def test_saves_keywords_without_duplicates(self):
+        import db
+        import offers
+        parsed = {"company": "Brightwave", "title": "Backend Engineer", "location": "Berlin, Germany (hybrid)",
+                  "phrases": [
+                      {"text": "5+ years of backend experience in Python", "skills": [
+                          {"name": "Python", "type": "technical", "priority": 100, "min_years": 5}]},
+                      {"text": "Design our APIs", "skills": [{"name": "APIs", "type": "technical", "priority": 100, "min_years": None}]},
+                      {"text": "Event driven systems", "skills": [{"name": "Event driven", "type": "technical", "priority": 0, "min_years": None}]},
+                      {"text": "German is a plus", "skills": [{"name": "German", "type": "language", "priority": 0, "min_years": None}]},
+                      {"text": "Free lunch", "type": "none", "skills": []}]}
+        with FreshDb() as root:
+            con = db.connect()
+            known = db.keyword_id(con, "API", confirmed=True)  # already a keyword: 'APIs' must reuse it
+            db.keyword_id(con, "event-driven", confirmed=True)
+            con.commit()
+            folder = root / "brightwave-backend-engineer-v1"
+            self.assertEqual(offers.parsed_location(parsed), "Berlin, Germany")
+            offers.save(folder, {"title": "Brightwave — Backend Engineer", "posting_text": "x",
+                                 "location": offers.parsed_location(parsed), "requirements": offers.from_parsed(parsed)})
+            con = db.connect()
+            rows = {k: (p, y, kid) for k, p, y, kid in con.execute(
+                "SELECT k.keyword, r.priority, r.min_years, k.id FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id")}
+            self.assertEqual(rows["python"][:2], (100, 5))
+            self.assertEqual(con.execute("SELECT s.type FROM skills s JOIN skill_keywords k ON k.skill_id = s.id "
+                                         "WHERE k.id = ?", (known,)).fetchone()[0], "technical")  # an untyped skill gets the type
+            self.assertEqual(rows["api"][2], known)                  # 'APIs' reused 'api'
+            self.assertIn("event-driven", rows)                      # 'Event driven' reused 'event-driven'
+            self.assertEqual(rows["german"][:2], (0, None))
+            self.assertEqual(len(rows), 4)                           # 'none' skipped
+            new = {n for (n,) in con.execute("SELECT json_extract(name, '$.en') FROM skills WHERE confirmed = 0")}
+            self.assertEqual(new, {"python", "german"} - {n for (n,) in con.execute(
+                "SELECT json_extract(name, '$.en') FROM skills WHERE confirmed = 1")})  # only new words wait for review
+            job = offers.load(folder)
+            self.assertEqual(job["location"], "Berlin, Germany")
+            self.assertTrue(any(r.get("kind") == "years_experience" and r["min_years"] == 5 for r in job["requirements"]))
 
 
 if __name__ == "__main__":

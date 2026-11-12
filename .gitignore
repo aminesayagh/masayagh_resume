@@ -21,3 +21,6 @@ jobs/*
 
 # personal settings (publishing); see config.example.json
 config.json
+
+# parse_offer.py results, rebuilt on demand
+data/cache/

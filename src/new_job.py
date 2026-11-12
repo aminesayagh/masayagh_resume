@@ -8,12 +8,12 @@ Usage: python3 src/new_job.py --url JOB_URL
 --url reads the title, company, description and location from the posting page
 (src/fetch_posting.py); --company/--title override what it found.
 
-Prompts for anything not given: the company, the job title, and the posting text
-(paste it, then press Ctrl-D). Refuses to run if template/content/default.json has any unresolved spelling, style
-or PDF-readability finding — every new application starts from that baseline, so it
-must be clean first. Creates jobs/<company>-<title>-v<N>/ and its offer in data/resume.db (posting, no requirements yet), a
-skeleton (no requirements yet), a copy of the default content, the built resume, and a
-partial report (no job-matching section until requirements are drafted).
+Prompts for the posting text when not given (paste it, then press Ctrl-D). src/parse_offer.py (one Haiku call,
+cached) reads the company, title, location and the skills the posting asks for, each with its type, priority and
+minimum years; --company/--title and --url win over what it found. Refuses to run if template/content/default.json
+has any unresolved spelling, style or PDF-readability finding: every new application starts from that baseline.
+Creates jobs/<company>-<title>-v<N>/, its offer and requirements in data/resume.db (a new skill is saved unconfirmed,
+for you to review or merge), composes the experience lines for the offer, builds the resume and writes the review.
 """
 
 import argparse
@@ -26,9 +26,9 @@ import unicodedata
 from pathlib import Path
 
 import build_resume
+import db
 import offers
 import paths
-import build_fr
 import check_template
 import fetch_posting
 import publish_resume
@@ -109,8 +109,6 @@ def main() -> None:
             print(f"[{f['severity']}] {f['message']}")
         sys.exit(1)
 
-    company = (args.company or found.get("company") or input("Company: ")).strip()
-    title = (args.title or found.get("title") or input("Job title: ")).strip()
     if found:
         posting = f"Source: {found['url']}\nLocation: {found['location']}\n\n{found['description']}"
     elif args.posting:
@@ -118,6 +116,14 @@ def main() -> None:
     else:
         print("Paste the job posting, then press Ctrl-D:")
         posting = sys.stdin.read().strip()
+    try:
+        import parse_offer  # late: it needs the claude CLI only when a posting is parsed
+        parsed = parse_offer.parse(posting)
+    except Exception as exc:  # no claude CLI, no login, a timeout: the job is still created, without requirements
+        print(f"[warning] the posting could not be parsed ({exc}); the job is created without requirements.")
+        parsed = {}
+    company = (args.company or found.get("company") or parsed.get("company") or input("Company: ")).strip()
+    title = (args.title or found.get("title") or parsed.get("title") or input("Job title: ")).strip()
     if not company or not title or not posting:
         sys.exit("Company, job title and posting text are all required.")
 
@@ -133,12 +139,16 @@ def main() -> None:
     job = {"title": f"{company} — {title}", "posting_text": posting,
            "pdf_name": pdf_name(name, title, company),
            "company": slugify(company),
-           **({"url": found["url"], "location": found["location"], "location_match": found["location_match"]} if found else {}),
-           "french_version": build_fr.is_french_only(posting),
+           **({"url": found["url"]} if found else {}),
+           "location": (found or {}).get("location") or offers.parsed_location(parsed),
            "template_sha": hashlib.sha256(content_path.read_bytes()).hexdigest(),
-           "requirements": []}
+           "requirements": offers.from_parsed(parsed)}
     job_path = paths.job(folder)
-    offers.save(folder, job)  # the offer lives in data/resume.db
+    offers.save(folder, job)  # the offer, its requirements and this composition live in data/resume.db
+    job = offers.load(folder)  # one requirement per keyword, as the review reads it
+    if job["requirements"]:
+        import compose  # late: compose imports build_resume, like this module
+        compose.compose(folder)
 
     pdf_path = build_resume.build(content_path)
     content = json.loads(content_path.read_text(encoding="utf-8"))
@@ -152,9 +162,9 @@ def main() -> None:
     if rep.get("job_title") and not rep["job_title"]["match"]:
         print(f"[warning] {rep['job_title']['message']}")
     publish_resume.publish(job_path)
-    print(f"Report so far: PDF readability + spelling + style (no job requirements yet, so no matching).")
-    print(f"Next: draft the requirements (job-requirements agent, .claude/skills/ats-review/SKILL.md), then run:\n"
-          f"  .venv/bin/python src/compose.py jobs/{folder.name} && .venv/bin/python src/tailor.py jobs/{folder.name}")
+    new = db.connect().execute("SELECT count(*) FROM skills WHERE confirmed = 0").fetchone()[0]
+    print(f"{len(job['requirements'])} requirement(s) saved from the posting; {new} skill(s) to confirm or merge.")
+    print(f"Next: review the gaps and tailor: .venv/bin/python src/tailor.py jobs/{folder.name}")
 
 
 assert pdf_name("Mohamed Amine Sayagh", "Développeur Full-Stack", "theodo") == "Mohamed-Amine-Sayagh-Developpeur-Full-Stack-Theodo.pdf"
