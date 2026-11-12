@@ -4,9 +4,12 @@ load(folder) returns the same dict a job.json used to hold, so the rest of the p
   title ("Company — Title"), posting_text, pdf_name, company (slug), url, location, location_match,
   french_version, sent, previous_version, template_sha, skipped_terms, requirements [{id: R01..., ...}], overrides.
 save(folder, data) writes it back. Requirement ids (R01...) are positions, recomputed on every load.
+
+Usage: python3 src/offers.py sent jobs/<slug> [YYYY-MM-DD]   # mark a job as sent (default today); it is then frozen
 """
 
 import json
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -146,3 +149,34 @@ def write(arg: Path, job: dict) -> None:
         arg.write_text(json.dumps(job, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     else:
         save(paths.folder_arg(arg), job)
+
+
+def mark_sent(folder: Path, when: str | None = None) -> str:
+    """Record the day the job was sent: from then on it is frozen (no rebuild, edit or republish). Saving the offer as
+    sent also snapshots the review's results (offer_results), so the db keeps what the employer received."""
+    job = load(folder)
+    if job.get("sent"):
+        sys.exit(f"{Path(folder).name} was already sent on {job['sent']}")
+    day = date.fromisoformat(when) if when else date.today()
+    if day > date.today():
+        sys.exit(f"{day} is in the future")
+    job["sent"] = day.isoformat()
+    save(folder, job)
+    return job["sent"]
+
+
+def main() -> None:
+    if len(sys.argv) not in (3, 4) or sys.argv[1] != "sent":
+        sys.exit(__doc__)
+    folder = paths.folder_arg(Path(sys.argv[2]))
+    if not exists(folder):
+        sys.exit(f"No offer for {folder.name} in data/resume.db")
+    try:
+        day = mark_sent(folder, sys.argv[3] if len(sys.argv) == 4 else None)
+    except ValueError:
+        sys.exit(f"Not a date: {sys.argv[3]} (use YYYY-MM-DD)")
+    print(f"Marked {folder.name} as sent on {day}")
+
+
+if __name__ == "__main__":
+    main()

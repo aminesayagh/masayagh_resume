@@ -62,7 +62,7 @@ def translation_memory() -> dict:
     con = db.connect()  # French of library lines and skills
     memory.update({en: fr for en, fr in con.execute("SELECT text_en, text_fr FROM descriptions WHERE text_fr IS NOT NULL")})
     memory.update({en: fr for en, fr in con.execute("SELECT name_en, name_fr FROM skills WHERE name_fr IS NOT NULL")})
-    return memory
+    return memory  # skill names are lowercase: translate() also looks a label up in lowercase
 
 
 def translate(node, memory: dict, missing: list, key=None):
@@ -71,9 +71,10 @@ def translate(node, memory: dict, missing: list, key=None):
     if isinstance(node, list):
         return [translate(v, memory, missing, key) for v in node]
     if isinstance(node, str) and node.strip() and key not in KEEP:
-        if node not in memory:
+        found = memory.get(node, memory.get(node.casefold()))
+        if found is None:
             missing.append(node)
-        return memory.get(node, node)
+        return node if found is None else found
     return node
 
 
@@ -94,7 +95,7 @@ def build(folder: Path) -> Path | None:
         rest = {}
         for en_text, fr_text in filled.items():
             hit = con.execute("UPDATE descriptions SET text_fr = ? WHERE text_en = ?", (fr_text, en_text)).rowcount
-            hit += con.execute("UPDATE skills SET name_fr = ? WHERE name_en = ?", (fr_text, en_text)).rowcount
+            hit += con.execute("UPDATE skills SET name_fr = ? WHERE name_en = lower(?)", (fr_text, en_text)).rowcount
             if not hit:
                 rest[en_text] = fr_text
         con.commit()

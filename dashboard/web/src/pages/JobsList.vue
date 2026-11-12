@@ -1,8 +1,9 @@
 <script setup>
-// Jobs list ( / ): summary cards, search + chips + filters, Table | Board. Read only: actions are disabled.
+// Jobs list ( / ): summary cards, search + chips + filters, and the jobs table.
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { newVersion } from '../newVersion.js'
+import { markSent } from '../markSent.js'
 
 const router = useRouter()
 
@@ -14,9 +15,8 @@ const q = ref('')
 const chip = ref('all')
 const skill = ref('')
 const location = ref('')
-const view = ref('Table')
 
-onMounted(async () => {
+async function load() {
   try {
     const res = await fetch('/api/jobs')
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`)
@@ -28,7 +28,8 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+onMounted(load)
 
 const CHIPS = {
   all: ['All', () => true],
@@ -50,10 +51,6 @@ const shown = computed(() => {
       && (!location.value || j.location === location.value)
   })
 })
-const columns = computed(() => [
-  ['In progress', shown.value.filter((j) => j.status === 'in progress')],
-  ['Sent', shown.value.filter((j) => j.status === 'sent')],
-])
 
 const pct = (v) => Math.round(v * 100)
 const barColor = (v) => (v >= 0.75 ? '#67c23a' : '#e6a23c') // green >= 75%, yellow below
@@ -114,32 +111,28 @@ const todoLine = (j) => {
     <el-select v-model="location" placeholder="Location" clearable style="width: 200px">
       <el-option v-for="l in locations" :key="l" :label="l" :value="l" />
     </el-select>
-    <el-segmented v-model="view" :options="['Table', 'Board']" class="toggle" />
   </div>
 
-  <el-table v-if="view === 'Table'" v-loading="loading" :data="shown" :row-class-name="rowClass"
+  <el-table v-loading="loading" :data="shown" :row-class-name="rowClass"
     empty-text="No job matches these filters">
-    <el-table-column label="Company / role" min-width="240">
+    <el-table-column label="Company / role" min-width="240" sortable :sort-by="(row) => `${row.company}\u0000${row.role}`.toLowerCase()">
       <template #default="{ row }">
         <router-link :to="`/job/${row.slug}`" class="company">{{ row.company }}</router-link>
         <div class="muted">{{ row.role }} · v{{ row.version }}<span v-if="row.sent">  (frozen)</span></div>
       </template>
     </el-table-column>
-    <el-table-column label="Status" width="120">
+    <el-table-column label="Status" width="120" sortable sort-by="status">
       <template #default="{ row }">
         <el-tag :type="row.status === 'sent' ? 'success' : 'primary'" round>{{ row.status }}</el-tag>
       </template>
     </el-table-column>
     <el-table-column v-for="p in ['must_have', 'preferred']" :key="p"
-      :label="p === 'must_have' ? 'Must-have' : 'Preferred'" width="140">
+      :label="p === 'must_have' ? 'Must-have' : 'Preferred'" width="150" sortable :sort-by="(row) => row[p] ?? -1">
       <template #default="{ row }">
         <span v-if="!row.has_requirements" class="muted">no requirements yet</span>
         <span v-else-if="row[p] == null" class="muted">—</span>
         <el-progress v-else :percentage="pct(row[p])" :color="barColor(row[p])" :stroke-width="8" />
       </template>
-    </el-table-column>
-    <el-table-column label="Location" width="170">
-      <template #default="{ row }">{{ row.location || '—' }}</template>
     </el-table-column>
     <el-table-column label="To do / info" min-width="200">
       <template #default="{ row }">
@@ -159,7 +152,8 @@ const todoLine = (j) => {
           <el-button text size="small" aria-label="Actions">⋯</el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item disabled>Mark as sent (not wired yet)</el-dropdown-item>
+              <el-dropdown-item v-if="row.sent" disabled>Sent on {{ row.sent }}</el-dropdown-item>
+              <el-dropdown-item v-else @click="markSent(row, load)">Mark as sent</el-dropdown-item>
               <el-dropdown-item @click="newVersion(row, router)">New version</el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -168,21 +162,6 @@ const todoLine = (j) => {
     </el-table-column>
   </el-table>
 
-  <el-row v-else :gutter="16">
-    <el-col v-for="[title, list] in columns" :key="title" :span="12">
-      <h3>{{ title }} {{ list.length }}</h3>
-      <el-empty v-if="!list.length" description="None" :image-size="60" />
-      <el-card v-for="j in list" :key="j.slug" shadow="hover" class="board-card" :class="{ frozen: j.sent }"
-        @click="$router.push(`/job/${j.slug}`)">
-        <div class="company">{{ j.company }} · {{ j.role }}</div>
-        <div class="muted">
-          v{{ j.version }} ·
-          {{ j.has_requirements ? (j.must_have == null ? 'must-have —' : `must-have ${pct(j.must_have)}%`) : 'no requirements yet' }}
-          · {{ todoLine(j) }}<span v-if="j.sent"> · sent {{ j.sent }}</span>
-        </div>
-      </el-card>
-    </el-col>
-  </el-row>
 
   <p class="muted">{{ jobs.length }} jobs · showing {{ shown.length }} · newest first.
     Coverage = met + ½ partial per priority; it is a tailoring aid, not an ATS score.</p>
@@ -194,14 +173,10 @@ const todoLine = (j) => {
 .kpi-label { font-size: 13px; color: #606266; }
 .kpi-value { font-size: 28px; font-weight: 600; margin: 4px 0; }
 .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-.toggle { margin-left: auto; }
 .company { font-weight: 600; color: inherit; text-decoration: none; }
 a.company:hover { color: var(--el-color-primary); }
-.board-card { cursor: pointer; }
 .todo { cursor: help; border-bottom: 1px dotted #909399; }
 .note { margin: 6px 0; font-size: 13px; }
-.board-card { margin-bottom: 10px; }
-.frozen { opacity: 0.6; }
 :deep(.el-table tr.frozen td) { color: #a8abb2; background: #fafafa; }
 :deep(.el-table tr.frozen .company) { color: #909399; }
 </style>

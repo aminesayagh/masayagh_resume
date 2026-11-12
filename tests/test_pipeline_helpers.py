@@ -231,8 +231,41 @@ class SkillTypesTest(unittest.TestCase):
         self.run_cli("type", "Git", "education")  # leaving the hard types drops the dates
         con = self.db.connect()
         rows = {r[0]: tuple(r[1:]) for r in con.execute("SELECT name_en, type, start_at, end_at FROM skills")}
-        self.assertEqual(rows, {"communication": ("soft", None, None), "Git": ("education", None, None)})
+        self.assertEqual(rows, {"communication": ("soft", None, None), "git": ("education", None, None)})
         self.assertTrue(self.db.DUMP.exists())  # resume.sql (here test.sql) refreshed after each change
+
+
+
+class MarkSentTest(unittest.TestCase):
+    """offers.py sent: records the day, snapshots the results, and refuses a second time or a future day."""
+
+    def test_mark_sent_on_a_copy(self):
+        import shutil
+        import sqlite3
+        import db
+        import offers
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            saved = (db.DB, db.DUMP)
+            shutil.copyfile(db.connect() and db.DB, root / "copy.db")  # a copy, never the real db
+            db.DB, db.DUMP = root / "copy.db", root / "copy.sql"
+            try:
+                con = sqlite3.connect(db.DB)
+                oid, folder = con.execute("SELECT id, folder FROM offers ORDER BY id LIMIT 1").fetchone()
+                con.execute("UPDATE offers SET sent_at = NULL, status = 'ready' WHERE id = ?", (oid,))
+                con.execute("DELETE FROM offer_results WHERE offer_id = ?", (oid,))
+                con.commit()
+                con.close()
+                job = offers.paths.ROOT / folder
+                with self.assertRaises(SystemExit):
+                    offers.mark_sent(job, "2999-01-01")  # never in the future
+                self.assertEqual(offers.mark_sent(job, "2026-11-10"), "2026-11-10")
+                self.assertEqual(offers.load(job)["sent"], "2026-11-10")
+                with self.assertRaises(SystemExit):
+                    offers.mark_sent(job)  # already sent
+                self.assertTrue(db.DUMP.exists())  # resume.sql (here copy.sql) refreshed
+            finally:
+                db.DB, db.DUMP = saved
 
 
 if __name__ == "__main__":

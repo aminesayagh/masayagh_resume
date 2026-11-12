@@ -186,6 +186,24 @@ class ApiTest(unittest.TestCase):
                 self.assertEqual(r.status_code, 409)
             self.assertEqual(run.call_count, calls)  # refused requests ran nothing
 
+    def test_mark_sent_runs_the_script(self):
+        """The script is mocked: nothing is written."""
+        from unittest import mock
+        slug = app.offers.all_folders(app.ro())[0].name
+        ok = mock.Mock(returncode=0, stdout=f"Marked {slug} as sent on 2026-11-10\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            with mock.patch.object(app.offers, "load", return_value={}):  # as if not sent yet
+                r = self.client.post(f"/api/jobs/{slug}/sent", json={"date": "2026-11-10"})
+                self.assertEqual(r.json()["ok"], True)
+                self.assertEqual(run.call_args.args[0][1:], ["src/offers.py", "sent", f"jobs/{slug}", "2026-11-10"])
+                calls = run.call_count
+                for bad in ("2999-01-01", "2026-02-30", "10/11/2026"):
+                    self.assertEqual(self.client.post(f"/api/jobs/{slug}/sent", json={"date": bad}).status_code, 422, bad)
+            with mock.patch.object(app.offers, "load", return_value={"sent": "2026-11-01"}):
+                self.assertEqual(self.client.post(f"/api/jobs/{slug}/sent", json={}).status_code, 409)
+            self.assertEqual(self.client.post("/api/jobs/no-such-job/sent", json={}).status_code, 404)
+            self.assertEqual(run.call_count, calls)  # refused requests ran nothing
+
     def test_skills_redirects_to_requirements(self):
         r = self.client.get("/skills", follow_redirects=False)
         self.assertEqual((r.status_code, r.headers["location"]), (301, "/requirements"))

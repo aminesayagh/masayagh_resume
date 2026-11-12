@@ -9,12 +9,15 @@ The backend for these is still to be decided. Each one is visible in the UI but 
 
 | Action | Where |
 |---|---|
-| Mark as sent | Jobs list "…" menu, job page main button |
 | Propose swap | Job page, "Gaps to work on" |
 | Interview notes (save) | Interview prep tab, every topic card |
 
 **Wired:** New version (jobs list and job page "…" menus) runs `src/new_job.py --from jobs/<slug>` after a
 confirmation, then opens the new job. One run at a time (server lock). **Dropped:** Reopen (not needed).
+
+**Wired (2026-11-12): Mark as sent** (jobs list "…" menu, job page button) runs `src/offers.py sent jobs/<slug> [date]`
+after you pick the day (today by default, never in the future). It records `sent_at` and snapshots the review's
+results; the job is then frozen. Sent jobs show "Sent on <date>" instead.
 
 **Wired (2026-11-12): the Requirements term drawer**, through `src/skills_inventory.py`:
 - Type: `type "<term>" <type>`; a term with no entry gets one. Leaving the hard types drops the dates.

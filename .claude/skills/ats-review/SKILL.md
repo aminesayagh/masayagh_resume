@@ -64,7 +64,7 @@ Each tool defaults to its input's own folder: run against `template/content/defa
 
 **Knowledge base:** before proposing experience edits, query the library for approved lines first: `SELECT d.text_en FROM descriptions d JOIN description_skills ds ON ds.description_id = d.id JOIN skills s ON s.id = ds.skill_id WHERE s.name_en = '<term>' AND d.status = 'approved'` (via `src/db.py`'s `connect()`). Reuse an approved line before writing a new one. Every build records new lines automatically.
 
-**Sent = frozen:** when the user sends an application, add `"sent": "YYYY-MM-DD"` to its offer. From then on `build_resume.py`, `build_cover.py`, `build_fr.py`, `tailor.py` and `publish_resume.py` refuse that folder, and `check_template.py` no longer lists it for refresh. Never edit a sent folder or propagate template changes into it; changes go into a new version folder. See AGENTS.md.
+**Sent = frozen:** when the user sends an application, run `src/offers.py sent jobs/<slug> [YYYY-MM-DD]` (default today); it records the date and snapshots the review's results. From then on `build_resume.py`, `build_cover.py`, `build_fr.py`, `tailor.py` and `publish_resume.py` refuse that folder, and `check_template.py` no longer lists it for refresh. Never edit a sent folder or propagate template changes into it; changes go into a new version folder. See AGENTS.md.
 
 **Not ready = `_` prefix:** a job PDF over 3 pages or with a broken skills layout is saved as `_<pdf_name>` and the ready-named file is removed. `publish_resume.py` refuses it and the dashboard labels it "NOT READY, do not send". Never rename it by hand; fix the content and rebuild.
 

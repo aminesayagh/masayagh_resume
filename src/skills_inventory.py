@@ -54,10 +54,10 @@ def save(inv: dict) -> None:
     con = db.connect()
     for s in inv["skills"]:
         if "id" not in s:
-            s["id"] = con.execute("INSERT INTO skills (type, name_en) VALUES ('technical', ?)", (s["name"],)).lastrowid
+            s["id"] = con.execute("INSERT INTO skills (type, name_en) VALUES ('technical', ?)", (s["name"].lower(),)).lastrowid
         con.execute("UPDATE skills SET start_at = ?, end_at = ? WHERE id = ?", (s.get("start"), s.get("end"), s["id"]))
         for m in s.get("match", []):
-            con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, 'en')", (s["id"], m))
+            con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, 'en')", (s["id"], m.lower()))
     con.commit()
     db.dump(con)
 
@@ -130,7 +130,7 @@ def main() -> None:
         save({"skills": [skill]} if "id" not in skill else {"skills": []})
         con = db.connect()
         con.execute("INSERT OR IGNORE INTO skill_keywords (skill_id, keyword, lang) VALUES (?, ?, ?)",
-                    (find(load(), sys.argv[2])["id"], sys.argv[3], lang))
+                    (find(load(), sys.argv[2])["id"], sys.argv[3].lower(), lang))
         con.commit()
         db.dump(con)
         print(f"{sys.argv[3]} ({lang}) now counts as {sys.argv[2]}")
@@ -141,7 +141,7 @@ def main() -> None:
             sys.exit(f"Unknown type '{kind}'; use one of: {', '.join(db.SKILL_TYPES)}")
         skill, con = find(inv, name), db.connect()
         if skill is None:
-            con.execute("INSERT INTO skills (type, name_en) VALUES (?, ?)", (kind, name))
+            con.execute("INSERT INTO skills (type, name_en) VALUES (?, ?)", (kind, name.lower()))
         elif kind in db.HARD_TYPES:
             con.execute("UPDATE skills SET type = ? WHERE id = ?", (kind, skill["id"]))
         else:  # only hard skills have dates

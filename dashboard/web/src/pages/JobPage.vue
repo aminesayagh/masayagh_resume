@@ -1,10 +1,11 @@
 <script setup>
 // Job page ( /job/<slug> ): header, links, last build, coverage, gaps, requirements, files, timeline, drawers.
-// Write actions other than New version are shown disabled ("not wired yet").
+// Write actions run src/ scripts on the server (Mark as sent, New version); the rest are shown disabled ("not wired yet").
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import InterviewPrep from './InterviewPrep.vue'
 import { newVersion } from '../newVersion.js'
+import { markSent } from '../markSent.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -140,9 +141,7 @@ const timeline = computed(() => job.value.timeline.filter((t) => t.date))
         </div>
       </div>
       <div class="head-actions">
-        <el-tooltip content="Not wired yet">
-          <span><el-button type="primary" disabled>Mark as sent</el-button></span>
-        </el-tooltip>
+        <el-button v-if="!job.sent" type="primary" @click="markSent(job, load)">Mark as sent</el-button>
         <el-dropdown trigger="click">
           <el-button aria-label="More actions">⋯</el-button>
           <template #dropdown>

@@ -3,7 +3,8 @@
 Run from the repo root:  python3 start.py   (or .venv/bin/python -m uvicorn dashboard.app:app --port 8000 after a build)
 The app itself only reads: data/resume.db is opened with mode=ro and jobs/ is only read.
 Writes run src/ scripts, so their rules hold: "New version" runs src/new_job.py --from (the source folder, sent or not,
-is never changed) and the Requirements term drawer runs src/skills_inventory.py. Every other write action in the UI is
+is never changed), "Mark as sent" runs src/offers.py sent, and the Requirements term drawer runs
+src/skills_inventory.py. Every other write action in the UI is
 shown disabled ("not wired yet").
 """
 
@@ -253,7 +254,8 @@ def requirement_terms() -> dict:
     terms = {}
     for term, folder in rows:
         skill = by_name.get(term.casefold()) or by_keyword.get(term.casefold()) or {}
-        t = terms.setdefault(term.casefold(), {"term": term, "skill": skill.get("name"), "type": skill.get("type"),
+        t = terms.setdefault(term.casefold(), {"term": term.lower(),  # one spelling, lowercase like the skills
+                                                "skill": skill.get("name"), "type": skill.get("type"),
                                                "start": skill.get("start"), "end": skill.get("end"),
                                                "keywords": skill.get("keywords", []), "jobs": {}})
         t["jobs"].setdefault(folder.removeprefix("jobs/"), None)
@@ -314,6 +316,28 @@ def new_version(slug: str) -> dict:
     created = re.search(r"^Created jobs/(\S+) from ", result.stdout, re.M)
     return {"ok": result.returncode == 0 and bool(created), "slug": created[1] if created else None,
             "output": (result.stdout + result.stderr).strip()}
+
+
+class Sent(BaseModel):
+    date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")  # default: today
+
+
+@app.post("/api/jobs/{slug}/sent")
+def api_mark_sent(slug: str, body: Sent):
+    """Mark the job as sent with src/offers.py sent: it is then frozen (no rebuild, edit or republish)."""
+    with ro() as con:
+        if "/" in slug or slug.startswith(".") or not offers.exists(paths.JOBS / slug, con):
+            raise HTTPException(404, "No such job")
+        sent = offers.load(paths.JOBS / slug, con).get("sent")
+    if sent:
+        raise HTTPException(409, f"Already sent on {sent}")
+    if body.date:
+        try:
+            if date.fromisoformat(body.date) > date.today():
+                raise HTTPException(422, "The date is in the future")
+        except ValueError:
+            raise HTTPException(422, "Not a date") from None
+    return script_result(run_script("src/offers.py", "sent", f"jobs/{slug}", *([body.date] if body.date else [])))
 
 
 @app.post("/api/jobs/{slug}/new-version")
