@@ -181,6 +181,8 @@ def set_value(args: list[str], con=None) -> None:
         raise SystemExit(__doc__)
     con.commit()
     db.dump(con)
+    import score_bullet  # late: new lines are scored like every other (one Haiku call each)
+    score_bullet.pending(con)
     write(con)
     print(f"Master updated ({what}); default.json and default-fr.json regenerated.")
 
@@ -235,6 +237,8 @@ def import_files(con=None) -> None:
         con.execute("INSERT INTO bloc_certifications (name, issuer, link) VALUES (?, ?, ?)", (x["name"], x["issuer"], x["link"]))
     con.commit()
     db.dump(con)
+    import score_bullet  # late: new lines are scored like every other (one Haiku call each)
+    score_bullet.pending(con)
     for lang, path in FILES.items():
         want = json.loads(path.read_text(encoding="utf-8"))
         got = generate(lang, con)

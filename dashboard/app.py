@@ -112,8 +112,13 @@ def summary(folder: Path, con: sqlite3.Connection) -> dict:
 
 
 def all_jobs() -> list[dict]:
+    """One row per offer: its latest version (by created_at), with how many versions it has. A composition without
+    an offer is its own row. Newest first."""
     with ro() as con:
-        return [summary(folder, con) for folder in offers.all_folders(con)]  # newest first
+        rows = con.execute("SELECT folder, offer_id, count(*) OVER (PARTITION BY coalesce(offer_id, -id)) AS n, "
+                           "row_number() OVER (PARTITION BY coalesce(offer_id, -id) ORDER BY created_at DESC, id DESC) AS k "
+                           "FROM compositions ORDER BY created_at DESC, id DESC").fetchall()
+        return [{**summary(paths.ROOT / folder, con), "versions": n} for folder, _, n, k in rows if k == 1]
 
 
 def cards(jobs: list[dict], today: date | None = None) -> dict:

@@ -155,6 +155,8 @@ def sync_job(folder: Path, con=None) -> int | None:
     if own:
         con.commit()
         db.dump(con)
+        import score_bullet  # late: a new or reworded line is scored like every other (one Haiku call each)
+        score_bullet.pending(con)
     return comp["id"]
 
 

@@ -110,7 +110,8 @@ CREATE TABLE IF NOT EXISTS bloc_descriptions (
   kind TEXT NOT NULL CHECK (kind IN ('description', 'bullet')),
   text TEXT NOT NULL,      -- json
   status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved', 'rejected')),
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  score TEXT               -- json, src/score_bullet.py (the user's bullet rubric); NULL = not scored yet
 );
 CREATE TABLE IF NOT EXISTS skills (
   id INTEGER PRIMARY KEY,

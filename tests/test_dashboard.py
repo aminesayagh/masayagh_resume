@@ -138,7 +138,9 @@ class ApiTest(unittest.TestCase):
     def test_jobs_are_real_and_status_is_binary(self):
         body = self.client.get("/api/jobs").json()
         with app.ro() as con:
-            self.assertEqual(len(body["jobs"]), con.execute("SELECT count(*) FROM compositions").fetchone()[0])
+            offers_n = con.execute("SELECT count(DISTINCT coalesce(offer_id, -id)) FROM compositions").fetchone()[0]
+        self.assertEqual(len(body["jobs"]), offers_n)  # one row per offer: its latest version
+        self.assertEqual([(j["slug"], j["versions"]) for j in body["jobs"]], [(f"{SLUG[:-1]}2", 2)])
         self.assertTrue({j["status"] for j in body["jobs"]} <= {"in progress", "sent"})
         self.assertNotIn("ats score", json.dumps(body).lower())
 

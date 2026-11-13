@@ -118,7 +118,7 @@ const todoLine = (j) => {
     <el-table-column label="Company / role" min-width="240" sortable :sort-by="(row) => `${row.company}\u0000${row.role}`.toLowerCase()">
       <template #default="{ row }">
         <router-link :to="`/job/${row.slug}`" class="company">{{ row.company }}</router-link>
-        <div class="muted">{{ row.role }} · v{{ row.version }}<span v-if="row.sent">  (frozen)</span></div>
+        <div class="muted">{{ row.role }} · v{{ row.version }}<span v-if="row.versions > 1"> (latest of {{ row.versions }})</span><span v-if="row.sent">  (frozen)</span></div>
       </template>
     </el-table-column>
     <el-table-column label="Status" width="120" sortable sort-by="status">
@@ -163,7 +163,7 @@ const todoLine = (j) => {
   </el-table>
 
 
-  <p class="muted">{{ jobs.length }} jobs · showing {{ shown.length }} · newest first.
+  <p class="muted">{{ jobs.length }} offers, latest version of each · showing {{ shown.length }} · newest first.
     Partial counts ½. Overall: a preferred skill counts ¼ of a must-have. A tailoring aid, not an ATS score.</p>
 </template>
 
