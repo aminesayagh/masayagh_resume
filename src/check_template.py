@@ -10,13 +10,10 @@ having to start (and abandon) a new application first.
 Exit code: 0 = ready (no findings), 1 = not ready (findings listed).
 """
 
-import hashlib
 import json
 from pathlib import Path
 
 import build_resume
-import offers
-import paths
 import review_ats
 
 HERE = Path(__file__).resolve().parent
@@ -51,26 +48,10 @@ def check() -> list[dict]:
     ]
 
 
-def stale_jobs() -> list[Path]:
-    """Job folders whose content.json is still the untouched template copy (its hash equals
-    the offer's template_sha) but the template has changed since. Safe to refresh."""
-    current = hashlib.sha256((TEMPLATE_DIR / "content" / "default.json").read_bytes()).hexdigest()
-    stale = []
-    for folder in offers.all_folders():
-        job = offers.load(folder)
-        sha = None if job.get("sent") else job.get("template_sha")  # sent jobs are frozen
-        content = paths.content(folder)
-        if sha and sha != current and content.exists() and hashlib.sha256(content.read_bytes()).hexdigest() == sha:
-            stale.append(folder)
-    return stale
-
-
 def main() -> None:
     findings = check()
     if not findings:
         print("template/ is ready: no spelling, style or PDF-readability findings.")
-        for folder in stale_jobs():
-            print(f"Untailored job behind the template (safe to refresh): {folder.relative_to(ROOT)}")
         return
     print(f"template/ is not ready: {len(findings)} finding(s) to fix first.\n")
     for f in findings:

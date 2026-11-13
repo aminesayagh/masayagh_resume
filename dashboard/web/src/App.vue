@@ -3,12 +3,13 @@
     <span class="brand">Resume pipeline</span>
     <router-link to="/" :class="{ active: $route.path === '/' || $route.path.startsWith('/job/') }">Jobs</router-link>
     <router-link to="/requirements">Requirements</router-link>
+    <router-link to="/resumes" :class="{ active: $route.path.startsWith('/resumes') }">Resumes</router-link>
   </header>
   <main class="page"><router-view /></main>
 </template>
 
 <style>
-body { margin: 0; font-family: system-ui, sans-serif; background: #f6f7f9; color: #1f2329; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #f6f7f9; color: #1f2329; line-height: 1.6; }
 .topbar { display: flex; gap: 24px; align-items: center; padding: 12px 32px; background: #fff; border-bottom: 1px solid #e4e7ed; }
 .topbar .brand { font-weight: 600; margin-right: 16px; }
 .topbar a { color: #606266; text-decoration: none; }

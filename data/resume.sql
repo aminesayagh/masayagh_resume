@@ -29,6 +29,11 @@ INSERT INTO "bloc_activities" VALUES(20,5,'Developed the web experience of',3,1)
 INSERT INTO "bloc_activities" VALUES(21,6,'Developed a responsive subscription website',1,1);
 INSERT INTO "bloc_activities" VALUES(22,7,'Automated the delivery process for',1,1);
 INSERT INTO "bloc_activities" VALUES(23,7,'Produced lead-capture websites that delivered',2,1);
+INSERT INTO "bloc_activities" VALUES(24,1,'LingoWP, maintain and support a',3,0);
+INSERT INTO "bloc_activities" VALUES(25,7,'Delivered client onboarding web experiences',3,0);
+INSERT INTO "bloc_activities" VALUES(26,3,'Co-developed engineering standards for code',6,0);
+INSERT INTO "bloc_activities" VALUES(27,2,'Delivered a moderation platform in',8,0);
+INSERT INTO "bloc_activities" VALUES(28,5,'Provided coaching and mentoring to',4,0);
 CREATE TABLE bloc_certifications (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -81,6 +86,34 @@ INSERT INTO "bloc_descriptions" VALUES(20,20,'bullet','{"en": "Developed the web
 INSERT INTO "bloc_descriptions" VALUES(21,21,'description','{"en": "Developed a responsive subscription website for individual real estate investment plans.", "fr": "Développement d''un site d''abonnement responsive pour des plans d''investissement immobilier individuels."}','approved','2026-11-12 18:16:45','{"scores": {"result": 1, "evidence": 0, "contribution": 2, "clarity": 2}, "supporting_phrases": {"result": "Developed a responsive subscription website", "evidence": null, "contribution": "Developed a responsive subscription website", "clarity": "Developed a responsive subscription website for individual real estate investment plans"}, "evidence_type": "none", "claim_evidence_match": "missing", "attribution": "individual", "revision_requests": ["State what the website enabled for subscribers or the business, only if verified.", "Add a verified scope or launch detail, such as subscriber counts or live status.", "Add evidence of the website''s use or launch, or keep the line to what was built."], "total": 5, "verdict": "Revise", "unquoted_phrases": [], "model": "claude-haiku-5-5", "via": "subagent", "version": 1, "text_hash": "d809791a6b4cd340", "scored_at": "2026-11-13"}');
 INSERT INTO "bloc_descriptions" VALUES(22,22,'bullet','{"en": "Automated the delivery process for new websites by reusing proven experience patterns, helping shorten release cycles.", "fr": "Automatisation de la livraison de nouveaux sites par la réutilisation de modèles éprouvés, réduisant les cycles de mise en production."}','approved','2026-11-12 18:16:45','{"scores": {"result": 2, "evidence": 0, "contribution": 2, "clarity": 2}, "supporting_phrases": {"result": "helping shorten release cycles", "evidence": null, "contribution": "Automated the delivery process for new websites", "clarity": "Automated the delivery process for new websites by reusing proven experience patterns, helping shorten release cycles"}, "evidence_type": "none", "claim_evidence_match": "missing", "attribution": "individual", "revision_requests": ["Add a verified measure of the release-cycle change, only if one exists.", "Add evidence of the release-cycle change, or remove the shortening claim."], "total": 6, "verdict": "Revise", "unquoted_phrases": [], "model": "claude-haiku-5-5", "via": "subagent", "version": 1, "text_hash": "c9baf5d1095b97a5", "scored_at": "2026-11-13"}');
 INSERT INTO "bloc_descriptions" VALUES(23,23,'bullet','{"en": "Produced lead-capture websites that delivered strong conversion performance for client campaigns.", "fr": "Sites de génération de leads à forte conversion pour les campagnes clients."}','approved','2026-11-12 18:16:45','{"scores": {"result": 2, "evidence": 0, "contribution": 2, "clarity": 2}, "supporting_phrases": {"result": "delivered strong conversion performance for client campaigns", "evidence": null, "contribution": "Produced lead-capture websites", "clarity": "Produced lead-capture websites that delivered strong conversion performance"}, "evidence_type": "none", "claim_evidence_match": "missing", "attribution": "individual", "revision_requests": ["Add a verified conversion metric or client scope for the websites, only if one exists.", "Add evidence for the conversion performance claim, or replace ''strong'' with a verified figure."], "total": 6, "verdict": "Revise", "unquoted_phrases": [], "model": "claude-haiku-5-5", "via": "subagent", "version": 1, "text_hash": "bea033b234e783f8", "scored_at": "2026-11-13"}');
+INSERT INTO "bloc_descriptions" VALUES(24,24,'bullet','{"en": "LingoWP, maintain and support a multilingual WordPress plugin deployed across four digital agencies."}','approved','2026-11-06',NULL);
+INSERT INTO "bloc_descriptions" VALUES(25,15,'description','{"en": "Designed and integrated product features for Inflauditor, a business decision-making dashboard that helps brands analyze large-scale creator data for campaign planning."}','approved','2026-11-06',NULL);
+INSERT INTO "bloc_descriptions" VALUES(26,15,'description','{"en": "Delivered high-conversion lead-capture landing pages for Miratti (Morocco), French Dandy (Dubai), and Horde Studio (USA), supporting growth campaigns showcased at regional events (e.g., Forbes Middle East)."}','approved','2026-11-06',NULL);
+INSERT INTO "bloc_descriptions" VALUES(27,25,'description','{"en": "Delivered client onboarding web experiences for solar energy products, serving as the first digital touchpoint between customers and suppliers."}','approved','2026-11-06',NULL);
+INSERT INTO "bloc_descriptions" VALUES(28,1,'bullet','{"en": "Tarifpublic.fr, provide full-stack technical consulting for a French state-supported marketplace for public procurement, supporting standardized product pricing."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(29,2,'bullet','{"en": "Develop enterprise software with AI agent workflows that automate business decisions for international agencies."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(30,3,'description','{"en": "Developed full-stack product features for Hypeo, a MENA creator-marketing SaaS platform connecting influencers and media creators with businesses launching online content campaigns."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(31,4,'bullet','{"en": "Integrated an AI agent experience built on agentic systems, turning open-ended client conversations into configured marketing campaigns connected to the internal influencer database."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(32,9,'bullet','{"en": "Built a data integration with external APIs for creator audience and professional collaboration metrics, later accepted and integrated into the company workflow."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(33,26,'description','{"en": "Co-developed engineering standards for code quality and shipping, delivering standardized software to enterprise clients at lower cost."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(34,18,'description','{"en": "Led web development of a CTF platform for security competitions, used in global events such as OWASP AppSec Days, BSides Singapore, and ISACA. Shared in managing teams and supported the hiring of new engineers."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(35,5,'bullet','{"en": "Built and refined the front-end experience in Next.js, TypeScript and Tailwind CSS, creating reusable component libraries on Radix UI, in close collaboration with a senior technical lead."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(36,27,'bullet','{"en": "Delivered a moderation platform in Vue 3 that let the team review and onboard creator profiles from one place, connected to Hypeo''s account API endpoints."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(37,16,'bullet','{"en": "Owned UI design, UX flows and prototypes for Inflauditor to validate product direction and accelerate development decisions."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(38,19,'bullet','{"en": "Implemented Go API endpoints to orchestrate isolated application deployments, providing a secure training environment for participants."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(39,28,'bullet','{"en": "Provided coaching and mentoring to developers on the platform''s web experience."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(40,21,'description','{"en": "Developed a responsive, accessible subscription website in HTML, CSS and JavaScript for individual real estate investment plans."}','approved','2026-11-09',NULL);
+INSERT INTO "bloc_descriptions" VALUES(41,4,'bullet','{"en": "Integrated a generative AI agent experience that transforms open-ended client conversations into configured marketing campaigns, connected to the internal influencer database."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(42,5,'bullet','{"en": "Built and refined the front-end experience in close collaboration with a senior technical lead, continuously adapting workflows to backend integration and evolving business requirements from stakeholders."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(43,7,'bullet','{"en": "Took ownership of production systems maintenance, deployment support on cloud services, access/IP handover, incident response and bug-fix coordination during a technical leadership transition."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(44,26,'description','{"en": "Co-developed engineering standards for code quality and shipping, delivering standardized software to enterprise customers at lower cost."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(45,11,'bullet','{"en": "Established a reusable prototyping approach to validate business requirements and set technical priorities before development."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(46,12,'bullet','{"en": "Tracked agile sprint KPIs in Odoo and surfaced bottlenecks to improve planning accuracy and throughput."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(47,4,'bullet','{"en": "Integrated an AI agent experience built on Large Language Models that transforms open-ended client conversations into configured marketing campaigns, connected to the internal influencer database."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(48,5,'bullet','{"en": "Built and refined the front-end experience in close collaboration and code review with a senior technical lead, continuously adapting workflows to backend integration and evolving business requirements."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(49,7,'bullet','{"en": "Took ownership of production-grade software maintenance, CI/CD deployment support on cloud services, access/IP handover, debugging and bug-fix coordination during a technical leadership transition."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(50,8,'bullet','{"en": "Documented core business modules, missing implementation areas, and software architecture solutions to support future engineering planning."}','approved','2026-11-10',NULL);
+INSERT INTO "bloc_descriptions" VALUES(51,13,'bullet','{"en": "Brought 02Book to production, an AI-enabled writing assistant for B2B writers, used by clients such as Orange and Le Matin."}','approved','2026-11-10',NULL);
 CREATE TABLE bloc_education (
   id INTEGER PRIMARY KEY,
   degree TEXT NOT NULL,       -- json
@@ -116,13 +149,23 @@ CREATE TABLE bloc_languages (
 INSERT INTO "bloc_languages" VALUES(1,1,'{"en": "Arabic", "fr": "Arabe"}','{"en": "Native", "fr": "Langue maternelle"}');
 INSERT INTO "bloc_languages" VALUES(2,2,'{"en": "French", "fr": "Français"}','{"en": "Professional", "fr": "Professionnel"}');
 INSERT INTO "bloc_languages" VALUES(3,3,'{"en": "English", "fr": "Anglais"}','{"en": "Professional", "fr": "Professionnel"}');
-CREATE TABLE bloc_profile (
+CREATE TABLE "bloc_profile" (
   id INTEGER PRIMARY KEY,
-  key TEXT NOT NULL UNIQUE,
-  text TEXT NOT NULL       -- json
+  key TEXT NOT NULL,
+  text TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved', 'rejected')),
+  score TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-INSERT INTO "bloc_profile" VALUES(1,'role','{"en": "Software Engineer", "fr": "Ingénieur logiciel"}');
-INSERT INTO "bloc_profile" VALUES(2,'summary','{"en": "Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted development to turn inefficient workflows into practical tools that help teams get more done. Looking to join a team that ships products at scale.", "fr": "Développeur logiciel qui conçoit des expériences produit simplifiant des processus complexes. J''allie ingénierie, design visuel, sens métier et développement assisté par l''IA pour transformer des workflows inefficaces en outils concrets qui rendent les équipes plus efficaces. Je souhaite rejoindre une équipe qui livre des produits à grande échelle."}');
+INSERT INTO "bloc_profile" VALUES(1,'role','{"en": "Software Engineer", "fr": "Ingénieur logiciel"}','approved',NULL,'2026-11-13 16:02:09');
+INSERT INTO "bloc_profile" VALUES(2,'summary','{"en": "Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted development to turn inefficient workflows into practical tools that help teams get more done. Looking to join a team that ships products at scale.", "fr": "Développeur logiciel qui conçoit des expériences produit simplifiant des processus complexes. J''allie ingénierie, design visuel, sens métier et développement assisté par l''IA pour transformer des workflows inefficaces en outils concrets qui rendent les équipes plus efficaces. Je souhaite rejoindre une équipe qui livre des produits à grande échelle."}','approved','{"name": {"score": 1, "quote": "Software developer building product experiences that simplify complex processes"}, "fame": {"score": 1, "quote": "Combining engineering, visual design, business understanding, and AI-assisted development"}, "aim": {"score": 1, "quote": "Looking to join a team that ships products at scale"}, "clarity": {"passes": true, "positioning": "A software developer who builds product experiences that simplify complex processes, combining engineering, visual design, and business understanding."}, "verdict": "revise", "revision_requests": [{"criterion": "name", "request": "Name the kind of product or workflow you build (for example, the domain, user group, or type of tool) so the role is tied to a specific area of work instead of general ''complex processes''."}, {"criterion": "fame", "request": "Replace the list of skills with one concrete contribution: a product you shipped, a workflow you turned into a tool, or an area you owned end to end. Add a measurable result only if you have one. If you lack such an example, add one real project you built and state your part in it."}, {"criterion": "aim", "request": "Say the specific kind of work you want next (for example, the type of product, team, or problem) and connect it to the experience above. Replace ''a team that ships products at scale'' with that concrete direction."}], "model_verdict": "revise", "unquoted_phrases": [], "target_role": null, "model": "claude-haiku-5-5", "via": "subagent", "version": 1, "text_hash": "654d750ffd8057bd", "scored_at": "2026-11-13"}','2026-11-13 16:02:09');
+INSERT INTO "bloc_profile" VALUES(3,'role','{"en": "Software Engineer Fullstack"}','approved',NULL,'2026-11-06');
+INSERT INTO "bloc_profile" VALUES(4,'summary','{"en": "Business-oriented software developer, working with teams to build product experiences that simplify complex processes. Combining software development, visual design, and business understanding to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale."}','approved',NULL,'2026-11-06');
+INSERT INTO "bloc_profile" VALUES(5,'summary','{"en": "Business-oriented software developer building product experiences that simplify complex processes. Combining software development, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale."}','approved',NULL,'2026-11-08');
+INSERT INTO "bloc_profile" VALUES(6,'summary','{"en": "Software developer building product experiences that simplify complex processes. Combining engineering, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale."}','approved',NULL,'2026-11-08');
+INSERT INTO "bloc_profile" VALUES(7,'role','{"en": "Front-End Engineer"}','approved',NULL,'2026-11-09');
+INSERT INTO "bloc_profile" VALUES(8,'role','{"en": "AI Software Engineer"}','approved',NULL,'2026-11-10');
+INSERT INTO "bloc_profile" VALUES(9,'summary','{"en": "Software developer building product experiences that simplify complex processes. Combining software engineering, visual design, business understanding, and AI-assisted engineering to turn inefficient workflows into practical tools that help teams get more done. Looking to join a software team building products at scale."}','approved',NULL,'2026-11-10');
 CREATE TABLE bloc_projects (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -181,6 +224,29 @@ INSERT INTO "companies" VALUES(12,'{"en": "Theodo"}');
 INSERT INTO "companies" VALUES(13,'{"en": "Oracle"}');
 INSERT INTO "companies" VALUES(14,'{"en": "Y Strategie"}');
 INSERT INTO "companies" VALUES(15,'{"en": "CGI"}');
+CREATE TABLE composition_profile (  -- which role and summary version each composition uses
+  composition_id INTEGER NOT NULL REFERENCES compositions(id) ON DELETE CASCADE,
+  profile_id INTEGER NOT NULL REFERENCES bloc_profile(id),
+  PRIMARY KEY (composition_id, profile_id)
+);
+INSERT INTO "composition_profile" VALUES(1,3);
+INSERT INTO "composition_profile" VALUES(1,4);
+INSERT INTO "composition_profile" VALUES(2,1);
+INSERT INTO "composition_profile" VALUES(2,5);
+INSERT INTO "composition_profile" VALUES(3,1);
+INSERT INTO "composition_profile" VALUES(3,6);
+INSERT INTO "composition_profile" VALUES(4,1);
+INSERT INTO "composition_profile" VALUES(4,6);
+INSERT INTO "composition_profile" VALUES(5,7);
+INSERT INTO "composition_profile" VALUES(5,6);
+INSERT INTO "composition_profile" VALUES(6,1);
+INSERT INTO "composition_profile" VALUES(6,6);
+INSERT INTO "composition_profile" VALUES(7,8);
+INSERT INTO "composition_profile" VALUES(7,9);
+INSERT INTO "composition_profile" VALUES(8,1);
+INSERT INTO "composition_profile" VALUES(8,6);
+INSERT INTO "composition_profile" VALUES(9,1);
+INSERT INTO "composition_profile" VALUES(9,6);
 CREATE TABLE compositions (
   id INTEGER PRIMARY KEY,
   offer_id INTEGER REFERENCES offers(id),   -- optional: a resume can be composed without an offer
@@ -188,18 +254,16 @@ CREATE TABLE compositions (
   pdf_name TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  sent_at TEXT,
-  template_sha TEXT
-);
-INSERT INTO "compositions" VALUES(1,1,'jobs/theodo-software-engineer-fullstack-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','2026-11-06','2026-11-06','2026-11-11',NULL);
-INSERT INTO "compositions" VALUES(2,2,'jobs/theodo-software-engineer-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','2026-11-08','2026-11-08','2026-11-11',NULL);
-INSERT INTO "compositions" VALUES(3,3,'jobs/theodo-software-engineer-v2','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','2026-11-08','2026-11-08','2026-11-11','dfcf8ca573bf37c22de25c4f50f025b39c716ee3dc3b1083f35b37f4fea076c5');
-INSERT INTO "compositions" VALUES(4,4,'jobs/oracle-senior-manager-platform-software-engineering-v1','Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf','2026-11-09','2026-11-09','2026-11-11',NULL);
-INSERT INTO "compositions" VALUES(5,5,'jobs/y-strategie-senior-front-end-developer-v1','Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf','2026-11-09','2026-11-09','2026-11-11','31dbade20293397aa6b1c43e776afedcfd5edd33e96411cc264be9e678293ba7');
-INSERT INTO "compositions" VALUES(6,6,'jobs/oracle-software-development-manager-v1','Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf','2026-11-10','2026-11-10','2026-11-11','9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f');
-INSERT INTO "compositions" VALUES(7,7,'jobs/oracle-senior-ai-software-engineer-v1','Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf','2026-11-10','2026-11-10','2026-11-11','9e065ff4ad4853ace22f595e3515612ee8f1256cc25b91f0eb12336f15971d6f');
-INSERT INTO "compositions" VALUES(8,8,'jobs/cgi-senior-ai-engineer-java-spring-boot-h-f-v1','Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf','2026-11-11','2026-11-11','2026-11-11','f3335ecb511d9b8dde24a9b92287bb5825b7ebf9084420c6201fceca3ab4a401');
-INSERT INTO "compositions" VALUES(9,8,'jobs/cgi-senior-ai-engineer-java-spring-boot-h-f-v2','Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf','2026-11-12 21:59:46','2026-11-12 21:59:46',NULL,NULL);
+  sent_at TEXT, name TEXT, approved_at TEXT);
+INSERT INTO "compositions" VALUES(1,1,'jobs/theodo-software-engineer-fullstack-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','2026-11-06','2026-11-06','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(2,2,'jobs/theodo-software-engineer-v1','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','2026-11-08','2026-11-08','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(3,3,'jobs/theodo-software-engineer-v2','Mohamed-Amine-Sayagh-Software-Engineer-Theodo.pdf','2026-11-08','2026-11-08','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(4,4,'jobs/oracle-senior-manager-platform-software-engineering-v1','Mohamed-Amine-Sayagh-Senior-Manager-Platform-Software-Engineering-Oracle.pdf','2026-11-09','2026-11-09','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(5,5,'jobs/y-strategie-senior-front-end-developer-v1','Mohamed-Amine-Sayagh-Senior-Front-End-Developer-Y-Strategie.pdf','2026-11-09','2026-11-09','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(6,6,'jobs/oracle-software-development-manager-v1','Mohamed-Amine-Sayagh-Software-Development-Manager-Oracle.pdf','2026-11-10','2026-11-10','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(7,7,'jobs/oracle-senior-ai-software-engineer-v1','Mohamed-Amine-Sayagh-Senior-AI-Software-Engineer-Oracle.pdf','2026-11-10','2026-11-10','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(8,8,'jobs/cgi-senior-ai-engineer-java-spring-boot-h-f-v1','Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf','2026-11-11','2026-11-11','2026-11-11',NULL,NULL);
+INSERT INTO "compositions" VALUES(9,8,'jobs/cgi-senior-ai-engineer-java-spring-boot-h-f-v2','Mohamed-Amine-Sayagh-Senior-AI-Engineer-Java-Spring-Boot-H-F-CGI.pdf','2026-11-12 21:59:46','2026-11-12 21:59:46',NULL,NULL,NULL);
 CREATE TABLE contracts (
   id INTEGER PRIMARY KEY,
   company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -218,26 +282,6 @@ INSERT INTO "contracts" VALUES(8,8,'job','2022-07','2022-09');
 INSERT INTO "contracts" VALUES(9,9,'job','2021-08','2022-06');
 INSERT INTO "contracts" VALUES(10,10,'job','2021-01','2021-06');
 INSERT INTO "contracts" VALUES(11,11,'freelance','2016','2020');
-CREATE TABLE cover_paragraph_experiences (
-  paragraph_id INTEGER NOT NULL REFERENCES cover_paragraphs(id) ON DELETE CASCADE,
-  experience_id INTEGER NOT NULL REFERENCES bloc_experiences(id) ON DELETE CASCADE,
-  PRIMARY KEY (paragraph_id, experience_id)
-);
-INSERT INTO "cover_paragraph_experiences" VALUES(3,5);
-CREATE TABLE cover_paragraph_skills (
-  paragraph_id INTEGER NOT NULL REFERENCES cover_paragraphs(id) ON DELETE CASCADE,
-  skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
-  PRIMARY KEY (paragraph_id, skill_id)
-);
-INSERT INTO "cover_paragraph_skills" VALUES(1,2);
-INSERT INTO "cover_paragraph_skills" VALUES(1,10);
-INSERT INTO "cover_paragraph_skills" VALUES(1,82);
-INSERT INTO "cover_paragraph_skills" VALUES(1,256);
-INSERT INTO "cover_paragraph_skills" VALUES(2,82);
-INSERT INTO "cover_paragraph_skills" VALUES(2,311);
-INSERT INTO "cover_paragraph_skills" VALUES(2,340);
-INSERT INTO "cover_paragraph_skills" VALUES(3,252);
-INSERT INTO "cover_paragraph_skills" VALUES(3,256);
 CREATE TABLE cover_paragraphs (
   id INTEGER PRIMARY KEY,
   part TEXT NOT NULL CHECK (part IN ('opening', 'example', 'support', 'close')),
@@ -249,14 +293,6 @@ INSERT INTO "cover_paragraphs" VALUES(1,'opening','{"en": "I am applying for the
 INSERT INTO "cover_paragraphs" VALUES(2,'example','{"en": "At Hypeo, I integrated an AI agent experience that turns client conversations into configured marketing campaigns using an internal influencer database. Working closely with a senior technical lead, I refined the front-end experience as the backend integration and business requirements evolved.", "fr": "Chez Hypeo, j''ai intégré une expérience d''agent IA qui transforme les conversations clients en campagnes marketing configurées, à partir d''une base interne d''influenceurs. En étroite collaboration avec un lead technique senior, j''ai fait évoluer l''expérience front-end au rythme de l''intégration back-end et des besoins métier."}','approved','2026-11-12 21:59:47');
 INSERT INTO "cover_paragraphs" VALUES(3,'support','{"en": "At Cyber Cohesion, I led web development for a security competition platform used at events including OWASP AppSec Days and BSides Singapore. I also developed its Warzone dashboard, which tracks team progress and scores.", "fr": "Chez Cyber Cohesion, j''ai dirigé le développement web d''une plateforme de compétitions de sécurité utilisée lors d''événements comme OWASP AppSec Days et BSides Singapore. J''ai également développé son tableau de bord Warzone, qui suit la progression et les scores des équipes."}','approved','2026-11-12 21:59:47');
 INSERT INTO "cover_paragraphs" VALUES(4,'close','{"en": "I would welcome the opportunity to discuss how my experience could support the work at CGI. Thank you for your consideration.", "fr": "Je serais heureux d''échanger avec vous sur la manière dont mon expérience pourrait contribuer aux projets de CGI. Je vous prie d''agréer, Madame, Monsieur, l''expression de mes salutations distinguées."}','approved','2026-11-12 21:59:47');
-CREATE TABLE description_skills (
-  description_id INTEGER NOT NULL REFERENCES bloc_descriptions(id) ON DELETE CASCADE,
-  skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
-  PRIMARY KEY (description_id, skill_id)
-);
-INSERT INTO "description_skills" VALUES(2,26);
-INSERT INTO "description_skills" VALUES(11,22);
-INSERT INTO "description_skills" VALUES(12,13);
 CREATE TABLE interview_notes (
   requirement_id INTEGER PRIMARY KEY REFERENCES requirements(id) ON DELETE CASCADE,
   note TEXT NOT NULL,
@@ -298,6 +334,195 @@ INSERT INTO "offer_lines" VALUES(9,19,20);
 INSERT INTO "offer_lines" VALUES(9,20,21);
 INSERT INTO "offer_lines" VALUES(9,21,22);
 INSERT INTO "offer_lines" VALUES(9,22,23);
+INSERT INTO "offer_lines" VALUES(1,0,1);
+INSERT INTO "offer_lines" VALUES(1,1,24);
+INSERT INTO "offer_lines" VALUES(1,2,3);
+INSERT INTO "offer_lines" VALUES(1,3,4);
+INSERT INTO "offer_lines" VALUES(1,4,5);
+INSERT INTO "offer_lines" VALUES(1,5,6);
+INSERT INTO "offer_lines" VALUES(1,6,7);
+INSERT INTO "offer_lines" VALUES(1,7,8);
+INSERT INTO "offer_lines" VALUES(1,8,9);
+INSERT INTO "offer_lines" VALUES(1,9,10);
+INSERT INTO "offer_lines" VALUES(1,10,11);
+INSERT INTO "offer_lines" VALUES(1,11,12);
+INSERT INTO "offer_lines" VALUES(1,12,13);
+INSERT INTO "offer_lines" VALUES(1,13,14);
+INSERT INTO "offer_lines" VALUES(1,14,25);
+INSERT INTO "offer_lines" VALUES(1,15,16);
+INSERT INTO "offer_lines" VALUES(1,16,17);
+INSERT INTO "offer_lines" VALUES(1,17,26);
+INSERT INTO "offer_lines" VALUES(1,18,18);
+INSERT INTO "offer_lines" VALUES(1,19,19);
+INSERT INTO "offer_lines" VALUES(1,20,20);
+INSERT INTO "offer_lines" VALUES(1,21,21);
+INSERT INTO "offer_lines" VALUES(1,22,27);
+INSERT INTO "offer_lines" VALUES(1,23,22);
+INSERT INTO "offer_lines" VALUES(1,24,23);
+INSERT INTO "offer_lines" VALUES(2,0,1);
+INSERT INTO "offer_lines" VALUES(2,1,24);
+INSERT INTO "offer_lines" VALUES(2,2,3);
+INSERT INTO "offer_lines" VALUES(2,3,4);
+INSERT INTO "offer_lines" VALUES(2,4,5);
+INSERT INTO "offer_lines" VALUES(2,5,6);
+INSERT INTO "offer_lines" VALUES(2,6,7);
+INSERT INTO "offer_lines" VALUES(2,7,8);
+INSERT INTO "offer_lines" VALUES(2,8,9);
+INSERT INTO "offer_lines" VALUES(2,9,10);
+INSERT INTO "offer_lines" VALUES(2,10,11);
+INSERT INTO "offer_lines" VALUES(2,11,12);
+INSERT INTO "offer_lines" VALUES(2,12,13);
+INSERT INTO "offer_lines" VALUES(2,13,14);
+INSERT INTO "offer_lines" VALUES(2,14,25);
+INSERT INTO "offer_lines" VALUES(2,15,16);
+INSERT INTO "offer_lines" VALUES(2,16,17);
+INSERT INTO "offer_lines" VALUES(2,17,26);
+INSERT INTO "offer_lines" VALUES(2,18,18);
+INSERT INTO "offer_lines" VALUES(2,19,19);
+INSERT INTO "offer_lines" VALUES(2,20,20);
+INSERT INTO "offer_lines" VALUES(2,21,21);
+INSERT INTO "offer_lines" VALUES(2,22,22);
+INSERT INTO "offer_lines" VALUES(2,23,23);
+INSERT INTO "offer_lines" VALUES(3,0,1);
+INSERT INTO "offer_lines" VALUES(3,1,2);
+INSERT INTO "offer_lines" VALUES(3,2,3);
+INSERT INTO "offer_lines" VALUES(3,3,4);
+INSERT INTO "offer_lines" VALUES(3,4,5);
+INSERT INTO "offer_lines" VALUES(3,5,6);
+INSERT INTO "offer_lines" VALUES(3,6,7);
+INSERT INTO "offer_lines" VALUES(3,7,8);
+INSERT INTO "offer_lines" VALUES(3,8,9);
+INSERT INTO "offer_lines" VALUES(3,9,10);
+INSERT INTO "offer_lines" VALUES(3,10,11);
+INSERT INTO "offer_lines" VALUES(3,11,12);
+INSERT INTO "offer_lines" VALUES(3,12,13);
+INSERT INTO "offer_lines" VALUES(3,13,14);
+INSERT INTO "offer_lines" VALUES(3,14,25);
+INSERT INTO "offer_lines" VALUES(3,15,16);
+INSERT INTO "offer_lines" VALUES(3,16,17);
+INSERT INTO "offer_lines" VALUES(3,17,26);
+INSERT INTO "offer_lines" VALUES(3,18,18);
+INSERT INTO "offer_lines" VALUES(3,19,19);
+INSERT INTO "offer_lines" VALUES(3,20,20);
+INSERT INTO "offer_lines" VALUES(3,21,21);
+INSERT INTO "offer_lines" VALUES(3,22,22);
+INSERT INTO "offer_lines" VALUES(3,23,23);
+INSERT INTO "offer_lines" VALUES(4,0,28);
+INSERT INTO "offer_lines" VALUES(4,1,29);
+INSERT INTO "offer_lines" VALUES(4,2,30);
+INSERT INTO "offer_lines" VALUES(4,3,31);
+INSERT INTO "offer_lines" VALUES(4,4,5);
+INSERT INTO "offer_lines" VALUES(4,5,6);
+INSERT INTO "offer_lines" VALUES(4,6,7);
+INSERT INTO "offer_lines" VALUES(4,7,8);
+INSERT INTO "offer_lines" VALUES(4,8,32);
+INSERT INTO "offer_lines" VALUES(4,9,33);
+INSERT INTO "offer_lines" VALUES(4,10,11);
+INSERT INTO "offer_lines" VALUES(4,11,12);
+INSERT INTO "offer_lines" VALUES(4,12,13);
+INSERT INTO "offer_lines" VALUES(4,13,14);
+INSERT INTO "offer_lines" VALUES(4,14,25);
+INSERT INTO "offer_lines" VALUES(4,15,16);
+INSERT INTO "offer_lines" VALUES(4,16,17);
+INSERT INTO "offer_lines" VALUES(4,17,26);
+INSERT INTO "offer_lines" VALUES(4,18,34);
+INSERT INTO "offer_lines" VALUES(4,19,19);
+INSERT INTO "offer_lines" VALUES(4,20,21);
+INSERT INTO "offer_lines" VALUES(4,21,22);
+INSERT INTO "offer_lines" VALUES(4,22,23);
+INSERT INTO "offer_lines" VALUES(5,0,1);
+INSERT INTO "offer_lines" VALUES(5,1,2);
+INSERT INTO "offer_lines" VALUES(5,2,3);
+INSERT INTO "offer_lines" VALUES(5,3,4);
+INSERT INTO "offer_lines" VALUES(5,4,35);
+INSERT INTO "offer_lines" VALUES(5,5,6);
+INSERT INTO "offer_lines" VALUES(5,6,7);
+INSERT INTO "offer_lines" VALUES(5,7,36);
+INSERT INTO "offer_lines" VALUES(5,8,9);
+INSERT INTO "offer_lines" VALUES(5,9,10);
+INSERT INTO "offer_lines" VALUES(5,10,11);
+INSERT INTO "offer_lines" VALUES(5,11,12);
+INSERT INTO "offer_lines" VALUES(5,12,13);
+INSERT INTO "offer_lines" VALUES(5,13,14);
+INSERT INTO "offer_lines" VALUES(5,14,25);
+INSERT INTO "offer_lines" VALUES(5,15,37);
+INSERT INTO "offer_lines" VALUES(5,16,17);
+INSERT INTO "offer_lines" VALUES(5,17,26);
+INSERT INTO "offer_lines" VALUES(5,18,18);
+INSERT INTO "offer_lines" VALUES(5,19,38);
+INSERT INTO "offer_lines" VALUES(5,20,39);
+INSERT INTO "offer_lines" VALUES(5,21,40);
+INSERT INTO "offer_lines" VALUES(5,22,22);
+INSERT INTO "offer_lines" VALUES(5,23,23);
+INSERT INTO "offer_lines" VALUES(6,0,1);
+INSERT INTO "offer_lines" VALUES(6,1,29);
+INSERT INTO "offer_lines" VALUES(6,2,3);
+INSERT INTO "offer_lines" VALUES(6,3,41);
+INSERT INTO "offer_lines" VALUES(6,4,42);
+INSERT INTO "offer_lines" VALUES(6,5,6);
+INSERT INTO "offer_lines" VALUES(6,6,43);
+INSERT INTO "offer_lines" VALUES(6,7,8);
+INSERT INTO "offer_lines" VALUES(6,8,9);
+INSERT INTO "offer_lines" VALUES(6,9,44);
+INSERT INTO "offer_lines" VALUES(6,10,45);
+INSERT INTO "offer_lines" VALUES(6,11,46);
+INSERT INTO "offer_lines" VALUES(6,12,13);
+INSERT INTO "offer_lines" VALUES(6,13,14);
+INSERT INTO "offer_lines" VALUES(6,14,25);
+INSERT INTO "offer_lines" VALUES(6,15,16);
+INSERT INTO "offer_lines" VALUES(6,16,17);
+INSERT INTO "offer_lines" VALUES(6,17,26);
+INSERT INTO "offer_lines" VALUES(6,18,34);
+INSERT INTO "offer_lines" VALUES(6,19,19);
+INSERT INTO "offer_lines" VALUES(6,20,39);
+INSERT INTO "offer_lines" VALUES(6,21,21);
+INSERT INTO "offer_lines" VALUES(6,22,22);
+INSERT INTO "offer_lines" VALUES(6,23,23);
+INSERT INTO "offer_lines" VALUES(7,0,1);
+INSERT INTO "offer_lines" VALUES(7,1,2);
+INSERT INTO "offer_lines" VALUES(7,2,3);
+INSERT INTO "offer_lines" VALUES(7,3,47);
+INSERT INTO "offer_lines" VALUES(7,4,48);
+INSERT INTO "offer_lines" VALUES(7,5,49);
+INSERT INTO "offer_lines" VALUES(7,6,50);
+INSERT INTO "offer_lines" VALUES(7,7,44);
+INSERT INTO "offer_lines" VALUES(7,8,11);
+INSERT INTO "offer_lines" VALUES(7,9,12);
+INSERT INTO "offer_lines" VALUES(7,10,51);
+INSERT INTO "offer_lines" VALUES(7,11,14);
+INSERT INTO "offer_lines" VALUES(7,12,25);
+INSERT INTO "offer_lines" VALUES(7,13,16);
+INSERT INTO "offer_lines" VALUES(7,14,17);
+INSERT INTO "offer_lines" VALUES(7,15,26);
+INSERT INTO "offer_lines" VALUES(7,16,18);
+INSERT INTO "offer_lines" VALUES(7,17,19);
+INSERT INTO "offer_lines" VALUES(7,18,39);
+INSERT INTO "offer_lines" VALUES(7,19,21);
+INSERT INTO "offer_lines" VALUES(7,20,22);
+INSERT INTO "offer_lines" VALUES(7,21,23);
+INSERT INTO "offer_lines" VALUES(8,0,1);
+INSERT INTO "offer_lines" VALUES(8,1,2);
+INSERT INTO "offer_lines" VALUES(8,2,3);
+INSERT INTO "offer_lines" VALUES(8,3,4);
+INSERT INTO "offer_lines" VALUES(8,4,5);
+INSERT INTO "offer_lines" VALUES(8,5,6);
+INSERT INTO "offer_lines" VALUES(8,6,7);
+INSERT INTO "offer_lines" VALUES(8,7,8);
+INSERT INTO "offer_lines" VALUES(8,8,9);
+INSERT INTO "offer_lines" VALUES(8,9,10);
+INSERT INTO "offer_lines" VALUES(8,10,11);
+INSERT INTO "offer_lines" VALUES(8,11,12);
+INSERT INTO "offer_lines" VALUES(8,12,13);
+INSERT INTO "offer_lines" VALUES(8,13,14);
+INSERT INTO "offer_lines" VALUES(8,14,15);
+INSERT INTO "offer_lines" VALUES(8,15,16);
+INSERT INTO "offer_lines" VALUES(8,16,17);
+INSERT INTO "offer_lines" VALUES(8,17,18);
+INSERT INTO "offer_lines" VALUES(8,18,19);
+INSERT INTO "offer_lines" VALUES(8,19,20);
+INSERT INTO "offer_lines" VALUES(8,20,21);
+INSERT INTO "offer_lines" VALUES(8,21,22);
+INSERT INTO "offer_lines" VALUES(8,22,23);
 CREATE TABLE offers (
   id INTEGER PRIMARY KEY,
   company_id INTEGER NOT NULL REFERENCES companies(id),
@@ -1573,6 +1798,13 @@ INSERT INTO "skill_keywords" VALUES(439,439,'designing of software','en');
 INSERT INTO "skill_keywords" VALUES(440,440,'provide technical leadership','en');
 INSERT INTO "skill_keywords" VALUES(441,441,'casablanca','en');
 INSERT INTO "skill_keywords" VALUES(442,442,'intégration de l''ia','en');
+INSERT INTO "skill_keywords" VALUES(443,443,'cli','en');
+INSERT INTO "skill_keywords" VALUES(444,444,'ai agent','en');
+INSERT INTO "skill_keywords" VALUES(445,445,'sql','en');
+INSERT INTO "skill_keywords" VALUES(446,446,'jev','en');
+INSERT INTO "skill_keywords" VALUES(447,447,'sqlite','en');
+INSERT INTO "skill_keywords" VALUES(448,448,'gliner2','en');
+INSERT INTO "skill_keywords" VALUES(449,449,'freebsd','en');
 CREATE TABLE skills (
   id INTEGER PRIMARY KEY,
   type TEXT CHECK (type IN ('programming_language', 'technology', 'technical', 'design', 'ai', 'soft', 'language', 'location', 'education')),  -- NULL = not typed yet
@@ -1582,7 +1814,7 @@ CREATE TABLE skills (
   confirmed INTEGER NOT NULL DEFAULT 1 CHECK (confirmed IN (0, 1))  -- 0 = created from a posting, to review or merge
 , ignored INTEGER NOT NULL DEFAULT 0 CHECK (ignored IN (0, 1)));
 INSERT INTO "skills" VALUES(1,'programming_language','{"en": "javascript"}',NULL,NULL,1,0);
-INSERT INTO "skills" VALUES(2,'programming_language','{"en": "java"}',NULL,NULL,1,0);
+INSERT INTO "skills" VALUES(2,'programming_language','{"en": "java"}','2023-03',NULL,1,0);
 INSERT INTO "skills" VALUES(3,'programming_language','{"en": "python"}',NULL,NULL,1,0);
 INSERT INTO "skills" VALUES(4,'programming_language','{"en": "php"}',NULL,NULL,1,0);
 INSERT INTO "skills" VALUES(5,'technology','{"en": "react"}',NULL,NULL,1,0);
@@ -1596,7 +1828,7 @@ INSERT INTO "skills" VALUES(12,'technology','{"en": "wordpress"}',NULL,NULL,1,0)
 INSERT INTO "skills" VALUES(13,'technology','{"en": "odoo"}',NULL,NULL,1,0);
 INSERT INTO "skills" VALUES(14,'technology','{"en": "postgresql"}',NULL,NULL,1,0);
 INSERT INTO "skills" VALUES(15,'technical','{"en": "data scraping"}',NULL,NULL,1,0);
-INSERT INTO "skills" VALUES(16,'technical','{"en": "ci/cd"}',NULL,NULL,1,0);
+INSERT INTO "skills" VALUES(16,'technical','{"en": "ci/cd"}','2020-01',NULL,1,0);
 INSERT INTO "skills" VALUES(17,'technology','{"en": "docker"}',NULL,NULL,1,0);
 INSERT INTO "skills" VALUES(18,'technical','{"en": "testing practices"}',NULL,NULL,1,0);
 INSERT INTO "skills" VALUES(19,'design','{"en": "figma"}',NULL,NULL,1,0);
@@ -1625,7 +1857,7 @@ INSERT INTO "skills" VALUES(46,'technical','{"en": "veille technique"}',NULL,NUL
 INSERT INTO "skills" VALUES(47,'soft','{"en": "exigence sur la qualité"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(48,'technical','{"en": "jidoka"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(49,'soft','{"en": "travailler de manière structurée"}',NULL,NULL,0,0);
-INSERT INTO "skills" VALUES(50,'soft','{"en": "amélioration continue"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(50,'soft','{"en": "amélioration continue"}',NULL,NULL,0,1);
 INSERT INTO "skills" VALUES(51,'technical','{"en": "5s"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(52,'soft','{"en": "esprit d''équipe"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(53,'soft','{"en": "prise d''initiative"}',NULL,NULL,0,0);
@@ -1728,7 +1960,7 @@ INSERT INTO "skills" VALUES(173,'programming_language','{"en": "typescript"}',NU
 INSERT INTO "skills" VALUES(174,'programming_language','{"en": "html5"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(176,'programming_language','{"en": "scss"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(177,'programming_language','{"en": "sass"}',NULL,NULL,0,0);
-INSERT INTO "skills" VALUES(178,'technology','{"en": "git"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(178,'technology','{"en": "git"}','2017-01',NULL,0,0);
 INSERT INTO "skills" VALUES(179,'technical','{"en": "git workflow"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(181,'technical','{"en": "scalable, reusable solutions"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(182,'soft','{"en": "collaborator"}',NULL,NULL,0,0);
@@ -1944,4 +2176,11 @@ INSERT INTO "skills" VALUES(439,'technical','{"en": "designing of software"}',NU
 INSERT INTO "skills" VALUES(440,'soft','{"en": "provide technical leadership"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(441,'location','{"en": "casablanca"}',NULL,NULL,0,0);
 INSERT INTO "skills" VALUES(442,'ai','{"en": "intégration de l''ia"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(443,'technology','{"en": "cli"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(444,'ai','{"en": "ai agent"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(445,'programming_language','{"en": "sql"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(446,'ai','{"en": "jev"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(447,'technology','{"en": "sqlite"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(448,'ai','{"en": "gliner2"}',NULL,NULL,0,0);
+INSERT INTO "skills" VALUES(449,'technology','{"en": "freebsd"}',NULL,NULL,0,0);
 COMMIT;

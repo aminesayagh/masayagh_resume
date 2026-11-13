@@ -362,7 +362,7 @@ def refresh(job_path: Path, job: dict, cv: Path, content_path: Path, network: bo
     print(f"  Evidence coverage v{cov['version']}: overall {cov.get('overall')}, must-have {cov['must_have']}, "
           f"preferred {cov['preferred']} (not an ATS score)")
     print(f"  Report: {rel(md_path)} (+ .json); interview prep: {rel(interview_path)}")
-    print(f"  Dashboard: http://127.0.0.1:8000/job/{job_path.parent.name} (run the dashboard app)")
+    print(f"  Dashboard: http://127.0.0.1:8765/job/{job_path.parent.name} (run the dashboard app)")
     return rep
 
 

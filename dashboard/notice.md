@@ -8,7 +8,7 @@ point needs a decision or a change outside the dashboard (data in `data/resume.d
 No disabled action is left. **Dropped (2026-11-12):** the job page's "Gaps to work on" card and its "Propose swap"
 button (the Skills tab lists every requirement with its hint).
 
-**Wired (2026-11-12): Interview notes.** Each topic card's box saves when it loses focus, through
+**Wired (2026-11-12): Interview notes.** Each topic card's box saves with its Save button (no autosave), through
 `src/offers.py note jobs/<slug> "<keyword>" ["text"]` (empty deletes). One note per requirement of the offer
 (`interview_notes`), so every version of the job shares it and sent jobs work (the folder is not touched). A topic is
 matched to its requirement by keyword ("java (10+ years)" -> java), so a years topic shares its keyword's note.
@@ -75,6 +75,6 @@ apply to the 8 old job folders only, which have no rows in the db any more.
   red).
 - **"Synonym only" (Requirements page):** counts terms matched by a synonym in at least one job (7 today). Terms matched
   only by synonym in every job asking for them would be 6.
-- **Stack:** Vue 3 + Element Plus front, built into `dashboard/web/dist` and served by FastAPI on port 8000, so the
+- **Stack:** Vue 3 + Element Plus front, built into `dashboard/web/dist` and served by FastAPI on port 8765, so the
   `/job/<slug>` links printed by `src/tailor.py` and `src/review_ats.py` keep working. `start.py` rebuilds on change;
   refresh the page to see it (no hot reload).

@@ -382,5 +382,98 @@ class ApiTest(unittest.TestCase):
                 app.files(slug, name)
 
 
+
+class ResumePageTest(unittest.TestCase):
+    """/resume reads the real db (read only); its buttons run src/ scripts (mocked: nothing is written)."""
+
+    @unittest.skipUnless(app.DB.exists(), "no data/resume.db")
+    def test_page_data_matches_the_db(self):
+        from fastapi.testclient import TestClient
+        data = TestClient(app.app).get("/api/resume").json()
+        with app.ro() as con:
+            lines = con.execute("SELECT count(*) FROM bloc_activities a WHERE active = 1 AND EXISTS (SELECT 1 FROM "
+                                "bloc_descriptions d WHERE d.activity_id = a.id AND d.status = 'approved')").fetchone()[0]
+            experiences = con.execute("SELECT count(*) FROM bloc_experiences").fetchone()[0]
+        self.assertEqual(data["score"]["lines"], lines)
+        self.assertEqual(len(data["experiences"]), experiences)
+        used = [c for e in data["experiences"] for line in e["lines"] for c in line["candidates"] if c["used"]]
+        self.assertEqual(len(used), lines)  # one candidate per line is the one the master uses
+        self.assertEqual(data["score"]["total"], sum(c["review"]["total"] for c in used if c["review"]))
+        starts = [e["from"] for e in data["experiences"]]
+        self.assertEqual(len(starts), len(set(starts)))  # newest first, one per experience
+
+    def test_gap_between_two_experiences(self):
+        self.assertEqual(app.months(app.ym("2021-06", end=True), app.ym("2021-08")) - 2, 1)  # Jul 2021
+        self.assertEqual(app.months(app.ym("2020", end=True), app.ym("2021-01")) - 2, 0)  # a year covers December
+
+    def test_buttons_run_the_scripts(self):
+        from unittest import mock
+        from fastapi.testclient import TestClient
+        client = TestClient(app.app)
+        ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
+        with mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            client.post("/api/resume/line", json={"id": 4, "en": "Built X.", "fr": "Construit X."})
+            client.post("/api/resume/new-line", json={"id": 8, "en": "Built Y.", "fr": "Construit Y."})
+            client.post("/api/resume/rescore", json={"id": 4})
+            client.post("/api/resume/summary/rescore", json={"id": 2})
+            client.post("/api/resume/profile", json={"key": "summary", "en": "Engineer.", "fr": "Ingénieur."})
+            self.assertEqual([c.args[0][1:] for c in run.call_args_list], [
+                ["src/master.py", "set", "line", "4", "Built X.", "Construit X."],
+                ["src/master.py", "set", "new-line", "8", "Built Y.", "Construit Y."],
+                ["src/score_bullet.py", "rescore", "4"], ["src/score_summary.py", "rescore", "2"],
+                ["src/master.py", "set", "summary", "Engineer.", "Ingénieur."]])
+            calls = run.call_count
+            self.assertEqual(client.post("/api/resume/line", json={"id": 4, "en": "Built X.", "fr": ""}).status_code, 422)
+            self.assertEqual(client.post("/api/resume/profile", json={"key": "contact", "en": "x", "fr": "y"}).status_code, 422)
+            self.assertEqual(run.call_count, calls)  # French is required, only role/summary: nothing ran
+
+
+
+class ResumesPageTest(unittest.TestCase):
+    """/resumes lists every composition with its score; its buttons run src/resumes.py (mocked: nothing is written)."""
+
+    @unittest.skipUnless(app.DB.exists(), "no data/resume.db")
+    def test_every_composition_is_listed_and_scored(self):
+        from fastapi.testclient import TestClient
+        client = TestClient(app.app)
+        rows = client.get("/api/resumes").json()["resumes"]
+        with app.ro() as con:
+            self.assertEqual(len(rows), con.execute("SELECT count(*) FROM compositions").fetchone()[0])
+        for r in rows:  # a score comes only from the reviewed lines it uses
+            self.assertEqual(r["score"] is None, r["scored"] == 0)
+        one = client.get(f"/api/resumes/{rows[0]['id']}").json()
+        lines = [line for e in one["experiences"] for line in e["lines"]]
+        self.assertEqual(len(lines), rows[0]["lines"])  # one row per recorded line
+        self.assertTrue(all(sum(c["used"] for c in line["candidates"]) == 1 for line in lines))
+        self.assertEqual(client.get("/api/resumes/999999").status_code, 404)
+
+    def test_buttons_run_the_scripts(self):
+        from unittest import mock
+        from fastapi.testclient import TestClient
+        client = TestClient(app.app)
+        ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
+        with mock.patch.object(app, "folder_of", return_value="jobs/acme-v1"), \
+                mock.patch.object(app.subprocess, "run", return_value=ok) as run:
+            client.post("/api/resumes", json={"name": "Short", "offer_id": 3})
+            client.post("/api/resumes/1/switch", json={"bloc": "4", "candidate": 12, "position": 2})
+            client.post("/api/resumes/1/switch", json={"bloc": "summary", "candidate": 6})
+            client.post("/api/resumes/1/name", json={"name": "Long"})
+            client.post("/api/resumes/1/approve", json={"approved": False})
+            client.post("/api/resumes/1/preview", json={"bloc": "summary", "candidate": 6})
+            client.post("/api/resumes/1/edit", json={"bloc": "4", "en": "Built X.", "fr": "Construit X.", "position": 2})
+            self.assertEqual([c.args[0][1:] for c in run.call_args_list], [
+                ["src/resumes.py", "new", "Short", "--offer", "3"],
+                ["src/resumes.py", "switch", "jobs/acme-v1", "4", "12", "2"],
+                ["src/resumes.py", "switch", "jobs/acme-v1", "summary", "6"],
+                ["src/resumes.py", "name", "jobs/acme-v1", "Long"],
+                ["src/resumes.py", "approve", "jobs/acme-v1", "off"],
+                ["src/resumes.py", "preview", "jobs/acme-v1", "summary", "6"],
+                ["src/resumes.py", "edit", "jobs/acme-v1", "4", "Built X.", "Construit X.", "2"]])
+            calls = run.call_count
+            self.assertEqual(client.post("/api/resumes/1/switch", json={"bloc": "x; rm", "candidate": 1}).status_code, 422)
+            self.assertEqual(run.call_count, calls)  # a bad bloc ran nothing
+        self.assertEqual(client.get("/previews/x.db").status_code, 404)  # only preview PDFs are served
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,12 +1,12 @@
 <script setup>
 // Interview prep tab ( /job/<slug>/interview ): review/interview.json topics + the posting's skills with years.
-// Notes are saved in the db (src/offers.py note) when the box loses focus: one per requirement of the offer.
+// Notes are saved in the db (src/offers.py note) when you press Save (no autosave): one per requirement of the offer.
 import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({ prep: { type: Object, required: true }, job: { type: Object, required: true } })
 
-// Notes: edited locally, saved on blur when changed; `saved` keeps the last stored text per keyword
+// Notes: edited locally, saved with the Save button; `saved` keeps the last stored text per keyword
 const saved = ref(Object.fromEntries(props.prep.topics.map((t) => [t.keyword, t.note])))
 const drafts = ref({ ...saved.value })
 const updated = ref(Object.fromEntries(props.prep.topics.map((t) => [t.keyword, t.updated])))
@@ -79,18 +79,24 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
         <div class="topic-head">
           <b>{{ t.requirement }}</b>
           <el-tag size="small" :type="TYPES[t.focus]?.tag" round>{{ TYPES[t.focus]?.label ?? t.focus }}</el-tag>
-          <el-tag size="small" type="info" round>{{ t.priority === 'must_have' ? 'must-have' : 'preferred' }}</el-tag>
+          <el-tag size="small" type="info" round>{{ t.priority === 'must_have' ? 'Must-have' : 'Preferred' }}</el-tag>
         </div>
         <p><span class="muted">Posting:</span> ‘{{ t.posting_says }}’</p>
         <p>
           <span class="muted">Resume: </span>
           <template v-if="t.your_resume_says?.length">‘{{ t.your_resume_says.join(' … ') }}’</template>
-          <template v-else>nothing yet</template>
+          <template v-else>Nothing yet</template>
         </p>
         <p v-if="t.focus === 'prepare_story'" class="star">STAR: {{ STAR }}</p>
         <el-input v-model="drafts[t.keyword]" type="textarea" :autosize="{ minRows: 2, maxRows: 12 }" maxlength="5000"
-          placeholder="My notes: the story, the example, what to say" @blur="saveNote(t.keyword)" />
-        <div class="note-state muted">{{ noteState(t.keyword) }}</div>
+          placeholder="My notes: the story, the example, what to say" />
+        <div class="note-bar">
+          <el-button size="small" type="primary" :loading="saving[t.keyword]"
+            :disabled="(drafts[t.keyword] ?? '').trim() === (saved[t.keyword] ?? '').trim()" @click="saveNote(t.keyword)">Save</el-button>
+          <span class="note-state muted">{{ noteState(t.keyword) }}</span>
+          <span class="grow" />
+          <span class="muted note-count">{{ (drafts[t.keyword] ?? '').trim().length }} characters</span>
+        </div>
       </el-card>
     </el-col>
 
@@ -131,4 +137,7 @@ const topics = computed(() => props.prep.topics.filter(CHIPS[chip.value][1]))
 .skill { display: flex; justify-content: space-between; font-size: 14px; margin: 6px 0; }
 .shortcuts { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .shortcuts .el-button + .el-button { margin-left: 0; }
+.note-bar { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+.note-bar .grow { flex: 1; }
+.note-count { font-size: 12px; }
 </style>

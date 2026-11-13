@@ -1,11 +1,11 @@
 """Local job dashboard: a JSON API under /api plus the built Vue app (dashboard/web/dist) on the same port.
 
-Run from the repo root:  python3 start.py   (or .venv/bin/python -m uvicorn dashboard.app:app --port 8000 after a build)
+Run from the repo root:  python3 start.py   (or .venv/bin/python -m uvicorn dashboard.app:app --port 8765 after a build)
 The app itself only reads: data/resume.db is opened with mode=ro and jobs/ is only read.
 Writes run src/ scripts, so their rules hold: "New version" runs src/new_job.py --from (the source folder, sent or not,
 is never changed), "Mark as sent" runs src/offers.py sent, interview notes run src/offers.py note, and the Requirements term drawer runs
-src/skills_inventory.py. Every other write action in the UI is
-shown disabled ("not wired yet").
+src/skills_inventory.py, and the Resume page runs src/master.py set line / new-line and the scorers' rescore.
+Every other write action in the UI is shown disabled ("not wired yet").
 """
 
 import json
@@ -30,7 +30,7 @@ import offers  # noqa: E402  (load/all_folders take a connection: we pass a read
 import paths  # noqa: E402  (only plain path joins: resume_pdf & co. call stem(), which opens a writable db)
 import check_style  # noqa: E402  (check(content) is pure: reads a dict, writes nothing)
 import skills_inventory  # noqa: E402  (pure helpers only: job_skills/years/label; its load() opens a writable db)
-from db import EN  # noqa: E402  (a JSON column's English text in SQL: json_extract(col, '$.en'))
+from db import EN, tr  # noqa: E402  (EN: a JSON column's English text in SQL; tr: that text in Python)
 
 DB = ROOT / "data" / "resume.db"
 PYTHON = ROOT / ".venv" / "bin" / "python"
@@ -604,6 +604,359 @@ def api_skill_move(body: Move):
     if out["ok"]:
         out["reviewed"] = rereview(keyword)
     return out
+
+
+# ---------- /resume: the master resume, bloc by bloc, with its candidates and reviews ----------
+MON = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+
+
+def ym(value: str, end: bool = False) -> tuple[int, int]:
+    """'2021-08' -> (2021, 8); a year alone covers the whole year."""
+    y, _, m = value.partition("-")
+    return int(y), int(m) if m else (12 if end else 1)
+
+
+def month_label(value: str | None) -> str | None:
+    if not value:
+        return None
+    y, _, m = value.partition("-")
+    return f"{MON[int(m) - 1]} {y}" if m else y
+
+
+def months(a: tuple[int, int], b: tuple[int, int]) -> int:
+    """Inclusive count of months from a to b."""
+    return (b[0] - a[0]) * 12 + b[1] - a[1] + 1
+
+
+def keyword_finder(con):
+    """Skill keywords found in a text, as on the board: whole words (same matching as src/db_sync.py), set-aside
+    skills left out; each with 'asked' (a job requirement uses the skill, with how many offers) or 'known'."""
+    import db_sync  # noqa: E402  (word_in and skill_words only read)
+    asked = dict(con.execute("SELECT k.skill_id, count(DISTINCT r.offer_id) FROM requirements r "
+                             "JOIN skill_keywords k ON k.id = r.keyword_id GROUP BY k.skill_id").fetchall())
+    ignored = {i for (i,) in con.execute("SELECT id FROM skills WHERE ignored")}
+    words = [(sid, names) for sid, names in db_sync.skill_words(con) if sid not in ignored]
+
+    def find(text: str) -> list[dict]:
+        out = []
+        for sid, names in words:
+            hit = next((n for n in names if len(n) > 1 and db_sync.word_in(n, text)), None)
+            if hit:
+                out.append({"name": hit, "status": "asked" if sid in asked else "known", "jobs": asked.get(sid, 0)})
+        return sorted(out, key=lambda k: (-k["jobs"], k["name"]))
+    return find
+
+
+def chip(name: str, find) -> dict:
+    """A token listed on the resume (a project's tech): its skill status, or 'new' when no skill has that keyword."""
+    hits = [k for k in find(name) if k["name"].casefold() == name.casefold()]
+    return hits[0] | {"name": name} if hits else {"name": name, "status": "new", "jobs": 0}
+
+
+def resume_data(comp_id: int | None = None) -> dict:
+    """Everything a resume page shows, read only. comp_id: one composition, whose recorded choices (offer_lines,
+    composition_profile) are the candidates in use, its lines in its own order. None: the best candidate of each bloc
+    (src/pick.py: best review, English and French text). Each slider lists the bloc's approved candidates, newest first."""
+    import pick  # noqa: E402  (best() and candidates() only read)
+    with ro() as con:
+        find = keyword_finder(con)
+        comp_lines, comp_profile, comp = {}, {}, None
+        if comp_id is not None:
+            comp = con.execute("SELECT * FROM compositions WHERE id = ?", (comp_id,)).fetchone()
+            if comp is None:
+                raise HTTPException(404, "No such resume")
+            for aid, did, pos in con.execute("SELECT d.activity_id, d.id, l.position FROM offer_lines l JOIN bloc_descriptions d "
+                                             "ON d.id = l.description_id WHERE l.composition_id = ? ORDER BY l.position", (comp_id,)):
+                comp_lines[pos] = (aid, did)  # one row per recorded line: two lines may share an activity
+            comp_profile = dict(con.execute("SELECT p.key, p.id FROM composition_profile c JOIN bloc_profile p "
+                                            "ON p.id = c.profile_id WHERE c.composition_id = ?", (comp_id,)).fetchall())
+        tr_ = lambda v, lang="en": (json.loads(v).get(lang) or "") if v else ""
+        def versions(key, quality):  # a profile bloc's versions, newest first, the one the master uses marked
+            cands = pick.profile_candidates(con, key)
+            chosen, _, warn = pick.best(cands, ("en", "fr"), quality=quality)
+            if comp is not None:  # this resume's own version
+                chosen, warn = next((c for c in cands if c["id"] == comp_profile.get(key)), None), None
+            if key == "role" and warn:  # the role has no rubric: "no reviewed candidate" is expected, not a warning
+                warn = warn.replace("; no reviewed candidate; the newest is used", "").replace(
+                    "no reviewed candidate; the newest is used", "") or None
+            cands.sort(key=lambda c: (c["created_at"] or "", c["id"]), reverse=True)
+            return {"warning": warn, "candidates": [
+                {"id": c["id"], "text": c["text_en"], "fr": tr_(c["text"], "fr"), "created_at": c["created_at"],
+                 "used": bool(chosen) and c["id"] == chosen["id"], "review": json.loads(c["score"]) if c["score"] else None}
+                for c in cands]}
+        role, summary = versions("role", pick.line_quality), versions("summary", pick.summary_quality)
+        used = lambda v: next((c for c in v["candidates"] if c["used"]), None)
+        profile = {"role": role, "summary": summary, "review": (used(summary) or {}).get("review")}
+        role_text, summary_text = (used(role) or {}).get("text", ""), (used(summary) or {}).get("text", "")
+        profile["keywords"] = find(f"{role_text} {summary_text}")
+        exps = con.execute(f"SELECT e.id, {EN.format('c.name')} AS company, {EN.format('e.role')} AS role, k.start_at, "
+                           "k.end_at FROM bloc_experiences e JOIN contracts k ON k.id = e.contract_id "
+                           "JOIN companies c ON c.id = k.company_id ORDER BY k.start_at DESC, e.id").fetchall()
+        experiences = []
+        for e in exps:
+            lines = []
+            acts = [(aid, label, None) for aid, label in con.execute(
+                "SELECT id, label FROM bloc_activities WHERE experience_id = ? AND active = 1 ORDER BY sort_order", (e["id"],))]
+            if comp is not None:  # the lines this resume uses, in its order (inactive activities included)
+                labels = dict(con.execute("SELECT id, label FROM bloc_activities WHERE experience_id = ?", (e["id"],)).fetchall())
+                acts = [(aid, labels[aid], pos) for pos, (aid, _) in sorted(comp_lines.items()) if aid in labels]
+            for aid, label, pos in acts:
+                cands = pick.candidates(con, aid)
+                chosen, _, warn = pick.best(cands, ("en", "fr"))
+                if comp is not None:
+                    chosen, warn = next((c for c in cands if c["id"] == comp_lines[pos][1]), None), None
+                if not chosen:
+                    continue
+                cands.sort(key=lambda c: (c["created_at"] or "", c["id"]), reverse=True)
+                lines.append({"activity_id": aid, "position": pos, "key": f"{aid}-{pos}", "label": label,
+                              "kind": chosen["kind"], "warning": warn,
+                              "chosen_id": chosen["id"], "keywords": find(chosen["text_en"]),
+                              "candidates": [{"id": c["id"], "text": c["text_en"], "fr": tr_(c["text"], "fr"),
+                                              "created_at": c["created_at"], "used": c["id"] == chosen["id"],
+                                              "review": json.loads(c["score"]) if c["score"] else None} for c in cands]})
+            seen = {}
+            for line in lines:
+                for k in line["keywords"]:
+                    seen.setdefault(k["name"], k)
+            start, end = ym(e["start_at"]), ym(e["end_at"], end=True) if e["end_at"] else None
+            experiences.append({"id": e["id"], "company": e["company"], "role": e["role"],
+                                "from": month_label(e["start_at"]), "to": month_label(e["end_at"]),
+                                "months": months(start, end) if end else None,
+                                "keywords": sorted(seen.values(), key=lambda k: (-k["jobs"], k["name"])), "lines": lines})
+        for newer, older in zip(exps, exps[1:]):  # a month with no experience between two jobs is a gap
+            last = ym(older["end_at"], end=True) if older["end_at"] else None
+            first = ym(newer["start_at"])
+            n = months(last, first) - 2 if last else 0
+            if n > 0:
+                g_from = (last[0] + last[1] // 12, last[1] % 12 + 1)
+                g_to = (first[0] - (first[1] == 1), (first[1] - 2) % 12 + 1)
+                gap = {"from": f"{MON[g_from[1] - 1]} {g_from[0]}", "to": f"{MON[g_to[1] - 1]} {g_to[0]}", "months": n,
+                       "after": older["company"], "before": newer["company"],
+                       "ended": month_label(older["end_at"]), "started": month_label(newer["start_at"])}
+                next(x for x in experiences if x["id"] == older["id"])["gap_after"] = gap
+        blocs = {
+            "projects": [{"title": r["name"], "keywords": [chip(t.strip(), find) for t in tr_(r["tech"]).split("·")
+                                                            if t.strip()]} for r in con.execute("SELECT * FROM bloc_projects ORDER BY id")],
+            "education": [{"title": f"{tr_(r['degree'])} · {tr_(r['institution'])}",
+                           "keywords": find(f"{tr_(r['degree'])} {tr_(r['institution'])}")}
+                          for r in con.execute("SELECT * FROM bloc_education ORDER BY id")],
+            "languages": [{"title": f"{tr_(r['name'])} · {tr_(r['level'])}", "keywords": find(tr_(r["name"]))}
+                          for r in con.execute("SELECT * FROM bloc_languages ORDER BY sort_order")],
+            "certifications": [{"title": f"{r['name']} · {r['issuer']}", "keywords": find(f"{r['name']} {r['issuer']}")}
+                               for r in con.execute("SELECT * FROM bloc_certifications ORDER BY id")],
+        }
+    used = [c["review"] for x in experiences for line in x["lines"] for c in line["candidates"] if c["used"]]
+    scored = [r for r in used if r]
+    crit = ("result", "evidence", "contribution", "clarity")
+    rev = profile["review"]
+    bloc_kw = {k["name"].casefold(): k["status"] for items in blocs.values() for i in items for k in i["keywords"]}
+    score = {
+        "lines": len(used), "scored": len(scored), "unscored": len(used) - len(scored),
+        "ready": sum(r["verdict"] == "Ready" for r in scored),
+        "total": sum(r["total"] for r in scored), "max": 8 * len(scored),
+        "average": round(sum(r["total"] for r in scored) / len(scored), 1) if scored else None,
+        "criteria": {c: round(sum(r["scores"][c] for r in scored) / len(scored), 1) if scored else None for c in crit},
+        "match": {m: sum(r["claim_evidence_match"] == m for r in scored) for m in ("supports", "partial", "missing", "mismatch")},
+        "low": sum(r["total"] < 5 for r in scored),
+        "summary": {k: rev[k]["score"] for k in ("name", "fame", "aim")} | {"verdict": rev["verdict"]} if rev else None,
+        "keywords": {"total": len(bloc_kw), **{s: sum(v == s for v in bloc_kw.values()) for s in ("asked", "known", "new")}},
+    }
+    # Ready only when every line and the summary pass (the rubrics' resume-wide rule)
+    score["verdict"] = "Ready" if used and score["ready"] == len(used) and rev and rev["verdict"] == "ready" else "Revise"
+    limits = {"bullet": check_style.MAX_BULLET_WORDS, "summary": check_style.MAX_SUMMARY_WORDS}  # the style check's word limits
+    out = {"score": score, "profile": profile, "experiences": experiences, "blocs": blocs, "limits": limits}
+    if comp is not None:
+        out["resume"] = next(r for r in resumes_list() if r["id"] == comp["id"])
+    return out
+
+
+def resumes_list() -> list[dict]:
+    """Every composition, with or without an offer, newest first, scored from the line candidates it uses (sum of
+    totals ÷ 8 per line, as the Resume score) and the review of the summary version it uses."""
+    with ro() as con:
+        out = []
+        for c in con.execute(f"SELECT c.*, o.title, {EN.format('co.name')} AS company FROM compositions c LEFT JOIN offers o "
+                             "ON o.id = c.offer_id LEFT JOIN companies co ON co.id = o.company_id "
+                             "ORDER BY c.created_at DESC, c.id DESC").fetchall():
+            reviews = [json.loads(sc) if sc else None for (sc,) in con.execute(
+                "SELECT d.score FROM offer_lines l JOIN bloc_descriptions d ON d.id = l.description_id "
+                "WHERE l.composition_id = ?", (c["id"],))]
+            scored = [r for r in reviews if r]
+            summ = con.execute("SELECT p.score FROM composition_profile cp JOIN bloc_profile p ON p.id = cp.profile_id "
+                               "WHERE cp.composition_id = ? AND p.key = 'summary'", (c["id"],)).fetchone()
+            out.append({"id": c["id"], "slug": c["folder"].removeprefix("jobs/"), "name": c["name"] or c["folder"].removeprefix("jobs/"),
+                        "offer": f"{c['company']} · {c['title']}" if c["title"] else None, "offer_id": c["offer_id"],
+                        "created": (c["created_at"] or "")[:10], "sent": c["sent_at"], "approved": c["approved_at"],
+                        "score": round(100 * sum(r["total"] for r in scored) / (8 * len(scored))) if scored else None,
+                        "lines": len(reviews), "scored": len(scored), "ready": sum(r["verdict"] == "Ready" for r in scored),
+                        "summary": json.loads(summ[0])["verdict"] if summ and summ[0] else None})
+        return out
+
+
+@app.get("/api/resume")
+def api_resume():
+    return resume_data()
+
+
+@app.get("/api/resumes")
+def api_resumes():
+    with ro() as con:
+        offers_ = [{"id": i, "label": f"{tr(n)} · {t}"} for i, n, t in con.execute(
+            "SELECT o.id, c.name, o.title FROM offers o JOIN companies c ON c.id = o.company_id ORDER BY o.created_at DESC")]
+    return {"resumes": resumes_list(), "offers": offers_}
+
+
+@app.get("/api/resumes/{comp_id}")
+def api_resume_one(comp_id: int):
+    return resume_data(comp_id)
+
+
+def folder_of(comp_id: int) -> str:
+    with ro() as con:
+        row = con.execute("SELECT folder FROM compositions WHERE id = ?", (comp_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, "No such resume")
+    return row[0]
+
+
+class NewResume(BaseModel):
+    name: str = Field(max_length=120, pattern=TEXT)
+    offer_id: int | None = None
+    from_id: int | None = None  # copy another resume's choices
+
+
+@app.post("/api/resumes")
+def api_resume_new(body: NewResume):
+    """A new resume (src/resumes.py new): the best candidate of each bloc, or a copy of another resume's choices."""
+    args = ["src/resumes.py", "new", body.name.strip()]
+    if body.offer_id is not None:
+        args += ["--offer", str(body.offer_id)]
+    if body.from_id is not None:
+        args += ["--from", folder_of(body.from_id)]
+    out = script_result(run_script(*args))
+    if out["ok"]:
+        with ro() as con:
+            out["id"] = con.execute("SELECT max(id) FROM compositions").fetchone()[0]
+    return out
+
+
+class Switch(BaseModel):
+    bloc: str = Field(pattern=r"^(\d+|role|summary)$")  # an activity id, or role / summary
+    candidate: int
+    position: int | None = None  # the line's position in the resume (two lines may share an activity)
+
+
+@app.post("/api/resumes/{comp_id}/switch")
+def api_resume_switch(comp_id: int, body: Switch):
+    """This resume uses another candidate for one bloc (src/resumes.py switch; refused on a sent resume)."""
+    return script_result(run_script("src/resumes.py", "switch", folder_of(comp_id), body.bloc, str(body.candidate),
+                                    *([] if body.position is None else [str(body.position)])))
+
+
+class Edit(BaseModel):
+    bloc: str = Field(pattern=r"^(\d+|role|summary)$")
+    en: str = Field(max_length=1200, pattern=TEXT)
+    fr: str = Field(max_length=1200, pattern=TEXT)
+    position: int | None = None
+
+
+@app.post("/api/resumes/{comp_id}/edit")
+def api_resume_edit(comp_id: int, body: Edit):
+    """A new version of one bloc, saved as a candidate and used in this resume (src/resumes.py edit)."""
+    return script_result(run_script("src/resumes.py", "edit", folder_of(comp_id), body.bloc, body.en.strip(), body.fr.strip(),
+                                    *([] if body.position is None else [str(body.position)]), timeout=600))
+
+
+class Preview(BaseModel):
+    bloc: str | None = Field(default=None, pattern=r"^(\d+|role|summary)$")  # none: the resume as it is
+    candidate: int | None = None
+    position: int | None = None
+
+
+@app.post("/api/resumes/{comp_id}/preview")
+def api_resume_preview(comp_id: int, body: Preview):
+    """A temporary PDF of this resume with one candidate swapped in (src/resumes.py preview): nothing is changed."""
+    args = ["src/resumes.py", "preview", folder_of(comp_id)]
+    if body.bloc is not None and body.candidate is not None:
+        args += [body.bloc, str(body.candidate), *([] if body.position is None else [str(body.position)])]
+    result = run_script(*args, timeout=300)
+    line = next((l for l in result.stdout.splitlines() if l.startswith("PREVIEW ")), None)
+    if result.returncode or not line:
+        return script_result(result)
+    return {"ok": True, **json.loads(line.removeprefix("PREVIEW ")), "url": f"/previews/{json.loads(line[8:])['pdf']}"}
+
+
+@app.get("/previews/{name}")
+def preview_file(name: str):
+    path = ROOT / "data" / "cache" / "preview" / name
+    if not re.fullmatch(r"[a-z0-9-]+\.pdf", name) or not path.is_file():
+        raise HTTPException(404, "No such preview")
+    return FileResponse(path, media_type="application/pdf")
+
+
+class Rename(BaseModel):
+    name: str = Field(max_length=120, pattern=TEXT)
+
+
+@app.post("/api/resumes/{comp_id}/name")
+def api_resume_rename(comp_id: int, body: Rename):
+    return script_result(run_script("src/resumes.py", "name", folder_of(comp_id), body.name.strip()))
+
+
+class Approve(BaseModel):
+    approved: bool
+
+
+@app.post("/api/resumes/{comp_id}/approve")
+def api_resume_approve(comp_id: int, body: Approve):
+    return script_result(run_script("src/resumes.py", "approve", folder_of(comp_id), *([] if body.approved else ["off"])))
+
+
+class NewCandidate(BaseModel):
+    id: int  # the activity (a new candidate of a line) or the experience (its next line)
+    en: str = Field(max_length=600, pattern=TEXT)
+    fr: str = Field(max_length=600, pattern=TEXT)  # required: the master resume needs both languages
+
+
+@app.post("/api/resume/line")
+def api_resume_line(body: NewCandidate):
+    """A new candidate for a line: src/master.py set line (scored, then the best one is used)."""
+    return script_result(run_script("src/master.py", "set", "line", str(body.id), body.en, body.fr))
+
+
+@app.post("/api/resume/new-line")
+def api_resume_new_line(body: NewCandidate):
+    """An experience's next line, as a new activity: src/master.py set new-line."""
+    return script_result(run_script("src/master.py", "set", "new-line", str(body.id), body.en, body.fr))
+
+
+class ProfileVersion(BaseModel):
+    key: str = Field(pattern=r"^(summary|role)$")
+    en: str = Field(max_length=1200, pattern=TEXT)
+    fr: str = Field(max_length=1200, pattern=TEXT)
+
+
+@app.post("/api/resume/profile")
+def api_resume_profile(body: ProfileVersion):
+    """A new version of the summary or the role (the old ones are kept): src/master.py set summary|role; a summary
+    version is then reviewed (src/score_summary.py, through master.py's scoring hook)."""
+    return script_result(run_script("src/master.py", "set", body.key, body.en, body.fr))
+
+
+class Rescore(BaseModel):
+    id: int
+
+
+@app.post("/api/resume/rescore")
+def api_resume_rescore(body: Rescore):
+    """Score one candidate again with the bullet rubric: src/score_bullet.py rescore."""
+    return script_result(run_script("src/score_bullet.py", "rescore", str(body.id), timeout=320))
+
+
+@app.post("/api/resume/summary/rescore")
+def api_resume_summary_rescore(body: Rescore):
+    """Review one summary version again with the Name / Fame / Aim prompt: src/score_summary.py rescore <id>."""
+    return script_result(run_script("src/score_summary.py", "rescore", str(body.id), timeout=320))
 
 
 @app.get("/files/{slug}/{name:path}")

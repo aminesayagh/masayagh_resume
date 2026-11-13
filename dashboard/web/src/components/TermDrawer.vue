@@ -147,7 +147,7 @@ const STATUS_TAG = { met: 'success', partial: 'warning', missing: 'danger', 'set
     <el-option v-for="x in others.filter((x) => !query || x.name.includes(query) || x.keywords.some((k) => k.keyword.includes(query)))"
       :key="x.name" :label="x.name" :value="x.name">
       <span>{{ x.name }}</span>
-      <span class="muted opt">{{ TYPE_LABEL[x.type] ?? 'not typed' }}<template v-if="keywordsOf(x)"> · {{ keywordsOf(x) }}</template></span>
+      <span class="muted opt">{{ TYPE_LABEL[x.type] ?? 'Not typed' }}<template v-if="keywordsOf(x)"> · {{ keywordsOf(x) }}</template></span>
     </el-option>
   </el-select>
   <el-button type="primary" size="small" :loading="busy" :disabled="!target" @click="moveTo">Move ‘{{ selected.term }}’ here</el-button>

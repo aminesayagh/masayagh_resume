@@ -6,7 +6,7 @@ composed resume in a job folder (jobs/<slug>-vN), usually for an offer; several 
 
 load(folder) returns the job dict the pipeline works with:
   title ("Company — Title"), posting_text, pdf_name, company (slug), url, location, french_version, sent,
-  template_sha, skipped_terms, created_at, offer_id, requirements [{id: R01, section, priority, quote, description,
+  skipped_terms, created_at, offer_id, requirements [{id: R01, section, priority, quote, description,
   terms, targets, reviewed[, kind, min_years]}]
 Requirements are rebuilt from the db on every load (one per keyword, its min_years included; R01... are positions): the posting quote is not
 stored, so quote is empty and description is the keyword. save(folder, data) writes a job dict back.
@@ -70,7 +70,7 @@ def load(folder: Path, con=None) -> dict:
     comp = composition(folder, con)
     if comp is None:
         raise FileNotFoundError(f"No composition for {Path(folder).name} in data/resume.db")
-    job = {"pdf_name": comp["pdf_name"], "sent": comp["sent_at"], "template_sha": comp["template_sha"],
+    job = {"pdf_name": comp["pdf_name"], "sent": comp["sent_at"],
            "created_at": comp["created_at"], "requirements": []}
     offer = con.execute("SELECT o.*, c.name AS company_name FROM offers o JOIN companies c ON c.id = o.company_id "
                         "WHERE o.id = ?", (comp["offer_id"],)).fetchone() if comp["offer_id"] else None
@@ -119,12 +119,12 @@ def save(folder: Path, job: dict, con=None) -> int:
             oid = con.execute(f"INSERT INTO offers ({', '.join(fields)}) VALUES ({', '.join('?' * len(fields))})",
                               tuple(fields.values())).lastrowid
     was_sent = bool(comp and comp["sent_at"])
-    values = (oid, job.get("pdf_name", "resume.pdf"), job.get("sent"), job.get("template_sha"))
+    values = (oid, job.get("pdf_name", "resume.pdf"), job.get("sent"))
     if comp:
-        con.execute("UPDATE compositions SET offer_id = ?, pdf_name = ?, sent_at = ?, template_sha = ?, "
+        con.execute("UPDATE compositions SET offer_id = ?, pdf_name = ?, sent_at = ?, "
                     "updated_at = datetime('now') WHERE id = ?", (*values, comp["id"]))
     else:
-        con.execute("INSERT INTO compositions (offer_id, pdf_name, sent_at, template_sha, folder) VALUES (?, ?, ?, ?, ?)",
+        con.execute("INSERT INTO compositions (offer_id, pdf_name, sent_at, folder) VALUES (?, ?, ?, ?)",
                     (*values, _folder_key(folder)))
     if oid and not was_sent and "requirements" in job:
         save_requirements(con, oid, job["requirements"])

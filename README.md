@@ -246,7 +246,7 @@ The report is saved to `match.json` next to the job file.
 A local web app to browse the job folders: every application with its status and coverage, one page per job (requirements, gaps, PDFs, posting, interview prep), and every posting term across jobs.
 
 ```bash
-python3 start.py   # then open http://127.0.0.1:8000
+python3 start.py   # then open http://127.0.0.1:8765
 ```
 
 [Watch a 30-second tour](https://cdn.lingowp.com/dashboard-tour.mp4)

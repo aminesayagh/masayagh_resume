@@ -60,7 +60,7 @@ def main() -> None:
     print("\nEverything not met:" if len(rows) > 2 else "\nEvery requirement is met.")
     if len(rows) > 2:
         print("\n".join(rows))
-    print(f"\nDashboard: http://127.0.0.1:8000/job/{folder.name} (run the dashboard app)")
+    print(f"\nDashboard: http://127.0.0.1:8765/job/{folder.name} (run the dashboard app)")
 
 
 if __name__ == "__main__":

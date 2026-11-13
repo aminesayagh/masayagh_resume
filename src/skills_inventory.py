@@ -128,9 +128,9 @@ def job_skills(job: dict, content: dict, inv: dict | None = None) -> list[dict]:
 
 
 def move(word: str, target: str) -> str:
-    """Merge: the keyword (every language) moves under the target skill. A skill left with no keyword is dropped, its
-    resume lines and cover paragraphs linked to the target instead; one that keeps keywords is renamed after one of
-    them if the moved keyword was its name (a skill's name is one of its keywords)."""
+    """Merge: the keyword (every language) moves under the target skill. A skill left with no keyword is dropped; one
+    that keeps keywords is renamed after one of them if the moved keyword was its name (a skill's name is one of its
+    keywords). Requirements point to keywords, and a text's skills are found from its words, so nothing else moves."""
     word, con = word.strip().lower(), db.connect()
     dest = find(load(), target) or sys.exit(f"Unknown skill '{target}'")
     olds = {sid for (sid,) in con.execute("SELECT skill_id FROM skill_keywords WHERE keyword = ?", (word,))}
@@ -147,9 +147,6 @@ def move(word: str, target: str) -> str:
             if name.casefold() == word:
                 con.execute("UPDATE skills SET name = ? WHERE id = ?", (db.i18n(left[0]), old))
             continue
-        for table, col in (("description_skills", "description_id"), ("cover_paragraph_skills", "paragraph_id")):
-            con.execute(f"INSERT OR IGNORE INTO {table} ({col}, skill_id) SELECT {col}, ? FROM {table} WHERE skill_id = ?",
-                        (dest["id"], old))
         con.execute("DELETE FROM skills WHERE id = ?", (old,))  # ponytail: its dates go with it (posting skills have none)
         dropped.append(name)
     con.commit()

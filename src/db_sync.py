@@ -48,15 +48,11 @@ def experience_ids(con) -> dict[str, int]:
 
 
 def skill_words(con) -> list[tuple[int, list[str]]]:
+    """Each skill's English keywords. A text's skills are never stored: they are the keywords found in it, computed when
+    needed (word_in), so they follow every merge, rename or new keyword."""
     rows = con.execute("SELECT skill_id, group_concat(keyword, '|') FROM skill_keywords WHERE lang = 'en' "
                        "GROUP BY skill_id").fetchall()
     return [(sid, kw.split("|")) for sid, kw in rows]
-
-
-def link_skills(con, table: str, key: str, row_id: int, text: str) -> None:
-    for sid, names in skill_words(con):
-        if any(len(n) > 1 and word_in(n, text) for n in names):
-            con.execute(f"INSERT OR IGNORE INTO {table} ({key}, skill_id) VALUES (?, ?)", (row_id, sid))
 
 
 def line_id(con, experience_id: int, text: str) -> int | None:
@@ -73,10 +69,8 @@ def add_line(con, activity_id: int, kind: str, text: str, text_fr: str | None = 
     x = con.execute("SELECT experience_id FROM bloc_activities WHERE id = ?", (activity_id,)).fetchone()[0]
     if found := line_id(con, x, text):
         return found
-    lid = con.execute("INSERT INTO bloc_descriptions (activity_id, kind, text) VALUES (?, ?, ?)",
-                      (activity_id, kind, i18n(text, text_fr))).lastrowid
-    link_skills(con, "description_skills", "description_id", lid, text)
-    return lid
+    return con.execute("INSERT INTO bloc_descriptions (activity_id, kind, text) VALUES (?, ?, ?)",
+                       (activity_id, kind, i18n(text, text_fr))).lastrowid
 
 
 def new_activity(con, experience_id: int, text: str) -> int:
@@ -116,6 +110,28 @@ def default_paragraphs(con, lang: str = "en") -> list[str]:
     return out
 
 
+def link_profile(con, comp_id: int, folder: Path, when: str | None = None) -> list[int]:
+    """Record which role and summary versions the composition uses (composition_profile). A text no version holds
+    (tailored for this job) becomes a new candidate of its bloc, with the French version's text when there is one;
+    `when` dates it (default now). Returns the linked bloc_profile ids."""
+    content, content_fr = load(paths.content(folder)), load(paths.content(folder, "fr"))
+    ids = []
+    for key in ("role", "summary"):
+        text = (content.get(key) or "").strip()
+        if not text:
+            continue
+        row = con.execute(f"SELECT id FROM bloc_profile WHERE key = ? AND {EN.format('text')} = ? ORDER BY id",
+                          (key, text)).fetchone()
+        if row is None:
+            fr = (content_fr.get(key) or "").strip() or None
+            row = (con.execute("INSERT INTO bloc_profile (key, text, created_at) VALUES (?, ?, coalesce(?, datetime('now')))",
+                               (key, i18n(text, fr), when)).lastrowid,)
+        ids.append(row[0])
+    con.execute("DELETE FROM composition_profile WHERE composition_id = ?", (comp_id,))
+    con.executemany("INSERT INTO composition_profile VALUES (?, ?)", [(comp_id, i) for i in ids])
+    return ids
+
+
 def sync_job(folder: Path, con=None) -> int | None:
     own = con is None
     con = con or db.connect()
@@ -138,6 +154,7 @@ def sync_job(folder: Path, con=None) -> int | None:
                            + [("bullet", b) for b in e.get("bullets", [])])
     con.execute("DELETE FROM offer_lines WHERE composition_id = ?", (comp["id"],))
     con.executemany("INSERT INTO offer_lines VALUES (?, ?, ?)", [(comp["id"], p, d) for p, d in enumerate(used) if d])
+    link_profile(con, comp["id"], folder)
 
     filled = [t.replace("{company}", name.strip()).replace("{job_title}", title or name) for t in default_paragraphs(con)]
     letter, letter_fr = load(paths.cover(folder)), load(paths.cover(folder, "fr"))
@@ -147,11 +164,7 @@ def sync_job(folder: Path, con=None) -> int | None:
             continue  # the default letter (stored once, with its placeholders) or a paragraph already known
         part = "opening" if i == 0 else "close" if i == len(paragraphs) - 1 else "example" if i == 1 else "support"
         text_fr = (letter_fr.get("paragraphs") or [None] * len(paragraphs))[i] if letter_fr else None
-        pid = con.execute("INSERT INTO cover_paragraphs (part, text) VALUES (?, ?)", (part, i18n(text, text_fr))).lastrowid
-        link_skills(con, "cover_paragraph_skills", "paragraph_id", pid, text)
-        for name_, x in experiences.items():
-            if name_ != "freelance" and word_in(name_, text):
-                con.execute("INSERT OR IGNORE INTO cover_paragraph_experiences VALUES (?, ?)", (pid, x))
+        con.execute("INSERT INTO cover_paragraphs (part, text) VALUES (?, ?)", (part, i18n(text, text_fr)))
     if own:
         con.commit()
         db.dump(con)

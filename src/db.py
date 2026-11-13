@@ -44,8 +44,11 @@ CREATE TABLE IF NOT EXISTS bloc_contact (
 );
 CREATE TABLE IF NOT EXISTS bloc_profile (
   id INTEGER PRIMARY KEY,
-  key TEXT NOT NULL UNIQUE,
-  text TEXT NOT NULL       -- json
+  key TEXT NOT NULL,       -- role, summary, cover_greeting, cover_closing; several rows per key = its versions
+  text TEXT NOT NULL,      -- json {"en", "fr"}
+  status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved', 'rejected')),
+  score TEXT,              -- json, src/score_summary.py for the summary; NULL = not reviewed yet
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS bloc_languages (
   id INTEGER PRIMARY KEY,
@@ -129,27 +132,12 @@ CREATE TABLE IF NOT EXISTS skill_keywords (
   lang TEXT NOT NULL CHECK (lang IN ('en', 'fr')),
   UNIQUE (keyword, lang)
 );
-CREATE TABLE IF NOT EXISTS description_skills (
-  description_id INTEGER NOT NULL REFERENCES bloc_descriptions(id) ON DELETE CASCADE,
-  skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
-  PRIMARY KEY (description_id, skill_id)
-);
 CREATE TABLE IF NOT EXISTS cover_paragraphs (
   id INTEGER PRIMARY KEY,
   part TEXT NOT NULL CHECK (part IN ('opening', 'example', 'support', 'close')),
   text TEXT NOT NULL,      -- json
   status TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('approved', 'rejected')),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS cover_paragraph_experiences (
-  paragraph_id INTEGER NOT NULL REFERENCES cover_paragraphs(id) ON DELETE CASCADE,
-  experience_id INTEGER NOT NULL REFERENCES bloc_experiences(id) ON DELETE CASCADE,
-  PRIMARY KEY (paragraph_id, experience_id)
-);
-CREATE TABLE IF NOT EXISTS cover_paragraph_skills (
-  paragraph_id INTEGER NOT NULL REFERENCES cover_paragraphs(id) ON DELETE CASCADE,
-  skill_id INTEGER NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
-  PRIMARY KEY (paragraph_id, skill_id)
 );
 CREATE TABLE IF NOT EXISTS offers (
   id INTEGER PRIMARY KEY,
@@ -172,7 +160,13 @@ CREATE TABLE IF NOT EXISTS compositions (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   sent_at TEXT,
-  template_sha TEXT
+  name TEXT,                                -- the resume's name in the Resumes list (default: its folder)
+  approved_at TEXT                          -- when you approved it as ready to use
+);
+CREATE TABLE IF NOT EXISTS composition_profile (  -- which role and summary version each composition uses
+  composition_id INTEGER NOT NULL REFERENCES compositions(id) ON DELETE CASCADE,
+  profile_id INTEGER NOT NULL REFERENCES bloc_profile(id),
+  PRIMARY KEY (composition_id, profile_id)
 );
 CREATE TABLE IF NOT EXISTS offer_lines (
   composition_id INTEGER NOT NULL REFERENCES compositions(id) ON DELETE CASCADE,

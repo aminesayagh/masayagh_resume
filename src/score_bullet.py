@@ -10,7 +10,8 @@ match is 'supports'; else Revise) and a check that each quoted phrase is really 
 Stored as JSON in bloc_descriptions.score with the text's hash; a line whose English text changed is re-scored.
 Target-role relevance and overlap need a posting or several lines, so they're not part of the per-line score.
 
-Usage: .venv/bin/python src/score_bullet.py pending        # score new or changed lines (also run by db_sync)
+Usage: .venv/bin/python src/score_bullet.py pending        # score new or changed lines and the summary (also run by db_sync)
+       .venv/bin/python src/score_bullet.py rescore <line id>   # score one line again, even if unchanged
        .venv/bin/python src/score_bullet.py show           # every line with its total and verdict
 Needs: the `claude` CLI, logged in. Each scored line is one Haiku call on the user's subscription.
 """
@@ -89,18 +90,21 @@ Job title: {role}
 Line: {text}"""
 
 
-def classify(text: str, role: str) -> Classified:
+def ask(prompt: str, schema: type[BaseModel], system: str) -> BaseModel:
     """One Haiku call through the Claude Code CLI (its login, no API key); same call shape as parse_offer."""
     cmd = ["claude", "-p", "--model", MODEL, "--output-format", "json",
-           "--json-schema", json.dumps(Classified.model_json_schema()),
-           "--system-prompt", "You score resume bullets against a fixed rubric and return JSON only.",
+           "--json-schema", json.dumps(schema.model_json_schema()), "--system-prompt", system,
            "--tools", "", "--setting-sources", "", "--strict-mcp-config", "--no-session-persistence"]
-    run = subprocess.run(cmd, input=PROMPT.format(role=role or "unknown", text=text), capture_output=True, text=True,
-                         cwd=tempfile.gettempdir(), timeout=300)
+    run = subprocess.run(cmd, input=prompt, capture_output=True, text=True, cwd=tempfile.gettempdir(), timeout=300)
     out = json.loads(run.stdout or "{}")
     if run.returncode or out.get("is_error") or not out.get("structured_output"):
         raise RuntimeError(f"claude CLI failed: {run.stderr.strip() or out.get('result')}")
-    return Classified.model_validate(out["structured_output"])
+    return schema.model_validate(out["structured_output"])
+
+
+def classify(text: str, role: str) -> Classified:
+    return ask(PROMPT.format(role=role or "unknown", text=text), Classified,
+               "You score resume bullets against a fixed rubric and return JSON only.")
 
 
 def text_hash(text: str) -> str:
@@ -151,9 +155,24 @@ def pending(con=None) -> int:
         con.commit()  # one line at a time: an interrupted run keeps what it scored
         done += 1
         print(f"score_bullet: line {row['id']} {result['total']}/8 {result['verdict']}")
+    import score_summary  # late: it imports this module
+    done += score_summary.pending(con)
     if done:
         db.dump(con)
     return done
+
+
+def rescore(line_id: int, con=None) -> dict:
+    """Score one line again whatever its saved score (the Resume page's Re-score)."""
+    con = con or db.connect()
+    row = next((r for r in lines(con) if r["id"] == line_id), None)
+    if row is None:
+        raise SystemExit(f"No line {line_id}")
+    result = score(row["text"], tr(row["role"]))
+    con.execute("UPDATE bloc_descriptions SET score = ? WHERE id = ?", (json.dumps(result, ensure_ascii=False), line_id))
+    con.commit()
+    db.dump(con)
+    return result
 
 
 def show(con=None) -> None:
@@ -161,6 +180,8 @@ def show(con=None) -> None:
         sc = json.loads(row["score"]) if row["score"] else None
         mark = f"{sc['total']}/8 {sc['verdict']:6}" if sc else "unscored  "
         print(f"{row['id']:>4} {mark} {row['text'][:90]}")
+    import score_summary
+    score_summary.show(con)
 
 
 assert verdict({"scores": {"result": 1, "evidence": 0, "contribution": 2, "clarity": 2}, "claim_evidence_match": "missing",
@@ -173,5 +194,8 @@ if __name__ == "__main__":
         print(f"Scored {pending()} line(s)")
     elif sys.argv[1:] == ["show"]:
         show()
+    elif len(sys.argv) == 3 and sys.argv[1] == "rescore" and sys.argv[2].isdigit():
+        r = rescore(int(sys.argv[2]))
+        print(f"line {sys.argv[2]}: {r['total']}/8 {r['verdict']}")
     else:
         sys.exit(__doc__)

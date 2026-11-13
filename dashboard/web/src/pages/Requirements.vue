@@ -19,7 +19,7 @@ async function load() {
 }
 onMounted(load)
 
-const typeLabel = (t) => TYPE_LABEL[t.type] ?? 'not typed'
+const typeLabel = (t) => TYPE_LABEL[t.type] ?? 'Not typed'
 const TABS = {
   all: ['All', () => true],
   hard: ['Hard skills', (t) => t.hard],

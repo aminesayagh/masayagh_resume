@@ -67,9 +67,9 @@ const CHIPS = {
 const termFilter = computed(() => route.query.term?.toString().toLowerCase() || '')
 const hasTerm = (r) => !termFilter.value || r.terms.some((t) => t.term.toLowerCase() === termFilter.value)
 // Skills tab: search (requirement, terms, evidence) and type, on top of the chips and ?term=
-const TYPE_LABEL = { programming_language: 'programming language', technology: 'technology', technical: 'technical', design: 'design', ai: 'AI', soft: 'soft skill', language: 'language',
-  location: 'location', education: 'education' }
-const typeLabel = (r) => TYPE_LABEL[r.type] ?? 'not typed'
+const TYPE_LABEL = { programming_language: 'Programming language', technology: 'Technology', technical: 'Technical', design: 'Design', ai: 'AI', soft: 'Soft skill', language: 'Language',
+  location: 'Location', education: 'Education' }
+const typeLabel = (r) => TYPE_LABEL[r.type] ?? 'Not typed'
 // Term drawer (same as the Requirements page): edit a requirement's skill without leaving the job
 const drawerTerm = ref(null)
 const termOpen = ref(false)

@@ -350,6 +350,110 @@ class MasterTest(unittest.TestCase):
         self.assertEqual(json.loads(self.master.FILES["en"].read_text(encoding="utf-8"))["role"], "Platform Engineer")
         self.assertEqual(json.loads(self.master.FILES["fr"].read_text(encoding="utf-8"))["role"], "Ingénieur plateforme")
 
+    def test_a_new_summary_is_a_new_version(self):
+        import json
+        con = self.master.db.connect()
+        self.master.set_value(["summary", "Backend engineer.", "Ingénieur backend."])
+        self.assertEqual(con.execute("SELECT count(*) FROM bloc_profile "
+                                     "WHERE key = 'summary'").fetchone()[0], 2)  # old one kept
+        # none reviewed (the tests never call the model), so the newest is used
+        self.assertEqual(json.loads(self.master.FILES["en"].read_text(encoding="utf-8"))["summary"], "Backend engineer.")
+        self.assertEqual(json.loads(self.master.FILES["fr"].read_text(encoding="utf-8"))["summary"], "Ingénieur backend.")
+
+    def test_new_line_gives_an_experience_its_first_bullet(self):
+        import json
+        con = self.master.db.connect()
+        empty = con.execute("SELECT e.id, json_extract(c.name, '$.en') FROM bloc_experiences e "
+                            "JOIN contracts k ON k.id = e.contract_id JOIN companies c ON c.id = k.company_id "
+                            "WHERE NOT EXISTS (SELECT 1 FROM bloc_activities a WHERE a.experience_id = e.id)").fetchone()
+        self.assertIsNotNone(empty, "the fixture needs an experience with no lines")
+        self.master.set_value(["new-line", str(empty[0]), "Shipped the checkout flow.", "Livré le parcours de paiement."])
+        # unscored (the tests never call the model), so pick.py falls back to the newest line rather than dropping it
+        for lang, text in (("en", "Shipped the checkout flow."), ("fr", "Livré le parcours de paiement.")):
+            entry = next(e for e in json.loads(self.master.FILES[lang].read_text(encoding="utf-8"))["experience"]
+                         if e["company"].rstrip(",").startswith(empty[1]))
+            self.assertEqual(entry["bullets"], [text])
+
+
+class CompositionProfileTest(unittest.TestCase):
+    """composition_profile: the role and summary versions a composition uses; a tailored text becomes a candidate."""
+
+    def test_links_and_new_candidates(self):
+        import json
+        import shutil
+        import db
+        import db_sync
+        import offers
+        import paths
+        with FreshDb() as root:
+            folder = root / "acme-dev-v1"
+            paths.content(folder).parent.mkdir(parents=True)
+            content = json.loads((REPO / "template/content/default.json").read_text(encoding="utf-8"))
+            content["summary"] = "Backend developer for payment platforms."  # tailored for this job
+            paths.content(folder).write_text(json.dumps(content), encoding="utf-8")
+            offers.save(folder, {"title": "Acme — Dev", "posting_text": "Payments."})
+            con = db.connect()
+            comp = offers.composition(folder, con)["id"]
+            ids = db_sync.link_profile(con, comp, folder)
+            ids_again = db_sync.link_profile(con, comp, folder)  # a rebuild links the same rows, adds nothing
+            keys = dict(con.execute("SELECT key, count(*) FROM bloc_profile GROUP BY key").fetchall())
+            self.assertEqual(ids, ids_again)
+            self.assertEqual(keys, {"role": 1, "summary": 2})  # the role matched; the summary is a new candidate
+            linked = [r[0] for r in con.execute(f"SELECT {db.EN.format('p.text')} FROM composition_profile c "
+                                                "JOIN bloc_profile p ON p.id = c.profile_id WHERE c.composition_id = ? "
+                                                "ORDER BY p.key", (comp,))]
+            self.assertEqual(linked, [content["role"], "Backend developer for payment platforms."])
+
+
+class ResumesSwitchTest(unittest.TestCase):
+    """src/resumes.py switch: one bloc of one resume takes another candidate (the build is mocked)."""
+
+    def test_switch_a_line_and_the_summary(self):
+        import json
+        import shutil
+        from unittest import mock
+        import db
+        import db_sync
+        import offers
+        import paths
+        import resumes
+        with FreshDb() as root:
+            folder = root / "acme-dev-v1"
+            paths.content(folder).parent.mkdir(parents=True)
+            shutil.copyfile(REPO / "template/content/default.json", paths.content(folder))
+            offers.save(folder, {"title": "Acme — Dev", "posting_text": "x"})
+            con = db.connect()
+            comp = offers.composition(folder, con)["id"]
+            content = json.loads(paths.content(folder).read_text(encoding="utf-8"))
+            first = content["experience"][1]["bullets"][0]
+            lid, aid = con.execute(f"SELECT id, activity_id FROM bloc_descriptions WHERE {db.EN.format('text')} = ?", (first,)).fetchone()
+            con.execute("INSERT INTO offer_lines VALUES (?, 0, ?)", (comp, lid))
+            other = db_sync.add_line(con, aid, "bullet", "Shipped the same thing, said better.")
+            summary = con.execute("INSERT INTO bloc_profile (key, text) VALUES ('summary', ?)", (db.i18n("Engineer."),)).lastrowid
+            con.commit()
+            with mock.patch.object(resumes.build_resume, "build", side_effect=lambda path: db_sync.sync_job(path.parent.parent)), mock.patch.object(resumes.build_resume, "frozen", return_value=None):
+                resumes.switch(folder, str(aid), other)
+                resumes.switch(folder, "summary", summary)
+                with self.assertRaises(SystemExit):
+                    resumes.switch(folder, str(aid), 999999)  # not a candidate of that activity
+            after = json.loads(paths.content(folder).read_text(encoding="utf-8"))
+            self.assertEqual(after["experience"][1]["bullets"][0], "Shipped the same thing, said better.")
+            self.assertEqual(after["summary"], "Engineer.")
+
+            # edit: a new version, saved as a candidate and used here; the old one stays
+            with mock.patch.object(resumes.build_resume, "build", side_effect=lambda path: db_sync.sync_job(path.parent.parent)), mock.patch.object(resumes.build_resume, "frozen", return_value=None):
+                new = resumes.edit(folder, str(aid), "Shipped it, with numbers.", "Livré, avec des chiffres.")
+                again = resumes.edit(folder, str(aid), "Shipped it, with numbers.", "Livré, avec des chiffres.")
+            self.assertEqual(new, again)  # the same text saved twice is one version
+            con = db.connect()
+            self.assertEqual(con.execute("SELECT count(*) FROM bloc_descriptions WHERE activity_id = ?", (aid,)).fetchone()[0], 3)
+            self.assertEqual(json.loads(paths.content(folder).read_text(encoding="utf-8"))["experience"][1]["bullets"][0],
+                             "Shipped it, with numbers.")
+            with mock.patch.object(resumes.build_resume, "frozen", return_value="sent"), \
+                    mock.patch.object(resumes, "switch") as switched:
+                resumes.edit(folder, "summary", "Sent ones keep theirs.", "Les envoyés gardent le leur.")
+            switched.assert_not_called()  # a sent resume only gains a candidate
+
 
 class ComposeOnceTest(unittest.TestCase):
     """compose.py picks each activity's line for the offer, writes text only, never recomposes a job; an agreed edit

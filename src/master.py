@@ -4,13 +4,14 @@
 Usage:
   python3 src/master.py write     # regenerate both files from the db (refuses if one was edited by hand)
   python3 src/master.py check     # exit 1 if a file differs from what the db generates
-  python3 src/master.py set summary|role "<English>" ["<French>"]
+  python3 src/master.py set summary|role "<English>" ["<French>"]   # a new version: the best-reviewed one is shown
   python3 src/master.py set skill <row> <position> "<English label>" ["<French label>"]
-  python3 src/master.py set line <activity id> "<English>" ["<French>"]   # a new line: the newest one is shown
+  python3 src/master.py set line <activity id> "<English>" ["<French>"]   # a new candidate: the best-reviewed one is shown (src/pick.py)
+  python3 src/master.py set new-line <experience id> "<English>" ["<French>"]   # a new activity with its first line
   python3 src/master.py set contact <email|phone|website|github|linkedin> "<value>"
   python3 src/master.py import    # load both files into an empty db (python3 src/db.py reset does it)
 
-Each active activity shows its newest approved line (no master pick is stored); experiences are ordered by their
+Each active activity shows its best-reviewed candidate with English and French text (src/pick.py; no master pick is stored); experiences are ordered by their
 contract dates, newest first. phone_link and website_link are derived from phone and website.
 Edit the master through the db (src/master.py helpers or SQL), never the generated files: the next write
 would refuse (and tell you) rather than lose the edit.
@@ -87,12 +88,15 @@ def experiences(con) -> list:
 
 
 def master_lines(con, experience_id: int) -> list:
-    """The line each active activity shows on the master: its newest approved line."""
+    """The line each active activity shows on the master: its best-reviewed candidate with English and French text
+    (src/pick.py; no job, so quality alone decides)."""
+    import pick  # late: pick imports db only, but keeps master's import list short
     out = []
-    for (aid,) in con.execute("SELECT id FROM bloc_activities WHERE experience_id = ? AND active = 1 ORDER BY sort_order",
-                              (experience_id,)):
-        line = con.execute("SELECT kind, text FROM bloc_descriptions WHERE activity_id = ? AND status = 'approved' "
-                           "ORDER BY created_at DESC, id DESC LIMIT 1", (aid,)).fetchone()
+    for aid, label_ in con.execute("SELECT id, label FROM bloc_activities WHERE experience_id = ? AND active = 1 "
+                                   "ORDER BY sort_order", (experience_id,)).fetchall():
+        line, _, warn = pick.best(pick.candidates(con, aid), ("en", "fr"))
+        if warn:
+            print(f"master: {label_}: {warn}", file=sys.stderr)
         if line:
             out.append(line)
     return out
@@ -101,7 +105,8 @@ def master_lines(con, experience_id: int) -> list:
 def generate(lang: str = "en", con=None) -> dict:
     con = con or db.connect()
     c = con.execute("SELECT * FROM bloc_contact WHERE id = 1").fetchone()
-    profile = {k: tr(t, lang) for k, t in con.execute("SELECT key, text FROM bloc_profile")}
+    import pick  # late, like master_lines
+    profile = {k: pick.profile_text(con, k, lang) for (k,) in con.execute("SELECT DISTINCT key FROM bloc_profile")}
     out = {"lang": "fr"} if lang == "fr" else {}
     out.update({
         "name": c["name"], "role": profile.get("role", ""),
@@ -158,15 +163,22 @@ def write(con=None, force: bool = False) -> list[Path]:
     return list(FILES.values())
 
 
+def add_profile_version(con, key: str, en: str, fr: str | None = None) -> int:
+    """A new version of a profile bloc (the old ones are kept; src/pick.py picks the one the resume uses). With no
+    French, the newest version's French is reused, as before versions existed."""
+    if fr is None:
+        last = con.execute("SELECT text FROM bloc_profile WHERE key = ? ORDER BY created_at DESC, id DESC", (key,)).fetchone()
+        fr = tr(last[0], "fr") if last and db.has(last[0], "fr") else None
+    return con.execute("INSERT INTO bloc_profile (key, text) VALUES (?, ?)", (key, i18n(en, fr))).lastrowid
+
+
 def set_value(args: list[str], con=None) -> None:
     """Change the master in the db, then regenerate the files."""
     con = con or db.connect()
     what = args[0]
     fr = lambda i: args[i] if len(args) > i else None
     if what in ("summary", "role"):
-        old = con.execute("SELECT text FROM bloc_profile WHERE key = ?", (what,)).fetchone()
-        con.execute("INSERT INTO bloc_profile (key, text) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET text = excluded.text",
-                    (what, i18n(args[1], fr(2) or (tr(old[0], "fr") if old and db.has(old[0], "fr") else None))))
+        add_profile_version(con, what, args[1], fr(2))
     elif what == "skill":
         con.execute("INSERT INTO bloc_skill_layout VALUES (?, ?, ?) ON CONFLICT (row, position) DO UPDATE SET label = excluded.label",
                     (int(args[1]), int(args[2]), i18n(args[3], fr(4))))
@@ -175,6 +187,16 @@ def set_value(args: list[str], con=None) -> None:
         aid = int(args[1])
         kind = con.execute("SELECT kind FROM bloc_descriptions WHERE activity_id = ? LIMIT 1", (aid,)).fetchone()
         db_sync.add_line(con, aid, kind[0] if kind else "bullet", args[2], fr(3))
+    elif what == "new-line":  # an experience's next bullet, as a new active activity (e.g. one with no lines yet)
+        import db_sync
+        xid = int(args[1])
+        if not con.execute("SELECT 1 FROM bloc_experiences WHERE id = ?", (xid,)).fetchone():
+            raise SystemExit(f"No experience {xid}")
+        order = con.execute("SELECT coalesce(max(sort_order), 0) + 1 FROM bloc_activities WHERE experience_id = ?",
+                            (xid,)).fetchone()[0]
+        aid = con.execute("INSERT INTO bloc_activities (experience_id, label, sort_order, active) VALUES (?, ?, ?, 1)",
+                          (xid, " ".join(args[2].split()[:5]), order)).lastrowid
+        db_sync.add_line(con, aid, "bullet", args[2], fr(3))
     elif what == "contact" and args[1] in {"email", "phone", "website", "github", "linkedin"}:
         con.execute(f"UPDATE bloc_contact SET {args[1]} = ? WHERE id = 1", (args[2],))
     else:
@@ -198,7 +220,7 @@ def import_files(con=None) -> None:
                 "VALUES (1, ?, ?, ?, ?, ?, ?, ?)", (en["name"], c["email"], c["phone"], c["website"], c.get("github"),
                                                     c.get("linkedin"), location_id(con, c["location"], fr["contact"]["location"])))
     for key in ("role", "summary"):
-        con.execute("INSERT INTO bloc_profile (key, text) VALUES (?, ?)", (key, i18n(en[key], fr[key])))
+        add_profile_version(con, key, en[key], fr[key])
     for r, (row, row_fr) in enumerate(zip(en["skills"], fr["skills"]), 1):
         for i, (label_en, label_fr) in enumerate(zip(row, row_fr), 1):
             con.execute("INSERT INTO bloc_skill_layout VALUES (?, ?, ?)", (r, i, i18n(label_en, label_fr)))

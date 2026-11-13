@@ -167,6 +167,8 @@ def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None
     if output_path is not None or folder is None or not offers.exists(folder):
         return
     job_file = paths.job(folder)
+    import db_sync  # every composition records its lines and role/summary, with or without an offer
+    db_sync.sync_job(folder)
     job = offers.load(folder)
     if not job.get("requirements"):
         return
@@ -175,8 +177,6 @@ def refresh_job_report(data_path: Path, pdf_file: Path, output_path: Path | None
         print("Job file has errors; report not refreshed (run src/check_job.py).")
         return
     review_ats.refresh(job_file, job, pdf_file, data_path.resolve())
-    import db_sync  # the offer, its requirements and any new approved lines join data/resume.db
-    db_sync.sync_job(job_file.parent)
 
 
 def build(data_path: Path, output_path: Path | None = None) -> Path:
