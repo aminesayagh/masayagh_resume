@@ -160,8 +160,7 @@ CREATE TABLE IF NOT EXISTS compositions (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   sent_at TEXT,
-  name TEXT,                                -- the resume's name in the Resumes list (default: its folder)
-  approved_at TEXT                          -- when you approved it as ready to use
+  name TEXT                                 -- the resume's name in the Resumes list (none: its folder)
 );
 CREATE TABLE IF NOT EXISTS composition_profile (  -- which role and summary version each composition uses
   composition_id INTEGER NOT NULL REFERENCES compositions(id) ON DELETE CASCADE,

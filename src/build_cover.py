@@ -141,6 +141,8 @@ def build(folder: Path, lang: str = "en") -> tuple[Path, Path] | None:
     if reason := build_resume.frozen(folder):
         raise SystemExit(reason)
     job = offers.load(folder)
+    if not job.get("offer_id"):  # a resume not written for a job offer has nobody to address a letter to
+        return None
     resume = paths.resume_pdf(folder, lang)
     if lang == "fr":
         letter = load_letter(paths.cover(folder, "fr"), lang="fr")

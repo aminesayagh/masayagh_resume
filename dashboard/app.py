@@ -112,12 +112,12 @@ def summary(folder: Path, con: sqlite3.Connection) -> dict:
 
 
 def all_jobs() -> list[dict]:
-    """One row per offer: its latest version (by created_at), with how many versions it has. A composition without
-    an offer is its own row. Newest first."""
+    """One row per offer: its latest version (by created_at), with how many versions it has. Newest first. Resumes
+    not written for an offer are on the Resumes page, not here."""
     with ro() as con:
-        rows = con.execute("SELECT folder, offer_id, count(*) OVER (PARTITION BY coalesce(offer_id, -id)) AS n, "
-                           "row_number() OVER (PARTITION BY coalesce(offer_id, -id) ORDER BY created_at DESC, id DESC) AS k "
-                           "FROM compositions ORDER BY created_at DESC, id DESC").fetchall()
+        rows = con.execute("SELECT folder, offer_id, count(*) OVER (PARTITION BY offer_id) AS n, "
+                           "row_number() OVER (PARTITION BY offer_id ORDER BY created_at DESC, id DESC) AS k "
+                           "FROM compositions WHERE offer_id IS NOT NULL ORDER BY created_at DESC, id DESC").fetchall()
         return [{**summary(paths.ROOT / folder, con), "versions": n} for folder, _, n, k in rows if k == 1]
 
 
@@ -371,7 +371,8 @@ def requirement_terms() -> dict:
         for sid, kw, lang in con.execute("SELECT skill_id, keyword, lang FROM skill_keywords ORDER BY lang, keyword"):
             skills[sid]["keywords"].append({"keyword": kw, "lang": lang})
         hard = con.execute(f"SELECT count(*), count(start_at) FROM skills WHERE type IN {HARD}").fetchone()
-        jobs = {f.name: summary(f, con) for f in offers.all_folders(con)}
+        jobs = {f.name: summary(f, con) for f in offers.all_folders(con)
+                if offers.composition(f, con)["offer_id"] is not None}  # the job offers' compositions only
     terms = {}
     for term, sid, folder in rows:
         skill = skills.get(sid, {})
@@ -671,7 +672,10 @@ def resume_data(comp_id: int | None = None) -> dict:
             comp_profile = dict(con.execute("SELECT p.key, p.id FROM composition_profile c JOIN bloc_profile p "
                                             "ON p.id = c.profile_id WHERE c.composition_id = ?", (comp_id,)).fetchall())
         tr_ = lambda v, lang="en": (json.loads(v).get(lang) or "") if v else ""
-        def versions(key, quality):  # a profile bloc's versions, newest first, the one the master uses marked
+        open_uses = dict(con.execute("SELECT cp.profile_id, count(*) FROM composition_profile cp JOIN compositions c "
+                                     "ON c.id = cp.composition_id WHERE c.sent_at IS NULL GROUP BY cp.profile_id").fetchall())
+
+        def versions(key, quality):  # a profile bloc's versions, newest first, the one in use marked
             cands = pick.profile_candidates(con, key)
             chosen, _, warn = pick.best(cands, ("en", "fr"), quality=quality)
             if comp is not None:  # this resume's own version
@@ -682,7 +686,8 @@ def resume_data(comp_id: int | None = None) -> dict:
             cands.sort(key=lambda c: (c["created_at"] or "", c["id"]), reverse=True)
             return {"warning": warn, "candidates": [
                 {"id": c["id"], "text": c["text_en"], "fr": tr_(c["text"], "fr"), "created_at": c["created_at"],
-                 "used": bool(chosen) and c["id"] == chosen["id"], "review": json.loads(c["score"]) if c["score"] else None}
+                 "used": bool(chosen) and c["id"] == chosen["id"], "review": json.loads(c["score"]) if c["score"] else None,
+                 "open_uses": open_uses.get(c["id"], 0)}  # in-progress resumes using it: 0 = it can be deleted
                 for c in cands]}
         role, summary = versions("role", pick.line_quality), versions("summary", pick.summary_quality)
         used = lambda v: next((c for c in v["candidates"] if c["used"]), None)
@@ -767,6 +772,12 @@ def resume_data(comp_id: int | None = None) -> dict:
     out = {"score": score, "profile": profile, "experiences": experiences, "blocs": blocs, "limits": limits}
     if comp is not None:
         out["resume"] = next(r for r in resumes_list() if r["id"] == comp["id"])
+        with ro() as con:  # the offer's requirement keywords, must-have first: context for the Copy prompt button
+            terms = con.execute("SELECT k.keyword, r.priority FROM requirements r JOIN skill_keywords k ON k.id = r.keyword_id "
+                                "JOIN skills s ON s.id = k.skill_id WHERE r.offer_id = ? AND NOT s.ignored "
+                                "ORDER BY r.priority DESC, r.id", (comp["offer_id"],)).fetchall() if comp["offer_id"] else []
+        out["resume"]["must_have"] = [k for k, p in terms if p >= 50]
+        out["resume"]["preferred"] = [k for k, p in terms if p < 50]
     return out
 
 
@@ -786,7 +797,7 @@ def resumes_list() -> list[dict]:
                                "WHERE cp.composition_id = ? AND p.key = 'summary'", (c["id"],)).fetchone()
             out.append({"id": c["id"], "slug": c["folder"].removeprefix("jobs/"), "name": c["name"] or c["folder"].removeprefix("jobs/"),
                         "offer": f"{c['company']} · {c['title']}" if c["title"] else None, "offer_id": c["offer_id"],
-                        "created": (c["created_at"] or "")[:10], "sent": c["sent_at"], "approved": c["approved_at"],
+                        "created": (c["created_at"] or "")[:10], "sent": c["sent_at"],
                         "score": round(100 * sum(r["total"] for r in scored) / (8 * len(scored))) if scored else None,
                         "lines": len(reviews), "scored": len(scored), "ready": sum(r["verdict"] == "Ready" for r in scored),
                         "summary": json.loads(summ[0])["verdict"] if summ and summ[0] else None})
@@ -800,10 +811,8 @@ def api_resume():
 
 @app.get("/api/resumes")
 def api_resumes():
-    with ro() as con:
-        offers_ = [{"id": i, "label": f"{tr(n)} · {t}"} for i, n, t in con.execute(
-            "SELECT o.id, c.name, o.title FROM offers o JOIN companies c ON c.id = o.company_id ORDER BY o.created_at DESC")]
-    return {"resumes": resumes_list(), "offers": offers_}
+    """Your own resumes: the compositions not written for a job offer (those live on the Jobs page)."""
+    return {"resumes": [r for r in resumes_list() if r["offer_id"] is None]}
 
 
 @app.get("/api/resumes/{comp_id}")
@@ -820,15 +829,15 @@ def folder_of(comp_id: int) -> str:
 
 
 class NewResume(BaseModel):
-    name: str = Field(max_length=120, pattern=TEXT)
     offer_id: int | None = None
     from_id: int | None = None  # copy another resume's choices
 
 
 @app.post("/api/resumes")
 def api_resume_new(body: NewResume):
-    """A new resume (src/resumes.py new): the best candidate of each bloc, or a copy of another resume's choices."""
-    args = ["src/resumes.py", "new", body.name.strip()]
+    """A new resume (src/resumes.py new): the best candidate of each bloc, or a copy of another resume's choices. Its
+    name comes from the offer, or from the resume's role when it has none."""
+    args = ["src/resumes.py", "new"]
     if body.offer_id is not None:
         args += ["--offer", str(body.offer_id)]
     if body.from_id is not None:
@@ -867,6 +876,19 @@ def api_resume_edit(comp_id: int, body: Edit):
                                     *([] if body.position is None else [str(body.position)]), timeout=600))
 
 
+@app.post("/api/resumes/{comp_id}/delete")
+def api_resume_delete(comp_id: int):
+    """Delete a resume not written for a job offer (src/resumes.py delete); refused for a job's or a sent one."""
+    return script_result(run_script("src/resumes.py", "delete", folder_of(comp_id)))
+
+
+@app.post("/api/resumes/versions/{version_id}/delete")
+def api_version_delete(version_id: int):
+    """Delete a summary version no in-progress resume uses (src/resumes.py delete-version): it leaves the candidates;
+    a sent resume that used it keeps its record."""
+    return script_result(run_script("src/resumes.py", "delete-version", str(version_id)))
+
+
 class Preview(BaseModel):
     bloc: str | None = Field(default=None, pattern=r"^(\d+|role|summary)$")  # none: the resume as it is
     candidate: int | None = None
@@ -892,24 +914,6 @@ def preview_file(name: str):
     if not re.fullmatch(r"[a-z0-9-]+\.pdf", name) or not path.is_file():
         raise HTTPException(404, "No such preview")
     return FileResponse(path, media_type="application/pdf")
-
-
-class Rename(BaseModel):
-    name: str = Field(max_length=120, pattern=TEXT)
-
-
-@app.post("/api/resumes/{comp_id}/name")
-def api_resume_rename(comp_id: int, body: Rename):
-    return script_result(run_script("src/resumes.py", "name", folder_of(comp_id), body.name.strip()))
-
-
-class Approve(BaseModel):
-    approved: bool
-
-
-@app.post("/api/resumes/{comp_id}/approve")
-def api_resume_approve(comp_id: int, body: Approve):
-    return script_result(run_script("src/resumes.py", "approve", folder_of(comp_id), *([] if body.approved else ["off"])))
 
 
 class NewCandidate(BaseModel):
@@ -987,4 +991,4 @@ def spa(page: str):
         return FileResponse(DIST / page)
     if not (DIST / "index.html").exists():
         raise HTTPException(503, "Front not built: run python3 start.py (or pnpm build in dashboard/web)")
-    return FileResponse(DIST / "index.html")
+    return FileResponse(DIST / "index.html", headers={"Cache-Control": "no-cache"})  # a rebuilt front shows on refresh

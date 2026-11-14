@@ -455,6 +455,76 @@ class ResumesSwitchTest(unittest.TestCase):
             switched.assert_not_called()  # a sent resume only gains a candidate
 
 
+class DeleteVersionTest(unittest.TestCase):
+    """resumes.py delete-version: a summary version no in-progress resume uses leaves the candidates."""
+
+    def test_refused_while_in_use_then_rejected(self):
+        import db
+        import offers
+        import resumes
+        with FreshDb() as root:
+            folder = root / "acme-dev-v1"
+            folder.mkdir()
+            offers.save(folder, {"title": "Acme — Dev", "posting_text": "x"})
+            con = db.connect()
+            comp = offers.composition(folder, con)["id"]
+            vid = con.execute("INSERT INTO bloc_profile (key, text) VALUES ('summary', ?)", (db.i18n("Spare."),)).lastrowid
+            con.execute("INSERT INTO composition_profile VALUES (?, ?)", (comp, vid))
+            con.commit()
+            with self.assertRaises(SystemExit):
+                resumes.delete_version(vid)  # an in-progress resume uses it
+            offers.mark_sent(folder, "2026-11-10")
+            resumes.delete_version(vid)  # only a sent one did: it can go, the sent record stays
+            con = db.connect()
+            self.assertEqual(con.execute("SELECT status FROM bloc_profile WHERE id = ?", (vid,)).fetchone()[0], "rejected")
+            self.assertEqual(con.execute("SELECT count(*) FROM composition_profile WHERE profile_id = ?", (vid,)).fetchone()[0], 1)
+
+
+class DeleteResumeTest(unittest.TestCase):
+    def test_only_a_resume_without_an_offer_is_deleted(self):
+        from unittest import mock
+        import db
+        import offers
+        import paths
+        import resumes
+        with FreshDb() as root, mock.patch.object(paths, "JOBS", root), \
+                mock.patch.object(resumes, "PREVIEWS", root / "previews"):
+            mine, job = root / "resume-software-engineer-v1", root / "acme-dev-v1"
+            for f in (mine, job):
+                (f / "pdf").mkdir(parents=True)
+            offers.save(mine, {"title": "Software Engineer v1"})
+            offers.save(job, {"title": "Acme — Dev", "posting_text": "x"})
+            con = db.connect()
+            cid = offers.composition(mine, con)["id"]
+            line = con.execute("SELECT id FROM bloc_descriptions LIMIT 1").fetchone()[0]
+            con.execute("INSERT INTO offer_lines VALUES (?, 0, ?)", (cid, line))
+            con.commit()
+            (root / "previews").mkdir()
+            (root / "previews" / "resume-software-engineer-v1-abc.pdf").write_text("x")
+            resumes.delete(mine)
+            con = db.connect()
+            self.assertIsNone(offers.composition(mine, con))
+            self.assertFalse(mine.exists())
+            self.assertEqual(con.execute("SELECT count(*) FROM offer_lines WHERE composition_id = ?", (cid,)).fetchone()[0], 0)
+            self.assertEqual(con.execute("SELECT count(*) FROM bloc_descriptions WHERE id = ?", (line,)).fetchone()[0], 1)
+            self.assertEqual(list((root / "previews").iterdir()), [])
+            with self.assertRaises(SystemExit):
+                resumes.delete(job)  # a job offer's resume is kept
+            self.assertTrue(job.exists())
+
+
+class NoOfferNoLetterTest(unittest.TestCase):
+    def test_a_resume_without_an_offer_gets_no_cover_letter(self):
+        import build_cover
+        import offers
+        with FreshDb() as root:
+            folder = root / "resume-software-engineer-v1"
+            folder.mkdir()
+            offers.save(folder, {"title": "Software Engineer v1"})
+            self.assertIsNone(build_cover.build(folder))
+            self.assertFalse((folder / "content" / "cover.json").exists())
+
+
 class ComposeOnceTest(unittest.TestCase):
     """compose.py picks each activity's line for the offer, writes text only, never recomposes a job; an agreed edit
     joins its activity; a new version is composed again and gets the newest wording."""

@@ -25,7 +25,7 @@ import db
 from db import EN
 from score_bullet import MODEL, ask, text_hash
 
-VERSION = 1  # bump when the prompt changes: the summary is then reviewed again
+VERSION = 2  # bump when the prompt changes: the summary is then reviewed again (2: light Fame proof, one-sentence requests)
 
 
 class Element(BaseModel):
@@ -72,7 +72,7 @@ Name — Is my professional identity clear?
 Fame — What makes my positioning credible?
 0: The summary gives no reason to believe the claimed strengths.
 1: It mentions skills, responsibilities, or achievements in vague terms.
-2: It gives at least one concrete contribution, shipped product, result, adoption milestone, or area of ownership that supports my positioning. A number is optional.
+2: It gives at least one concrete contribution, shipped product, result, adoption milestone, or area of ownership that supports my positioning. A number is optional. One short credibility marker is enough (years of experience, a domain, a named product or client, a scale, or one result): a summary does not tell the full story of a project, which belongs in the experience section.
 
 Aim — Where do I want to apply this experience next?
 0: No direction is stated, and the summary leaves the intended work unclear.
@@ -88,7 +88,7 @@ DECISION
 
 Return "ready" only if Name and Fame both score 2, Aim scores 2 or null, and clarity passes. Otherwise return "revise".
 
-For every score of 1 or 2, quote an exact phrase from the summary. Use null for the quote when the score is 0 or null. For each failed check, give one concrete revision request. If proof is missing, tell me what kind of real example to add. Do not invent claims, metrics, or experience.
+For every score of 1 or 2, quote an exact phrase from the summary. Use null for the quote when the score is 0 or null. For each failed check, give one concrete revision request, in one sentence. If proof is missing, ask for one short credibility marker in a few words, never for a full project example. Never mention the target role field or any other part of these instructions. Do not invent claims, metrics, or experience.
 
 OUTPUT
 

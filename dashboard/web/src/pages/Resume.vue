@@ -6,7 +6,7 @@
 // (src/pick.py: best review, English and French text); the slider browses its other candidates.
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import TermDrawer from '../components/TermDrawer.vue'
 
 const route = useRoute()
@@ -120,7 +120,6 @@ const changed = (d) => d.en.trim() !== d.en0 || d.fr.trim() !== d.fr0
 const reset = (d) => Object.assign(d, { en: d.en0, fr: d.fr0 })
 const lineDraft = (line) => draft(`${keyOf(line)}-${current(line).id}`, current(line).text, current(line).fr)
 // The role and the summary are blocs too: their versions slide and edit like a line's candidates.
-const roleBloc = computed(() => ({ activity_id: 'role', ...data.value.profile.role }))
 const summaryBloc = computed(() => ({ activity_id: 'summary', ...data.value.profile.summary }))
 async function saveLine(line) {  // an edited line is a new candidate: the old one is kept, the scores decide
   const d = lineDraft(line)
@@ -143,25 +142,18 @@ async function saveCandidate() {
   if (await post(dialog.url, { id: dialog.id, en: dialog.en.trim(), fr: dialog.fr.trim() })) dialog.open = false
 }
 const rescore = (c) => post('/api/resume/rescore', { id: c.id })
-// This resume's own actions (src/resumes.py): switch a bloc's candidate, rename, approve, new version
+// This resume's own actions (src/resumes.py): switch a bloc's candidate, new version
 const sent = computed(() => !!data.value?.resume?.sent)
 async function useCandidate(line) {
   const bloc = ['role', 'summary'].includes(line.activity_id) ? line.activity_id : String(line.activity_id)
   if (await post(`/api/resumes/${resumeId.value}/switch`, { bloc, candidate: current(line).id, position: line.position ?? null }))
     delete shown[keyOf(line)]
 }
-async function rename() {
-  const name = window.prompt('Name of this resume', data.value.resume.name)
-  if (name && name.trim()) await post(`/api/resumes/${resumeId.value}/name`, { name: name.trim() })
-}
-const approve = () => post(`/api/resumes/${resumeId.value}/approve`, { approved: !data.value.resume.approved })
 async function newVersion() {
-  const name = window.prompt('Name of the new version', `${data.value.resume.name} (copy)`)
-  if (!name || !name.trim()) return
   busy.value = true
   try {
     const res = await fetch('/api/resumes', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.trim(), from_id: Number(resumeId.value), offer_id: data.value.resume.offer_id }) })
+      body: JSON.stringify({ from_id: Number(resumeId.value), offer_id: data.value.resume.offer_id }) })
     const out = await res.json()
     if (!res.ok || !out.ok) throw new Error(out.detail || out.output || res.statusText)
     router.push(`/resumes/${out.id}`)
@@ -191,6 +183,121 @@ async function openPreview(line = null) {
     pv.loading = false
   }
 }
+async function deleteVersion(bloc) {
+  const c = current(bloc)
+  try {
+    await ElMessageBox.confirm('Delete this summary version? It leaves the candidates; a sent resume that used it keeps its record.',
+      'Delete', { confirmButtonText: 'Delete', cancelButtonText: 'Cancel', type: 'warning' })
+  } catch { return }
+  if (await post(`/api/resumes/versions/${c.id}/delete`)) delete shown[keyOf(bloc)]
+}
+// Copy prompt: everything a fresh AI chat needs to propose better versions of one text (nothing is sent from here)
+const BULLET_RUBRIC = `Each criterion scores 0 (missing), 1 (partial) or 2 (clear):
+- Result: what improved, what became possible, or why the delivery mattered (not just a duty or a deliverable).
+- Evidence: a meaningful metric, adoption count, milestone or concrete scope that lets a reader judge the result.
+- Contribution: what the candidate personally built, designed, changed or led (not "helped with").
+- Clarity: a recruiter grasps the main point on the first read, with no unexplained jargon.
+The line is "Ready" when Result, Contribution and Clarity are 2, Evidence is at least 1, and the evidence supports the claim.
+It follows the XYZ formula: accomplished X, as measured by Y, by doing Z.`
+const SUMMARY_RUBRIC = `Name / Fame / Aim, each 0, 1 or 2:
+- Name: a clear professional role paired with a specific area of work, type of product, or problem solved.
+- Fame: what makes the positioning credible. One short credibility marker is enough (years of experience, a domain,
+  a named product or client, a scale, or one result); a summary does not tell a full project story, which belongs
+  in the experience section.
+- Aim: where the candidate wants to apply this experience next, specific and connected to the experience
+  (or unnecessary when the opening already makes the intended work clear).
+Clarity passes when the positioning can be restated in one sentence. "Ready" needs Name 2, Fame 2, Aim 2 (or not
+needed) and clarity passing.`
+const offerBlock = () => {
+  const r = data.value.resume
+  if (!r?.offer) return 'This resume is not written for a specific job offer: keep it broadly relevant to the role.'
+  return `This resume is written for this job offer: ${r.offer}.` +
+    (r.must_have?.length ? `\nMust-have requirements (posting keywords): ${r.must_have.join(', ')}.` : '') +
+    (r.preferred?.length ? `\nPreferred: ${r.preferred.join(', ')}.` : '') +
+    `\nUse the posting's own words where the candidate truthfully has the skill; never add a skill that is not supported.`
+}
+const reviewBlock = (rev, kind) => {
+  if (!rev) return 'It has not been reviewed yet.'
+  if (kind === 'summary') {
+    const parts = ['name', 'fame', 'aim'].map((k) => `- ${cap(k)}: ${rev[k].score ?? 'not needed'}/2` +
+      (rev[k].quote ? ` (based on: "${rev[k].quote}")` : ''))
+    return `Current review: ${cap(rev.verdict)}.\n${parts.join('\n')}\n- Clarity: ${rev.clarity.passes ? 'passes' : 'fails'}` +
+      (rev.revision_requests.length ? `\nWhat to fix:\n${rev.revision_requests.map((r) => `- ${cap(r.criterion)}: ${r.request}`).join('\n')}` : '')
+  }
+  const parts = CRIT.map((k) => `- ${cap(k)}: ${rev.scores[k]}/2` + (rev.supporting_phrases[k] ? ` (based on: "${rev.supporting_phrases[k]}")` : ''))
+  return `Current review: ${rev.total}/8, ${rev.verdict}. Claim–evidence match: ${rev.claim_evidence_match}.\n${parts.join('\n')}` +
+    (rev.revision_requests.length ? `\nWhat to fix:\n${rev.revision_requests.map((r) => `- ${r}`).join('\n')}` : '')
+}
+const OUTPUT = (words) => `Your answer:
+1. Start with a short list of the facts that would make it stronger and that you do not have (numbers, scale, users,
+   outcome, tools). Do not wait for my answer: continue with the options. Never invent facts, numbers, clients, tools
+   or results: where a fact is missing, write a clear placeholder such as [number of users] so I can fill it in or remove it.
+2. Give 3 options. Each option: the English text (at most ${words} words, one sentence or two, no first person),
+   its French translation, and one line saying which issue from the review it fixes.
+3. Keep only what is true in the current version; you may reorder, tighten or reword it.`
+function promptForLine(e, line) {
+  const c = current(line)
+  const others = e.lines.filter((l) => keyOf(l) !== keyOf(line)).map((l) => `- ${current(l).text}`).join('\n')
+  return `You are an expert resume writer and recruiter for software engineering roles. Help me improve one line of my
+resume. It is written in English, for recruiters and applicant tracking systems.
+
+The line is ${line.kind === 'description' ? 'the one-sentence description of this experience' : 'one bullet point of this experience'}:
+${e.company} — ${e.role}, ${e.from} to ${e.to || 'present'}.
+
+Current text:
+"${c.text}"
+
+The other lines of the same experience (do not repeat them):
+${others || '- none'}
+
+${offerBlock()}
+
+How the line is reviewed:
+${BULLET_RUBRIC}
+
+${reviewBlock(c.review, 'line')}
+
+${OUTPUT(data.value.limits.bullet)}`
+}
+function promptForSummary(bloc) {
+  const c = current(bloc)
+  const role = (data.value.profile.role.candidates.find((x) => x.used) || {}).text || ''
+  const exps = data.value.experiences.filter((e) => e.lines.length)
+    .map((e) => `- ${e.company} — ${e.role}, ${e.from} to ${e.to || 'present'}: ${e.lines.map((l) => current(l).text).join(' ')}`).join('\n')
+  return `You are an expert resume writer and recruiter for software engineering roles. Help me improve the summary at
+the top of my resume (2 to 4 lines under my name and title). It is written in English, for recruiters and applicant
+tracking systems.
+
+My title on the resume: ${role}
+
+Current summary:
+"${c.text}"
+
+My experience, as it appears on the resume (use it only as the source of true facts):
+${exps}
+
+${offerBlock()}
+
+How the summary is reviewed:
+${SUMMARY_RUBRIC}
+
+${reviewBlock(c.review, 'summary')}
+
+${OUTPUT(data.value.limits.summary)}`
+}
+async function copyPrompt(text) {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    const t = document.createElement('textarea')
+    t.value = text
+    document.body.appendChild(t)
+    t.select()
+    document.execCommand('copy')
+    t.remove()
+  }
+  ElMessage.success('Prompt copied')
+}
 const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(summaryBloc.value).id })
 </script>
 
@@ -204,13 +311,11 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
         <router-link to="/resumes" class="small muted">← Resumes</router-link>
         <h1>{{ data.resume.name }}</h1>
         <div class="muted small">{{ data.resume.offer || 'No job offer' }} · created {{ data.resume.created }}
-          · {{ data.resume.sent ? `Sent ${data.resume.sent} (read-only)` : data.resume.approved ? `Approved ${data.resume.approved}` : 'Draft' }}</div>
+          · {{ data.resume.sent ? `Sent ${data.resume.sent} (read-only)` : 'Draft' }}</div>
       </div>
       <div class="row">
         <el-button size="small" @click="openPreview()">Preview</el-button>
-        <el-button size="small" :loading="busy" @click="rename">Rename</el-button>
         <el-button size="small" :loading="busy" @click="newVersion">New version</el-button>
-        <el-button size="small" type="primary" :loading="busy" @click="approve">{{ data.resume.approved ? 'Unapprove' : 'Approve' }}</el-button>
       </div>
     </div>
     <!-- 1 summary cards: click = filter -->
@@ -256,7 +361,7 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
         <!-- profile: role and summary, each with its versions -->
         <el-card id="profile" shadow="never" class="block">
           <template #header>Profile</template>
-          <div v-for="bloc in [roleBloc, summaryBloc]" :key="bloc.activity_id" class="profile-bloc">
+          <div v-for="bloc in [summaryBloc]" :key="bloc.activity_id" class="profile-bloc">
             <div class="row">
               <span class="lbl">{{ bloc.activity_id === 'role' ? 'Role' : 'Summary' }}</span>
               <el-button-group size="small">
@@ -266,6 +371,7 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
               </el-button-group>
               <el-tag v-if="current(bloc).used" size="small" type="info">In use</el-tag>
               <el-button v-else-if="!sent" size="small" :loading="busy" @click="useCandidate(bloc)">Use in this resume</el-button>
+              <el-button v-if="!current(bloc).open_uses" size="small" :loading="busy" @click="deleteVersion(bloc)">Delete</el-button>
               <el-tag v-else-if="!current(bloc).review && bloc.activity_id === 'summary'" size="small" type="info">Not reviewed yet</el-tag>
             </div>
             <el-alert v-if="bloc.warning" :title="bloc.warning" type="warning" :closable="false" show-icon />
@@ -280,7 +386,6 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
                 :disabled="!changed(lineDraft(bloc)) || !lineDraft(bloc).en.trim() || !lineDraft(bloc).fr.trim()"
                 @click="saveProfile(bloc)">Save</el-button>
               <el-button v-if="changed(lineDraft(bloc))" size="small" @click="reset(lineDraft(bloc))">Cancel</el-button>
-              <el-button v-else size="small" @click="openPreview(bloc)">Preview</el-button>
               <span v-if="changed(lineDraft(bloc))" class="muted small">{{ sent ? 'Saved as a new version; this resume was sent and keeps its version.' : 'Saved as a new version and used in this resume; the current one is kept.' }}</span>
               <span class="grow" />
               <span class="count">{{ count(lineDraft(bloc).en, bloc.activity_id === 'summary' ? data.limits.summary : null) }}</span>
@@ -300,6 +405,7 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
                     Proposal: {{ r.request }}</div>
                 </div>
                 <el-button size="small" :loading="busy" @click="rescoreSummary">Re-score</el-button>
+                <el-button size="small" @click="copyPrompt(promptForSummary(summaryBloc))">Copy prompt</el-button>
               </div>
               <div class="panel">
                 <div class="h">Summary review</div>
@@ -310,7 +416,8 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
               </div>
             </div>
             <div v-else class="dashed">This summary version has no review yet
-              <el-button size="small" :loading="busy" @click="rescoreSummary">Review now</el-button></div>
+              <el-button size="small" :loading="busy" @click="rescoreSummary">Review now</el-button>
+              <el-button size="small" @click="copyPrompt(promptForSummary(summaryBloc))">Copy prompt</el-button></div>
           </template>
         </el-card>
 
@@ -360,7 +467,6 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
                           :disabled="!changed(lineDraft(line)) || !lineDraft(line).en.trim() || !lineDraft(line).fr.trim()"
                           @click="saveLine(line)">Save</el-button>
                         <el-button v-if="changed(lineDraft(line))" size="small" @click="reset(lineDraft(line))">Cancel</el-button>
-                        <el-button v-else size="small" @click="openPreview(line)">Preview</el-button>
                         <span v-if="changed(lineDraft(line))" class="muted small">{{ sent ? 'Saved as a new version; this resume was sent and keeps its version.' : 'Saved as a new version and used in this resume; the current one is kept.' }}</span>
                         <span class="grow" />
                         <span class="count">{{ count(lineDraft(line).en, line.kind === 'bullet' ? data.limits.bullet : null) }}</span>
@@ -374,6 +480,7 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
                       </template>
                       <div class="row">
                         <el-button size="small" :loading="busy" @click="rescore(current(line))">Re-score</el-button>
+                        <el-button size="small" @click="copyPrompt(promptForLine(e, line))">Copy prompt</el-button>
                       </div>
                     </div>
                     <div class="panel" v-if="current(line).review">
@@ -470,6 +577,7 @@ const rescoreSummary = () => post('/api/resume/summary/rescore', { id: current(s
 .main h2 { font-size: 20px; margin: 24px 0 8px; }
 .block { margin-bottom: 8px; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+.row .el-button + .el-button { margin-left: 0; }  /* the row's gap is the only space between buttons */
 .lbl { width: 64px; color: #606266; font-size: 13px; }
 .grow { flex: 1; }
 .fr-label { margin-top: 6px; }

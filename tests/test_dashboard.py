@@ -433,17 +433,19 @@ class ResumesPageTest(unittest.TestCase):
     """/resumes lists every composition with its score; its buttons run src/resumes.py (mocked: nothing is written)."""
 
     @unittest.skipUnless(app.DB.exists(), "no data/resume.db")
-    def test_every_composition_is_listed_and_scored(self):
+    def test_only_resumes_without_an_offer_are_listed(self):
         from fastapi.testclient import TestClient
         client = TestClient(app.app)
         rows = client.get("/api/resumes").json()["resumes"]
         with app.ro() as con:
-            self.assertEqual(len(rows), con.execute("SELECT count(*) FROM compositions").fetchone()[0])
-        for r in rows:  # a score comes only from the reviewed lines it uses
+            self.assertEqual(len(rows), con.execute("SELECT count(*) FROM compositions WHERE offer_id IS NULL").fetchone()[0])
+            any_id = con.execute("SELECT id FROM compositions ORDER BY id DESC").fetchone()[0]
+        self.assertTrue(all(r["offer_id"] is None for r in rows))
+        for r in app.resumes_list():  # a score comes only from the reviewed lines a resume uses
             self.assertEqual(r["score"] is None, r["scored"] == 0)
-        one = client.get(f"/api/resumes/{rows[0]['id']}").json()
+        one = client.get(f"/api/resumes/{any_id}").json()  # any composition still opens (the Jobs page links to it)
         lines = [line for e in one["experiences"] for line in e["lines"]]
-        self.assertEqual(len(lines), rows[0]["lines"])  # one row per recorded line
+        self.assertEqual(len(lines), one["resume"]["lines"])  # one row per recorded line
         self.assertTrue(all(sum(c["used"] for c in line["candidates"]) == 1 for line in lines))
         self.assertEqual(client.get("/api/resumes/999999").status_code, 404)
 
@@ -454,21 +456,21 @@ class ResumesPageTest(unittest.TestCase):
         ok = mock.Mock(returncode=0, stdout="done\n", stderr="")
         with mock.patch.object(app, "folder_of", return_value="jobs/acme-v1"), \
                 mock.patch.object(app.subprocess, "run", return_value=ok) as run:
-            client.post("/api/resumes", json={"name": "Short", "offer_id": 3})
+            client.post("/api/resumes", json={"offer_id": 3})
             client.post("/api/resumes/1/switch", json={"bloc": "4", "candidate": 12, "position": 2})
             client.post("/api/resumes/1/switch", json={"bloc": "summary", "candidate": 6})
-            client.post("/api/resumes/1/name", json={"name": "Long"})
-            client.post("/api/resumes/1/approve", json={"approved": False})
             client.post("/api/resumes/1/preview", json={"bloc": "summary", "candidate": 6})
             client.post("/api/resumes/1/edit", json={"bloc": "4", "en": "Built X.", "fr": "Construit X.", "position": 2})
+            client.post("/api/resumes/versions/7/delete")
+            client.post("/api/resumes/1/delete")
             self.assertEqual([c.args[0][1:] for c in run.call_args_list], [
-                ["src/resumes.py", "new", "Short", "--offer", "3"],
+                ["src/resumes.py", "new", "--offer", "3"],
                 ["src/resumes.py", "switch", "jobs/acme-v1", "4", "12", "2"],
                 ["src/resumes.py", "switch", "jobs/acme-v1", "summary", "6"],
-                ["src/resumes.py", "name", "jobs/acme-v1", "Long"],
-                ["src/resumes.py", "approve", "jobs/acme-v1", "off"],
                 ["src/resumes.py", "preview", "jobs/acme-v1", "summary", "6"],
-                ["src/resumes.py", "edit", "jobs/acme-v1", "4", "Built X.", "Construit X.", "2"]])
+                ["src/resumes.py", "edit", "jobs/acme-v1", "4", "Built X.", "Construit X.", "2"],
+                ["src/resumes.py", "delete-version", "7"],
+                ["src/resumes.py", "delete", "jobs/acme-v1"]])
             calls = run.call_count
             self.assertEqual(client.post("/api/resumes/1/switch", json={"bloc": "x; rm", "candidate": 1}).status_code, 422)
             self.assertEqual(run.call_count, calls)  # a bad bloc ran nothing
